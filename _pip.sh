@@ -3,44 +3,42 @@
 # pip plugin for KYMSU
 # https://github.com/welcoMattic/kymsu
 
+#version: pip ou pip3
+version=pip3
+#user: "" or "--user"
+user=""
 
-echo "🐍  pip"
+if ! [ -x "$(command -v $version)" ]; then
+  echo "Error: $version is not installed." >&2
+  exit 1
+fi
+
+echo ""
+echo "🐍  Update $version (Python 3)"
+echo ""
+$version install --upgrade pip
 echo ""
 
-echo "🐍  update pip3 (Python 3)(Homebrew)"
-echo ""
-pip3 install --upgrade pip
-#pip3 install --upgrade mkdocs
-#pip3 install --upgrade mkdocs-material
-echo ""
+pip_outdated=$($version list --outdated --format columns)
+upd=$(echo "$pip_outdated" | sed '1,2d' | awk '{print $1}')
 
-pip3_outdated=$(pip3 list --outdated --format columns)
-upd3=$(echo "$pip3_outdated" | sed '1,2d' | awk '{print $1}')
-#echo $upd3
-# terminaltables tornado
-
-#pip3_outdated_freeze=$(pip3 list --outdated --format=freeze)
-#echo $pip3_outdated_freeze
-#upd3=$(echo $pip3_outdated_freeze | tr [:space:] '\n' | awk -F== '{print $1}')
-
-if [ -n "$upd3" ]; then
+if [ -n "$upd" ]; then
 
 	echo -e "\033[4mAvailables updates:\033[0m"
 	#echo $pip3_outdated_freeze | tr [:space:] '\n'
-	echo "$pip3_outdated"
+	echo "$pip_outdated"
 	echo ""
 	
-	echo -e "\033[4mCheck dependancies:\033[0m"
-	echo "Be carefull!! This updates can be a dependancie for some modules. Check for any incompatible version."
+	if [ -x "$(command -v pipdeptree)" ]; then
+		echo -e "\033[4mCheck dependancies:\033[0m"
+		echo "Be carefull!! This updates can be a dependancie for some modules. Check for any incompatible version."
+	fi
 	echo ""
-	for i in $upd3
+	for i in $upd
 		do
-			#echo "$i" | xargs pipdeptree -r -p | grep "$upd3" | sed '1d'
-			dependencies=$(echo "$i" | xargs pipdeptree -r -p | grep "$upd3")
-			#a=$(echo "$dependencies" | sed '1d')
-			b=$(echo "$dependencies" | wc -l)
-		
-			#if [ "$b" -ge 2 ]; then
+			if [ -x "$(command -v pipdeptree)" ]; then
+				dependencies=$(echo "$i" | xargs pipdeptree -r -p | grep "$upd")
+
 				z=0
 				while read -r line; do
 					if [[ $line = *"<"* ]]; then
@@ -54,13 +52,12 @@ if [ -n "$upd3" ]; then
 						z=$((z+1))
 					fi
 				done <<< "$dependencies"
-			#fi
+			fi
 			
-			b=$(echo -e "Do you wanna run \033[1mpip3 install --upgrade "$i"\033[0m ? (y/n)")
+			b=$(echo -e "Do you wanna run \033[1m$version install $user --upgrade "$i"\033[0m ? (y/n)")
   			read -p "$b" choice
   			case "$choice" in
-    			#y|Y|o ) echo $i | xargs -p pip3 install --upgrade ;;
-    			y|Y|o ) echo $i | xargs -p echo ;;
+    			y|Y|o ) echo $i | xargs $version install $user --upgrade ;;
     			n|N ) echo "Ok, let's continue";;
     			* ) echo "invalid";;
   			esac
@@ -68,20 +65,6 @@ if [ -n "$upd3" ]; then
 			
 		done
 
-<<COMMENT
-
-	#echo "$pip3_outdated" | sed '1,2d' | awk '{print $1}'
-	#echo ""
-	a=$(echo -e "Do you wanna run \033[1mpip3 install --upgrade "$upd3"\033[0m ? (y/n) (You may have choice for each module)")
-
-  	read -p "$a" choice
-  	case "$choice" in
-    	y|Y|o ) echo $upd3 | xargs -p -n 1 pip3 install --upgrade ;;
-    	n|N ) echo "Ok, let's continue";;
-    	* ) echo "invalid";;
-  	esac
-COMMENT
-  	
 else
 	echo -e "\033[4mNo availables updates.\033[0m"
 fi
