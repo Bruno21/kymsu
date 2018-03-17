@@ -13,14 +13,22 @@ pip3 install --upgrade pip
 #pip3 install --upgrade mkdocs-material
 echo ""
 
-pip3_outdated=$(pip3 list --outdated --format=freeze)
-upd3=$(echo $pip3_outdated | tr [:space:] '\n' | awk -F== '{print $1}')
+pip3_outdated=$(pip3 list --outdated --format columns)
+upd3=$(echo "$pip3_outdated" | sed '1,2d' | awk '{print $1}')
+#echo $upd3
+
+pip3_outdated_freeze=$(pip3 list --outdated --format=freeze)
+#upd3=$(echo $pip3_outdated_freeze | tr [:space:] '\n' | awk -F== '{print $1}')
+
 
 if [ -n "$upd3" ]; then
 
 	echo -e "\033[4mAvailables updates:\033[0m"
-	echo $pip3_outdated | tr [:space:] '\n'
+	#echo $pip3_outdated_freeze | tr [:space:] '\n'
+	echo "$pip3_outdated"
 	echo ""
+	#echo "$pip3_outdated" | sed '1,2d' | awk '{print $1}'
+	#echo ""
 	a=$(echo -e "Do you wanna run \033[1mpip3 install --upgrade "$upd3"\033[0m ? (y/n)")
 
   	read -p "$a" choice
