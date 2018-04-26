@@ -7,6 +7,8 @@
 version=pip3
 #user: "" or "--user"
 user=""
+#add module to do_not_update array
+declare -a do_not_update=( "tornado")
 
 if ! [ -x "$(command -v $version)" ]; then
   echo "Error: $version is not installed." >&2
@@ -54,15 +56,21 @@ if [ -n "$upd" ]; then
 				done <<< "$dependencies"
 			fi
 			
-			b=$(echo -e "Do you wanna run \033[1m$version install $user --upgrade "$i"\033[0m ? (y/n)")
-  			read -p "$b" choice
-  			case "$choice" in
-    			y|Y|o ) echo $i | xargs $version install $user --upgrade ;;
-    			n|N ) echo "Ok, let's continue";;
-    			* ) echo "invalid";;
-  			esac
-  			echo ""
+			# si la m-à-j n'est pas dans le tableau do_not_update, on propose de l'installer
 			
+			FOUND=`echo ${do_not_update[*]} | grep "$i"`
+			if [ "${FOUND}" = "" ]; then
+			
+				b=$(echo -e "Do you wanna run \033[1m$version install $user --upgrade "$i"\033[0m ? (y/n)")
+  				read -p "$b" choice
+  				case "$choice" in
+    				y|Y|o ) echo $i | xargs $version install $user --upgrade ;;
+    				n|N ) echo "Ok, let's continue";;
+    				* ) echo "invalid";;
+  				esac
+  				echo ""
+
+			fi			
 		done
 
 else
