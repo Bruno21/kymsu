@@ -3,6 +3,12 @@
 # Homebrew plugin for KYMSU
 # https://github.com/welcoMattic/kymsu
 
+# Display info on updated pakages 
+display_info=true
+
+# No distract mode
+no_distract=false
+
 echo "🍺  Homebrew"
 brew update
 
@@ -10,10 +16,39 @@ echo ""
 
 brew_outdated=$(brew outdated)
 upd3=$(echo "$brew_outdated" | awk '{print $1}')
-#brewsy=$(echo "$brew_outdated" | wc -l | awk {'print $1'})
 
-#if [ "$upd3" != "" ]; then
 if [ -n "$upd3" ]; then
+	
+	if [ "$display_info" = true ]; then
+		echo -e "\033[4mInfo on updated packages:\033[0m"
+		for pkg in $upd3
+		do
+			
+			# if jq (https://stedolan.github.io/jq/) is installed
+			if [ -x "$(command -v jq)" ]; then
+				info_pkg=$(brew info --json=v1 "$pkg")
+				current=$(echo "$info_pkg" | jq -r .[].installed[].version | tail -n 1 | awk '{print $1}')
+				stable=$(echo "$info_pkg" | jq -r .[].versions.stable)
+				homepage=$(echo "$info_pkg" | jq -r .[].homepage)
+				desc=$(echo "$info_pkg" | jq -r .[].desc)
+
+				echo -e "\033[1m$pkg:\033[0m current: $current last: $stable"		
+				echo "$desc"
+				echo "$homepage"		
+
+			else
+				info=$(brew info $pkg | head -n 4)
+				ligne1=$(echo "$info" | head -n 1)
+				
+				echo -e "\033[1m$ligne1\033[0m"					
+				echo "$info" | sed -n -e '2,3p'
+			
+			fi
+
+			echo ""
+		done
+	fi
+	
 	a=$(echo -e "Do you wanna run \033[1mbrew upgrade "$upd3"\033[0m? (y/n)")
 	read -p "$a" choice
 	case "$choice" in
