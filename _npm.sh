@@ -22,3 +22,9 @@ npm ls
 npm outdated
 npm outdated | awk '{print $1}' | xargs npm update
 echo ""
+
+if [[ $1 == "npm_cleanup" ]]; then
+	echo "🌬  Cleaning npm cache"
+	npm cache clean
+	echo ""
+fi
