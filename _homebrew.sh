@@ -6,8 +6,12 @@
 # Display info on updated pakages 
 display_info=true
 
-# No distract mode
+# No distract mode (Casks with 'latest' version number won't be updated)
 no_distract=false
+
+if [[ $1 == "nodistract" ]]; then
+	no_distract=true
+fi
 
 echo "🍺  Homebrew"
 brew update
@@ -48,19 +52,27 @@ if [ -n "$upd3" ]; then
 			echo ""
 		done
 	fi
+	if [ "$no_distract" = false ]; then
 	
-	a=$(echo -e "Do you wanna run \033[1mbrew upgrade "$upd3"\033[0m? (y/n)")
-	read -p "$a" choice
-	case "$choice" in
-		y|Y ) echo "$brew_outdated" | awk '{print $1}' | xargs -p -n 1 brew upgrade ;;
-    	n|N ) echo "Ok, let's continue";;
-    	* ) echo "invalid";;
-	esac
+		a=$(echo -e "Do you wanna run \033[1mbrew upgrade "$upd3"\033[0m? (y/n)")
+		read -p "$a" choice
+		case "$choice" in
+			y|Y ) echo "$brew_outdated" | awk '{print $1}' | xargs -p -n 1 brew upgrade ;;
+  		  	n|N ) echo "Ok, let's continue";;
+    		* ) echo "invalid";;
+		esac
+		
+	else
+	
+		echo "$brew_outdated" | awk '{print $1}' | xargs -n 1 brew upgrade
+		
+	fi
+	
 	echo ""
 fi
 
 echo "🍺  Casks upgrade."
-#brew cask outdated --greedy --verbose | grep -v '(latest)' | awk '{print $1}' | xargs brew cask reinstall
+
 cask_outdated=$(brew cask outdated --greedy --verbose)
 
 outdated=$(echo "$cask_outdated" | grep -v '(latest)')
@@ -74,7 +86,8 @@ fi
 
 echo ""
 latest=$(echo "$cask_outdated" | grep '(latest)')
-if [ -n "$latest" ]; then
+
+if [ -n "$latest" ] && [ "$no_distract" = false ]; then
 	echo -e "\033[4mCasks (latest):\033[0m"
 	echo "$latest" | cut -d " " -f1,2
 	echo ""
@@ -96,8 +109,9 @@ echo ""
 
 if [[ $1 == "cleanup" ]]; then
   echo "🍺  Cleaning brewery"
-  #brew cleanup -s
+  ##brew cleanup -s
   brew cleanup --prune=30
-  #brew cask cleanup
+  ##brew cask cleanup
   brew cask cleanup --outdated
+  echo ""
 fi
