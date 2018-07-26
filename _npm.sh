@@ -16,15 +16,20 @@
 
 # https://github.com/npm/npm/issues/17744
 
-echo " 🌿  npm"
-cd /Users/bruno/Sites/node_modules/
-npm ls
-npm outdated
-npm outdated | awk '{print $1}' | xargs npm update
+echo -e "\033[1m🌿  npm \033[0m"
 echo ""
 
-if [[ $1 == "npm_cleanup" ]]; then
+cd /Users/bruno/Sites/node_modules/
+echo -e "\033[4mInstalled scripts:\033[0m"
+npm ls
+outdated=$(npm outdated)
+echo "$outdated" | awk '{print $1}' | xargs npm update
+echo ""
+
+if [[ $1 == "--npm_cleanup" ]]; then
 	echo "🌬  Cleaning npm cache"
 	npm cache clean
 	echo ""
 fi
+
+echo ""

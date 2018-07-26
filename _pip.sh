@@ -12,7 +12,7 @@ no_distract=false
 #add module to do_not_update array
 declare -a do_not_update=( "tornado","urllib3")
 
-if [[ $1 == "nodistract" ]]; then
+if [[ $1 == "--nodistract" ]]; then
 	no_distract=true
 fi
 
@@ -21,8 +21,8 @@ if ! [ -x "$(command -v $version)" ]; then
 	exit 1
 fi
 
-echo ""
-echo "🐍  Update $version (Python 3)"
+echo -e "\033[1m🐍  $version (Python 3) \033[0m"
+
 echo ""
 $version install --upgrade pip
 echo ""
@@ -87,4 +87,5 @@ else
 	echo -e "\033[4mNo availables updates.\033[0m"
 fi
 
+echo ""
 echo ""

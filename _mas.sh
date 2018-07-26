@@ -3,7 +3,8 @@
 # Mac Appstore plugin for KYMSU
 # https://github.com/welcoMattic/kymsu
 
-echo "🍏  Mac App Store updates come fast as lightning"
+echo -e "\033[1m🍏  Mac App Store updates come fast as lightning \033[0m"
+
 #mas outdated
 massy=`mas outdated`
 echo ""
@@ -26,4 +27,5 @@ else
 	echo -e "\033[4mNo availables mas updates.\033[0m"
 fi
 
+echo ""
 echo ""

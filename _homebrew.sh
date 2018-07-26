@@ -9,11 +9,12 @@ display_info=true
 # No distract mode (Casks with 'latest' version number won't be updated)
 no_distract=false
 
-if [[ $1 == "nodistract" ]]; then
+if [[ $1 == "--nodistract" ]]; then
 	no_distract=true
 fi
 
-echo "🍺  Homebrew"
+echo -e "\033[1m🍺  Homebrew \033[0m"
+
 brew update
 
 echo ""
@@ -107,7 +108,7 @@ brew doctor
 brew missing
 echo ""
 
-if [[ $1 == "cleanup" ]]; then
+if [[ $1 == "--cleanup" ]]; then
   echo "🍺  Cleaning brewery"
   ##brew cleanup -s
   brew cleanup --prune=30
@@ -115,3 +116,5 @@ if [[ $1 == "cleanup" ]]; then
   brew cask cleanup --outdated
   echo ""
 fi
+
+echo ""
