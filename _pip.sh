@@ -37,6 +37,17 @@ if [ -n "$upd" ]; then
 	echo "$pip_outdated"
 	echo ""
 	
+	for i in $upd
+		do
+			info=$($version show $i)
+			#info=$($version show $i | sed -n 4q)
+			#info=$($version show $i | head -5)
+			#info=$($version show $i | tail -n +5)
+			echo "$info" | head -4
+			echo ''
+			#echo "$i"
+		done
+
 	if [ -x "$(command -v pipdeptree)" ]; then
 		echo -e "\033[4mCheck dependancies:\033[0m"
 		echo "Be carefull!! This updates can be a dependancie for some modules. Check for any incompatible version."
