@@ -10,7 +10,7 @@ user=""
 # No distract mode
 no_distract=false
 #add module to do_not_update array
-declare -a do_not_update=( "tornado","urllib3")
+declare -a do_not_update=()
 
 if [[ $1 == "--nodistract" ]]; then
 	no_distract=true

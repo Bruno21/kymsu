@@ -22,6 +22,8 @@ echo ""
 brew_outdated=$(brew outdated)
 upd3=$(echo "$brew_outdated" | awk '{print $1}')
 
+#nb=$(echo $upd3 | wc -w)
+
 if [ -n "$upd3" ]; then
 	
 	if [ "$display_info" = true ]; then
