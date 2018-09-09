@@ -21,6 +21,7 @@ no_distract=false
 
 doctor=false
 
+# Local install
 local_path=/Users/bruno/Sites/node_modules/
 
 echo -e "\033[1m🌿  npm \033[0m"
@@ -44,16 +45,17 @@ fi
 echo
 
 # Local packages
-#cd /Users/bruno/Sites/node_modules/
-cd $local_path
-echo -e "\033[4m🌿  Local installed scripts:\033[0m"
-npm ls
-outdated=$(npm outdated)
-if [ -n "$outdated" ]; then
-	echo "$outdated"
-	echo "$outdated" | awk '{print $1}' | xargs npm update
-else
-	echo -e "\033[4mNo local packages updates.\033[0m"
+if [ -d "$local_path" ]; then
+	cd $local_path
+	echo -e "\033[4m🌿  Local installed scripts:\033[0m"
+	npm ls
+	outdated=$(npm outdated)
+	if [ -n "$outdated" ]; then
+		echo "$outdated"
+		echo "$outdated" | awk '{print $1}' | xargs npm update
+	else
+		echo -e "\033[4mNo local packages updates.\033[0m"
+	fi
 fi
 	
 echo ""
