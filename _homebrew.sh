@@ -59,11 +59,20 @@ if [ -n "$upd3" ]; then
 	
 		a=$(echo -e "Do you wanna run \033[1mbrew upgrade "$upd3"\033[0m? (y/n)")
 		read -p "$a" choice
-		case "$choice" in
-			y|Y ) echo "$brew_outdated" | awk '{print $1}' | xargs -p -n 1 brew upgrade ;;
-  		  	n|N ) echo "Ok, let's continue";;
-    		* ) echo "invalid";;
-		esac
+		#case "$choice" in
+		#	y|Y ) echo "$brew_outdated" | awk '{print $1}' | xargs -p -n 1 brew upgrade ;;
+  		#  	n|N ) echo "Ok, let's continue";;
+    	#	* ) echo "invalid";;
+		#esac
+		
+		if [ "$choice" == "y" ]; then
+			for i in "$upd3"
+			do	
+				echo "$i" | awk '{print $1}' | xargs -p -n 1 brew upgrade
+			done
+		else
+			echo "Ok, let's continue"		
+		fi
 		
 	else
 	
@@ -82,7 +91,12 @@ outdated=$(echo "$cask_outdated" | grep -v '(latest)')
 if [ -n "$outdated" ]; then
 	echo "$outdated"
 	
-	echo "$outdated" | awk '{print $1}' | awk '{print $1}' | xargs brew cask reinstall
+	#echo "$outdated" | awk '{print $1}' | awk '{print $1}' | xargs brew cask reinstall
+	for i in "$outdated"
+	do
+		echo "$i" | awk '{print $1}' | awk '{print $1}' | xargs brew cask reinstall
+	done
+	
 else
 	echo -e "\033[4mNo availables Cask updates.\033[0m"
 fi
@@ -96,11 +110,15 @@ if [ -n "$latest" ] && [ "$no_distract" = false ]; then
 	echo ""
 	
 	read -p "Do you wanna run Cask (latest) upgrade? (y/n)" choice
-  	case "$choice" in
-    	y|Y|o ) echo "$latest" | awk '{print $1}' | xargs -p -n 1 brew cask upgrade --greedy ;;
-    	n|N ) echo "Ok, let's continue";;
-    	* ) echo "invalid";;
-  	esac
+
+	if [ "$choice" == "y" ]; then
+		for i in "$latest"
+		do	
+			echo "$i" | awk '{print $1}' | xargs -p -n 1 brew cask upgrade --greedy
+		done
+	else
+		echo "Ok, let's continue"		
+	fi
 
 fi
 echo ""
