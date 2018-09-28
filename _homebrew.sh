@@ -70,7 +70,7 @@ if [ -n "$upd3" ]; then
 		
 		if [ "$choice" == "y" ]; then
 		
-			for i in "$upd3"
+			for i in $upd3
 			do	
 				FOUND=`echo ${do_not_update[*]} | grep "$i"`
 				if [ "${FOUND}" = "" ]; then
@@ -96,27 +96,16 @@ cask_outdated=$(brew cask outdated --greedy --verbose)
 
 outdated=$(echo "$cask_outdated" | grep -v '(latest)')
 if [ -n "$outdated" ]; then
-	echo "$outdated"
-		
-	#echo "$outdated" | awk '{print $1}' | awk '{print $1}' | xargs brew cask reinstall
-	for i in "$outdated"
+
+	# don't stop multiples updates if one block (bad checksum, not compatible with OS version (Onyx))
+	sea=$(echo "$outdated" | awk '{print $1}')
+	
+	for i in $sea
 	do
-		echo "$i"
-		
-		echo "$i" | awk '{print $1}'
-		
-		sea=$(echo "$i" | awk '{print $1}')
-		echo "$sea"
-		
-		if [ "$sea" != "onyx" ]; then
-			echo ${do_not_update[*]} | grep "$sea"
-		fi
-		#FOUND=`echo ${do_not_update[*]} | grep "$sea"`
-		#echo "found: ${FOUND}"
+		FOUND=`echo ${do_not_update[*]} | grep "$i"`
 		
 		if [ "${FOUND}" == "" ]; then
-			echo
-			#echo "$i" | awk '{print $1}' | awk '{print $1}' | xargs brew cask reinstall
+			echo "$i" | xargs brew cask reinstall
 		fi
 	done
 	
