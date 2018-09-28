@@ -6,6 +6,9 @@
 # Display info on updated pakages 
 display_info=true
 
+#add module to do_not_update array
+declare -a do_not_update=('onyx')
+
 # No distract mode (Casks with 'latest' version number won't be updated)
 no_distract=false
 
@@ -66,9 +69,13 @@ if [ -n "$upd3" ]; then
 		#esac
 		
 		if [ "$choice" == "y" ]; then
+		
 			for i in "$upd3"
 			do	
-				echo "$i" | awk '{print $1}' | xargs -p -n 1 brew upgrade
+				FOUND=`echo ${do_not_update[*]} | grep "$i"`
+				if [ "${FOUND}" = "" ]; then
+					echo "$i" | awk '{print $1}' | xargs -p -n 1 brew upgrade
+				fi
 			done
 		else
 			echo "Ok, let's continue"		
@@ -90,11 +97,27 @@ cask_outdated=$(brew cask outdated --greedy --verbose)
 outdated=$(echo "$cask_outdated" | grep -v '(latest)')
 if [ -n "$outdated" ]; then
 	echo "$outdated"
-	
+		
 	#echo "$outdated" | awk '{print $1}' | awk '{print $1}' | xargs brew cask reinstall
 	for i in "$outdated"
 	do
-		echo "$i" | awk '{print $1}' | awk '{print $1}' | xargs brew cask reinstall
+		echo "$i"
+		
+		echo "$i" | awk '{print $1}'
+		
+		sea=$(echo "$i" | awk '{print $1}')
+		echo "$sea"
+		
+		if [ "$sea" != "onyx" ]; then
+			echo ${do_not_update[*]} | grep "$sea"
+		fi
+		#FOUND=`echo ${do_not_update[*]} | grep "$sea"`
+		#echo "found: ${FOUND}"
+		
+		if [ "${FOUND}" == "" ]; then
+			echo
+			#echo "$i" | awk '{print $1}' | awk '{print $1}' | xargs brew cask reinstall
+		fi
 	done
 	
 else
