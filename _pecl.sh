@@ -9,6 +9,9 @@ echo -e "\033[1m🐘 pecl \033[0m"
 
 echo ""
 
+echo -e "\033[1m❗️ plugin en test (pre-alpha) \033[0m"
+echo ""
+
 #upd=$(echo "$pip_outdated" | sed '1,2d' | awk '{print $1}')
 
 list=$(pecl list | sed '1,3d')
@@ -37,4 +40,5 @@ if [ -n "$pecl_upgrade" ]; then
 	echo "$pecl_upgrade"
 fi
 
+echo ""
 echo ""
