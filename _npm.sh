@@ -78,17 +78,31 @@ else
 	echo -e "\033[4mNo global packages updates.\033[0m"
 fi
 
-echo 
+echo ""
 
 # Maintenance
 if [ "$doctor" = true ]; then
 	echo "🌿  The Doc is checking that everything is ok."
 	npm doctor
+	echo ""
+	
+    echo "🔍   Verifying npm cache"
+    npm cache verify
+    echo ""
 fi
 
+
 if [[ $1 == "--npm_cleanup" ]]; then
-	echo "🌿  Cleaning npm cache"
-	npm cache clean
+
+	# As of npm@5, the npm cache self-heals from corruption issues and data extracted from the cache is guaranteed to be valid. 
+	# If you want to make sure everything is consistent, use 'npm cache verify' instead. 
+	# On the other hand, if you're debugging an issue with the installer, you can use `npm install --cache /tmp/empty-cache` to use a temporary cache instead of nuking the actual one.
+	# If you're sure you want to delete the entire cache, rerun this command with --force.
+
+    if printf '%s\n%s\n' "$(npm --version)" 5.0.0 | sort --version-sort --check=silent; then
+        echo "🌿  Cleaning npm cache"
+    	npm cache clean
+    fi
 	echo ""
 fi
 
