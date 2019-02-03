@@ -140,12 +140,15 @@ brew doctor
 brew missing
 echo ""
 
+# Homebrew 2.0.0+ run a cleanup every 30 days
+
 if [[ $1 == "--cleanup" ]]; then
   echo "🍺  Cleaning brewery"
   ##brew cleanup -s
+  # keep 30 days
   brew cleanup --prune=30
-  ##brew cask cleanup
-  brew cask cleanup --outdated
+  ##brew cask cleanup: deprecated - merged with brew cleanup
+  #brew cask cleanup --outdated
   echo ""
 fi
 
