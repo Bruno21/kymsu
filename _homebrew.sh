@@ -146,7 +146,7 @@ dir="/usr/local/etc/httpd"
 name="httpd.conf"
 
 test=$(find $dir -name "$name"  -mmin -5 -maxdepth 1)
-[ ! -z $test ] && echo -e "\033[1;31m$name was modified in the last 5 minutes\033[0m"
+[ ! -z $test ] && echo -e "\033[1;31m❗️ ️$name was modified in the last 5 minutes\033[0m"
 
 
 # Homebrew 2.0.0+ run a cleanup every 30 days
