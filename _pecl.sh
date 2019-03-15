@@ -9,25 +9,7 @@ echo -e "\033[1m🐘 pecl \033[0m"
 
 echo ""
 
-echo -e "\033[1m❗️ plugin en test (alpha) \033[0m"
-echo ""
-
-#upd=$(echo "$pip_outdated" | sed '1,2d' | awk '{print $1}')
-
-list=$(pecl list | sed '1,3d')
-pecl_list=$(echo "$list")
-
-if [ -n "$pecl_list" ]; then
-
-	echo -e "\033[4mInstalled extensions:\033[0m"
-	echo ""
-	echo "$pecl_list"
-	
-	echo "Installed PECL extensions:" > $HOME/installations.txt
-	echo "$pecl_list" >> $HOME/installations.txt
-	echo " " >> $HOME/installations.txt
-fi
-
+echo -e "\033[1m❗️ plugin en test (beta) \033[0m"
 echo ""
 
 upgrade=$(pecl list-upgrades)
@@ -38,9 +20,7 @@ if [ -n "$pecl_upgrade" ]; then
 	echo -e "\033[4mExtensions update:\033[0m"
 	
 	echo ""
-	# à supprimer
 	echo "$pecl_upgrade"
-	# / à supprimer
 
 	echo ""
 	available=$(echo "$upgrade" | grep -v 'No upgrades available' | grep 'kB')
@@ -48,17 +28,19 @@ if [ -n "$pecl_upgrade" ]; then
 
 	while read ligne 
 	do 
-		echo "$ligne"
+		#echo "$ligne"
 		a=$(echo "$ligne" | grep "pear")
 		if [ -n "$a" ]; then
 			echo "pear update available"
 			# pecl channel-update pear.php.net
 		else
-			#echo "pecl or doc update available"
-			pecl=true
+			#echo "(pecl or doc) update available"
+			#pecl=true
 			b=$(echo "$ligne" | awk '{print $2}')
 			pecl info "$b"
-			#pecl upgrade "$b"
+			echo ""
+			echo "$b" | xargs -p -n 1 pecl upgrade
+
 		fi
 	done <<< "$available"
 
