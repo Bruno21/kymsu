@@ -3,11 +3,13 @@
 # Homebrew plugin for KYMSU
 # https://github.com/welcoMattic/kymsu
 
+# Error: Cask 'onyx' definition is invalid: invalid 'depends_on macos' value: :snow_leopard
+
 # Display info on updated pakages 
 display_info=true
 
 #add module to do_not_update array
-declare -a do_not_update=('onyx')
+declare -a do_not_update=('')
 
 # No distract mode (Casks with 'latest' version number won't be updated)
 no_distract=false
