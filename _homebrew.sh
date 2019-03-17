@@ -4,6 +4,10 @@
 # https://github.com/welcoMattic/kymsu
 
 # Error: Cask 'onyx' definition is invalid: invalid 'depends_on macos' value: :snow_leopard
+#	Supprimer manuellement onyx de /Applications
+# 	rm -rvf "$(brew --prefix)/Caskroom/onyx"
+# ou
+# /usr/bin/find "$(brew --prefix)/Caskroom/"*'/.metadata' -type f -name '*.rb' -print0 | /usr/bin/xargs -0 /usr/bin/perl -i -0pe 's/depends_on macos: \[.*?\]//gsm;s/depends_on macos: .*//g'
 
 # Display info on updated pakages 
 display_info=true
@@ -129,6 +133,7 @@ if [ -n "$latest" ] && [ "$no_distract" = false ]; then
 		for i in "$latest"
 		do	
 			echo "$i" | awk '{print $1}' | xargs -p -n 1 brew cask upgrade --greedy
+			echo $?
 		done
 	else
 		echo "Ok, let's continue"		
