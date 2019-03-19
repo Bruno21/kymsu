@@ -26,27 +26,27 @@ if [ -n "$pecl_upgrade" ]; then
 
 	echo ""
 	available=$(echo "$pecl_upgrade" | grep -v 'No upgrades available' | grep 'kB')
-
-	while read ligne 
-	do 
-		#echo "$ligne"
-		a=$(echo "$ligne" | grep "pear")
-		if [ -n "$a" ]; then
-			pecl channel-update pear.php.net
-		else
-			#(pecl or doc) update available
-			b=$(echo "$ligne" | awk '{print $2}')
-			pecl info "$b"
-			echo ""
-			if [ "$no_distract" = false ]; then
-				echo "$b" | xargs -p -n 1 pecl upgrade
+	
+	if [ -n "$available" ]; then
+		while read ligne 
+		do 
+			#echo "$ligne"
+			a=$(echo "$ligne" | grep "pear")
+			if [ -n "$a" ]; then
+				pecl channel-update pear.php.net
 			else
-				echo "$b" | xargs -n 1 pecl upgrade
+				#(pecl or doc) update available
+				b=$(echo "$ligne" | awk '{print $2}')
+				pecl info "$b"
+				echo ""
+				if [ "$no_distract" = false ]; then
+					echo "$b" | xargs -p -n 1 pecl upgrade
+				else
+					echo "$b" | xargs -n 1 pecl upgrade
+				fi
 			fi
-
-		fi
-	done <<< "$available"
-
+		done <<< "$available"
+	fi
 fi
 
 echo ""
