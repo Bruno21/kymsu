@@ -149,8 +149,10 @@ echo ""
 
 # Test if Apache conf file has been modified by Homebrew (Apache, PHP or Python updates)
 
-dir="/usr/local/etc/httpd"
-name="httpd.conf"
+v_apa=$(httpd -V | grep 'SERVER_CONFIG_FILE')
+conf_apa=$(echo "$v_apa" | awk -F "\"" '{print $2}')
+dir=$(dirname $conf_apa)
+name=$(basename $conf_apa)
 
 test=$(find $dir -name "$name"  -mmin -5 -maxdepth 1)
 [ ! -z $test ] && echo -e "\033[1;31m❗️ ️$name was modified in the last 5 minutes\033[0m"

@@ -64,6 +64,9 @@ echo ""
 echo -e "\033[4m🌿  Global installed scripts:\033[0m"
 npm list -g --depth=0
 g_outdated=$(npm outdated -g)
+
+# => npm ERR! Cannot read property 'length' of undefined -> https://stackoverflow.com/questions/55172700/npm-outdated-g-error-cannot-read-property-length-of-undefined
+
 # update -> wanted ; install -> latest
 if [ -n "$g_outdated" ]; then
 	if [ "$no_distract" = false ]; then

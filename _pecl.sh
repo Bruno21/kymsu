@@ -49,6 +49,15 @@ if [ -n "$pecl_upgrade" ]; then
 	fi
 fi
 
+# php.ini a été modifié il y a moins de 5mn
+v_php=$(php --info | grep -E 'usr.*ini')
+conf_php=$(echo "$v_php" | grep 'Loaded Configuration File' | awk '{print $NF}')
+dir=$(dirname $conf_php)
+name=$(basename $conf_php)
+
+test=$(find $dir -name "$name"  -mmin -5 -maxdepth 1)
+[ ! -z $test ] && echo -e "\033[1;31m❗️ ️$name was modified in the last 5 minutes\033[0m"
+
 echo ""
 echo ""
 
