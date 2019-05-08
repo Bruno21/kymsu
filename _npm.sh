@@ -37,11 +37,29 @@ echo -e "\033[4m🌿  npm\033[0m (current version): $npm_v"
 
 # versions installées de node.js
 nvm_installed=$(brew info nvm | grep Cellar)
-if [ -n "$nvm_installed" ]; then
-	source $(brew --prefix nvm)/nvm.sh
+
+if [ -f "$NVM_DIR/nvm.sh" ]; then
+	source $NVM_DIR/nvm.sh
+	# version courante de nvm
+	nvm_v=$(nvm --version)
+	echo -e "\033[4m🌿  nvm install is:\033[0m $NVM_DIR/nvm.sh"
+	echo "nvm $nvm_v is installed from https://github.com/nvm-sh/nvm"
+	
 	node_install=$(nvm list)
 	echo -e "\033[4m🌿  node.js\033[0m (installed versions): \n$node_install"
+
+elif [ -f "/usr/local/opt/nvm/nvm.sh" ]; then
+	source $(brew --prefix nvm)/nvm.sh
+	# version courante de nvm
+	nvm_v=$(nvm --version)
+	echo -e "\033[4m🌿  nvm install is:\033[0m /usr/local/opt/nvm/nvm.sh"
+	echo "nvm $nvm_v is installed from homebrew"
+	
+	node_install=$(nvm list)
+	echo -e "\033[4m🌿  node.js\033[0m (installed versions): \n$node_install"
+
 fi
+
 echo
 
 # Local packages
