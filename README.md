@@ -1,39 +1,42 @@
-# KYMSU
-Keep Your macOs Stuff Updated (KYMSU)
+# altKYMSU
+altKYMSU is a fork from **KYMSU** (Keep Your macOs Stuff Updated)
+https://github.com/welcoMattic/kymsu
 
-> Get your Homebrew, Mac App Store, Atom Package Manager (apm), npm, yarn, composer, rustup ... stuff updated.
 
-## Requirements
 
-- [Homebrew](https://brew.sh)
+### Plug-ins:
 
-## Installation
+- **atom** (plug-ins)
+- **homebrew**  (brew and cask)
+- **installed** (create a list of all your brew, pip, npm... stuffs). 
+- **npm** (javascript package) (local or global package)
+- **mas** (Mac Appstore) plugin for KYMSU
+- **pip** (Python Package index) (pip or pip3)
+- **PECL** (PHP modules)
+- **Wordpress** (wp-cli) (for testing only)
 
-`$ git clone git@github.com:welcoMattic/kymsu.git && cd kymsu && ./install.sh`
 
-## Usage
 
-Only update all the things
-`$ kymsu`
+### Requirements
 
-With cleanup after updates
-`$ kymsu cleanup`
+- [Homebrew](https://brew.sh/)
+- [pipdeptree](https://pypi.python.org/pypi/pipdeptree) for checking dependancies (pip plugin)
 
-## Plugins system
 
-All default plugins are placed in `~/.kymsu/plugins.d`, feel free to delete those you don't use, and/or add new ones.
-Don't forget to share them here with a shiny pull request! ✨
 
-## Auto-update
+### Installation
 
-KYMSU will auto-update itself each time you run `kymsu` command.
+`$ git clone git@github.com:Bruno21/kymsu.git && cd kymsu && ./install.sh`
 
-## Credits
 
-* [All contributors](https://github.com/welcomattic/kymsu/graphs/contributors)
-* Thanks to [@waxzce](https://github.com/waxzce) for his [article](https://medium.com/@waxzce/keeping-macos-clean-this-is-my-osx-brew-update-cli-command-6c8f12dc1731) about keeping macOs clean!
 
-## License
+### Credit
 
-KYMSU is licensed under the MIT License - see the [LICENSE](LICENSE) file
-for details.
+All credit goes to [welcoMattic](https://github.com/welcoMattic/kymsu)
+
+
+
+### License
+
+Same as KYMSU (MIT)
+
