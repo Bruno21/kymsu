@@ -5,7 +5,7 @@
 
 # https://pecl.php.net
 
-# No distract mode
+# No distract mode (no user interaction)
 no_distract=false
 
 echo -e "\033[1m🐘 pecl \033[0m"

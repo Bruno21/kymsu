@@ -13,9 +13,9 @@
 display_info=true
 
 #add module to do_not_update array
-declare -a do_not_update=('')
+declare -a do_not_update=('virtualbox,virtualbox-extension-pack')
 
-# No distract mode (Casks with 'latest' version number won't be updated)
+# No distract mode (no user interaction)(Casks with 'latest' version number won't be updated)
 no_distract=false
 
 if [[ $1 == "--nodistract" ]]; then

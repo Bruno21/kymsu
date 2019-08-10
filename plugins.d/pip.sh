@@ -71,6 +71,16 @@ if [ -n "$upd" ]; then
 						z=$((z+1))
 					fi
 				done <<< "$dependencies"
+				
+			else
+				c=$(echo -e "Do you want to install pipdeptree to check dependancies ? (y/n)")
+  				read -p "$c" choice
+  				case "$choice" in
+    				y|Y|o ) $version install $user pipdeptree ;;
+    				n|N ) echo "Ok, let's continue";;
+    				* ) echo "invalid";;
+  				esac
+			
 			fi
 			
 			# If the update is not in the do_not_update array, we install it.

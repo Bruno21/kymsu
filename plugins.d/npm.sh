@@ -22,7 +22,7 @@ no_distract=false
 doctor=false
 
 # Local install
-local_path=/Users/bruno/Sites/node_modules/
+local_path=$HOME/Sites/node_modules/
 
 echo -e "\033[1m🌿  npm \033[0m"
 echo ""
@@ -81,9 +81,12 @@ echo ""
 # Global packages
 echo -e "\033[4m🌿  Global installed scripts:\033[0m"
 npm list -g --depth=0
+
 g_outdated=$(npm outdated -g)
 
 # => npm ERR! Cannot read property 'length' of undefined -> https://stackoverflow.com/questions/55172700/npm-outdated-g-error-cannot-read-property-length-of-undefined
+# /Users/bruno/.nvm/versions/node/v10.16.2/lib/node_modules/npm/lib/outdated.js
+# /usr/local/lib/node_modules/npm/lib/outdated.js
 
 # update -> wanted ; install -> latest
 if [ -n "$g_outdated" ]; then
