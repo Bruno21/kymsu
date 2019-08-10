@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 if [[ "$1" == "-h" || "$1" == "--help" ]]; then
-  echo -e "\033[93m\033[1mkymsu2\033[0m"
+  echo -e "\033[93m\033[1maltKymsu\033[0m"
   echo ""
-  echo "Keep Your macOs Stuff Updated 2"
+  echo "alt Keep Your macOs Stuff Updated"
   echo "a fork from kymsu https://github.com/welcoMattic/kymsu"
   echo
   echo "USAGE: kymsu2"
@@ -16,6 +16,7 @@ if [[ "$1" == "-h" || "$1" == "--help" ]]; then
   echo
   echo "Tips:"
   echo " -prefix the plugin with _ to ignore it"
+  echo " -see Settings section on top of each plug-in"
   echo
   exit 0
 fi

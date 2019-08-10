@@ -5,8 +5,18 @@
 
 # https://pecl.php.net
 
+#########################################
+#
+# Settings:
+
 # No distract mode (no user interaction)
 no_distract=false
+#
+#########################################
+
+if [[ $1 == "--nodistract" ]]; then
+	no_distract=true
+fi
 
 echo -e "\033[1m🐘 pecl \033[0m"
 

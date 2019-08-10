@@ -3,4 +3,4 @@
 rm -rf $(which kymsu2)
 rm -rf ~/.kymsu
 
-echo "KYMSU2 has been uninstalled."
+echo "altKYMSU has been uninstalled."

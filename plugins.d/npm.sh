@@ -16,13 +16,24 @@
 
 # https://github.com/npm/npm/issues/17744
 
-# No distract mode
+#########################################
+#
+# Settings:
+
+# No distract mode (no user interaction)
 no_distract=false
 
-doctor=false
+if [[ $1 == "--nodistract" ]]; then
+	no_distract=true
+fi
+
+# Set doctor=true to run 'npm doctor' and 'npm cache verify' each time
+doctor=true
 
 # Local install
 local_path=$HOME/Sites/node_modules/
+
+#########################################
 
 echo -e "\033[1m🌿  npm \033[0m"
 echo ""
@@ -115,9 +126,9 @@ if [ "$doctor" = true ]; then
     echo ""
 fi
 
-
-if [[ $1 == "--npm_cleanup" ]]; then
-
+#if [[ $1 == "--npm_cleanup" ]]; then
+if [[ $1 == "--cleanup" ]]; then
+	echo "npm cache clean"
 	# As of npm@5, the npm cache self-heals from corruption issues and data extracted from the cache is guaranteed to be valid. 
 	# If you want to make sure everything is consistent, use 'npm cache verify' instead. 
 	# On the other hand, if you're debugging an issue with the installer, you can use `npm install --cache /tmp/empty-cache` to use a temporary cache instead of nuking the actual one.

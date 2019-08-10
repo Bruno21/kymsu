@@ -9,6 +9,10 @@
 # ou
 # /usr/bin/find "$(brew --prefix)/Caskroom/"*'/.metadata' -type f -name '*.rb' -print0 | /usr/bin/xargs -0 /usr/bin/perl -i -0pe 's/depends_on macos: \[.*?\]//gsm;s/depends_on macos: .*//g'
 
+#########################################
+#
+# Settings:
+
 # Display info on updated pakages 
 display_info=true
 
@@ -17,6 +21,8 @@ declare -a do_not_update=('virtualbox,virtualbox-extension-pack')
 
 # No distract mode (no user interaction)(Casks with 'latest' version number won't be updated)
 no_distract=false
+#
+#########################################
 
 if [[ $1 == "--nodistract" ]]; then
 	no_distract=true
