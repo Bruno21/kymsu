@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Disabled</key>
+	<false/>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>/usr/local/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:</string>
+		<key>_</key>
+		<string>/usr/bin/env</string>
+	</dict>
+	<key>Label</key>
+	<string>kymsy.installed</string>
+	<key>Program</key>
+	<string>/Users/bruno/Documents/Scripts/kymsu2/plugins.d/installed.sh</string>
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Hour</key>
+		<integer>6</integer>
+		<key>Minute</key>
+		<integer>45</integer>
+		<key>Weekday</key>
+		<integer>1</integer>
+	</dict>
+	<key>WorkingDirectory</key>
+	<string>/Users/bruno/Documents/Scripts/kymsu2/plugins.d</string>
+</dict>
+</plist>

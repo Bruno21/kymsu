@@ -8,12 +8,12 @@ https://github.com/welcoMattic/kymsu
 
 - **atom** (plug-ins)
 - **homebrew**  (brew and cask)
-- **installed** (create a list of all your brew, pip, npm... stuffs). 
+- **installed** (create a list of all your brew, pip, npm... stuffs and a Brewfile). 
 - **npm** (javascript package) (local or global packages)
 - **mas** (Mac Appstore)
 - **pip** (Python Package index) (pip or pip3)
 - **PECL** (PHP modules)
-- **Wordpress** (wp-cli) (for testing only)
+- **Wordpress** (wp-cli) <u>(for testing only)</u>
 
  
 
@@ -50,6 +50,8 @@ Prefix plugin with a _ to ignore it:
 00-kymsu.sh _wp.sh      atom.sh     homebrew.sh mas.sh      npm.sh      pecl.sh     pip.sh
 ```
 
+`Installed.sh` create a Markdown file with all yours installed stuffs and a Brewfile. I suggest to disable the plugin and run it manually.
+
 
 
 ## Settings
@@ -76,6 +78,14 @@ declare -a do_not_update=('virtualbox,virtualbox-extension-pack')
 Git pull and re-run install.sh:
 
 `$ cd kymsu2 && git pull && ./install.sh`
+
+
+
+## Automate
+
+altKYMSU comes with 2 **.plist** files (one for kymsu2, one for installed.sh) to automate the use of KYMSU.  Please edit and drag them into the folder ~ / Library / LaunchAgents
+
+For configure LaunchAgent, I suggest [LaunchControl](http://www.soma-zone.com).
 
 
 
