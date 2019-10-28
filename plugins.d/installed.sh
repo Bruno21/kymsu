@@ -86,7 +86,7 @@ echo -e "🍏  Get mas \033[3m\033[93mApp Store applications\033[0m list"
 echo '## mas (Mac App Store)' >> Installed.md
 echo '' >> Installed.md
 
-appfrommas=$(mas list)
+appfrommas=$(mas list | sort -k2)
 #echo "$appfrommas"
 #declare -a appstore
 echo "\`\`\`bash" >> Installed.md
@@ -193,6 +193,9 @@ echo ''
 echo -e "To restore everything listed in that file, run \033[3m\033[93m'$ brew bundle'\033[0m in folder that contains the Brewfile."
 echo ''
 
+#iconv -f macroman -t utf-8  Installed.md > Installed-utf8.md
+iconv -s -f macroman -t utf-8 Installed.md
 mv Installed.md "$filename".md
+#rm Installed.md
 
 open "$filename".md
