@@ -139,9 +139,9 @@ atom=$(apm list | grep 'Community Packages' -A 100 | sed '1,1d')
 
 echo "\`\`\`bash" >> Installed.md	
 while read -r line; do
-	a=$(echo "$line" | awk -F  "@" '{print $1}')
-	atom_pkg=${a:4}
-	echo "$atom_pkg" >> "$chemin/Installed.md"		
+	a=$(echo "$line" | awk -F "@" '{print $1}' | awk '{print $2}' )
+	#atom_pkg=${a:4}
+	echo "$a" >> Installed.md	
 done <<< "$atom"
 echo "\`\`\`" >> Installed.md
 echo '' >> Installed.md
@@ -193,9 +193,9 @@ echo ''
 echo -e "To restore everything listed in that file, run \033[3m\033[93m'$ brew bundle'\033[0m in folder that contains the Brewfile."
 echo ''
 
-#iconv -f macroman -t utf-8  Installed.md > Installed-utf8.md
-iconv -s -f macroman -t utf-8 Installed.md
-mv Installed.md "$filename".md
-#rm Installed.md
+iconv -f macroman -t utf-8  Installed.md > Installed-utf8.md
+#iconv -s -f macroman -t utf-8 Installed.md
+mv Installed-utf8.md "$filename".md
+rm Installed.md
 
 open "$filename".md
