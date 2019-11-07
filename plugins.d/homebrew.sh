@@ -17,12 +17,24 @@
 display_info=true
 
 #add module to do_not_update array
-declare -a do_not_update=('virtualbox,virtualbox-extension-pack')
+declare -a do_not_update=('')
 
 # No distract mode (no user interaction)(Casks with 'latest' version number won't be updated)
 no_distract=false
 #
 #########################################
+
+notification() {
+    sound="Basso"
+    title="Attention !!!"
+	message="$1 was modified in the last 5 minutes"
+	image="error.png"
+
+	if [[ "$OSTYPE" == "darwin"* ]] && [ -x "$(command -v terminal-notifier)" ]; then
+    	terminal-notifier -title "$title" -message "$message" -sound "$sound" -contentImage "$image"
+	fi
+}
+
 
 if [[ $1 == "--nodistract" ]]; then
 	no_distract=true
@@ -160,9 +172,9 @@ conf_apa=$(echo "$v_apa" | awk -F "\"" '{print $2}')
 dir=$(dirname $conf_apa)
 name=$(basename $conf_apa)
 
-test=$(find $dir -name "$name"  -mmin -5 -maxdepth 1)
+test=$(find $dir -name "$name" -mmin -5 -maxdepth 1)
 [ ! -z $test ] && echo -e "\033[1;31m❗️ ️$name was modified in the last 5 minutes\033[0m"
-
+[ ! -z $test ] && notification $dir
 
 # Homebrew 2.0.0+ run a cleanup every 30 days
 
