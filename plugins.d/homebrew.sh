@@ -16,11 +16,17 @@
 # Display info on updated pakages 
 display_info=true
 
-#add module to do_not_update array
+#add Cask to do_not_update array
 declare -a do_not_update=('')
 
 # No distract mode (no user interaction)(Casks with 'latest' version number won't be updated)
 no_distract=false
+#
+#########################################
+#
+# Recommended software (brew install):
+#	-jq
+#	-terminal-notifier
 #
 #########################################
 
@@ -43,14 +49,44 @@ fi
 
 echo -e "\033[1m🍺  Homebrew \033[0m"
 
-brew update
+#brew update
 
 echo ""
 
+# pinned
+
+brew_pinned=$(brew list --pinned)
+
+if [ -n "$brew_pinned" ]; then
+
+	echo -e "\033[4mList of pinned packages:\033[0m"
+
+	pinned=$(echo "$brew_pinned" | tr '\n' ' ')
+	echo -e "\033[1;31m️$pinned\033[0m"
+	echo "To update a pinned package, you need to un-pin it manually (brew unpin <formula>)"
+	echo ""
+
+	# Remove pinned package from the update packages list
+
+	k=""		
+	upd4=$(echo "$upd3" | tr -d '\n')
+
+	for j in $brew_pinned
+	do 
+		upd4=${upd4/$j/$k} 
+	done
+		
+	# If no update package
+	upd4=$(echo "$upd4" | tr -s ' ')
+
+else
+	upd4="$upd3"
+fi
+
+# Un paquet pinned est dans 'brew outdated'
+
 brew_outdated=$(brew outdated)
 upd3=$(echo "$brew_outdated" | awk '{print $1}')
-
-#nb=$(echo $upd3 | wc -w)
 
 if [ -n "$upd3" ]; then
 	
@@ -59,6 +95,10 @@ if [ -n "$upd3" ]; then
 		for pkg in $upd3
 		do
 			
+			#if [[ "$pkg" == *"$brew_pinned"* ]]; then
+			#	echo "PINNED"
+			#fi
+			
 			# if jq (https://stedolan.github.io/jq/) is installed
 			if [ -x "$(command -v jq)" ]; then
 				info_pkg=$(brew info --json=v1 "$pkg")
@@ -66,16 +106,25 @@ if [ -n "$upd3" ]; then
 				stable=$(echo "$info_pkg" | jq -r .[].versions.stable)
 				homepage=$(echo "$info_pkg" | jq -r .[].homepage)
 				desc=$(echo "$info_pkg" | jq -r .[].desc)
-
-				echo -e "\033[1m$pkg:\033[0m current: $current last: $stable"		
+				# "linked_keg":"7.3.12","pinned":true
+				# "installed":[{"version":"7.3.12",
+				pined=$(echo "$info_pkg" | jq -r .[].pinned)
+				#pined=false
+				
+				#if [[ "$pkg" == *"$brew_pinned"* ]]; then echo -e "\033[1;31m$pkg:\033[0;31m current: $current last: $stable pinned\033[0m";
+				if [ "$pined" = "true" ]; then echo -e "\033[1;31m$pkg:\033[0;31m current: $current last: $stable ! pinned !\033[0m";
+				else echo -e "\033[31m$pkg:\033[0;31m current: $current last: $stable\033[0m";
+				fi
 				echo "$desc"
-				echo "$homepage"		
+				echo "$homepage"
 
 			else
 				info=$(brew info $pkg | head -n 4)
 				ligne1=$(echo "$info" | head -n 1)
 				
-				echo -e "\033[1m$ligne1\033[0m"					
+				if [[ "$pkg" == *"$brew_pinned"* ]]; then echo -e "\033[1;31m$ligne1\033[0m"
+				else echo -e "\033[1m$ligne1\033[0m"
+				fi					
 				echo "$info" | sed -n -e '2,3p'
 			
 			fi
@@ -88,35 +137,52 @@ if [ -n "$upd3" ]; then
 	
 	if [ "$no_distract" = false ]; then
 	
-		a=$(echo -e "Do you wanna run \033[1mbrew upgrade "$upd3"\033[0m? (y/n)")
-		read -p "$a" choice
-		#case "$choice" in
-		#	y|Y ) echo "$brew_outdated" | awk '{print $1}' | xargs -p -n 1 brew upgrade ;;
-  		#  	n|N ) echo "Ok, let's continue";;
-    	#	* ) echo "invalid";;
-		#esac
+		if [ -n "$upd4" ]; then
 		
-		if [ "$choice" == "y" ]; then
+			a=$(echo -e "Do you wanna run \033[1mbrew upgrade "$upd4"\033[0m? (y/n)")
+			read -p "$a" choice
+			#case "$choice" in
+			#	y|Y ) echo "$brew_outdated" | awk '{print $1}' | xargs -p -n 1 brew upgrade ;;
+  			#  	n|N ) echo "Ok, let's continue";;
+    		#	* ) echo "invalid";;
+			#esac
 		
-			for i in $upd3
-			do	
-				FOUND=`echo ${do_not_update[*]} | grep "$i"`
-				if [ "${FOUND}" = "" ]; then
-					echo "$i" | awk '{print $1}' | xargs -p -n 1 brew upgrade
-				fi
-			done
+			if [ "$choice" == "y" ]; then
+		
+				for i in $upd4
+				do	
+					FOUND=`echo ${do_not_update[*]} | grep "$i"`
+					#if [ "${FOUND}" = "" ]; then
+					if [ "${FOUND}" = "" ]; then
+						#if [[ "$i" != *"$brew_pinned"* ]]; then
+							echo "$i" | awk '{print $1}' | xargs -p -n 1 brew upgrade
+						#fi
+					fi
+				done
+			else
+				echo "Ok, let's continue"		
+			fi
 		else
-			echo "Ok, let's continue"		
+			echo "No package to update"
 		fi
 		
-	else
+	else	# no distract
 	
-		echo "$brew_outdated" | awk '{print $1}' | xargs -n 1 brew upgrade
+		echo "$upd4"
+		
+		#if [[ "$i" != *"$brew_pinned"* ]]; then
+		if [ -n "$upd4" ]; then
+			echo "$upd4" | awk '{print $1}' | xargs -n 1 brew upgrade
+		else
+			echo "No package to update"
+		fi
 		
 	fi
 	
 	echo ""
 fi
+
+# Casks
 
 echo "🍺  Casks upgrade."
 
