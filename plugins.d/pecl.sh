@@ -14,6 +14,19 @@ no_distract=false
 #
 #########################################
 
+notification() {
+    sound="Basso"
+    title="Homebrew"
+    #subtitle="Attention !!!"
+	message="$1"
+	image="error.png"
+
+	if [[ "$OSTYPE" == "darwin"* ]] && [ -x "$(command -v terminal-notifier)" ]; then
+    	terminal-notifier -title "$title" -message "$message" -sound "$sound" -contentImage "$image"
+	fi
+}
+
+
 if [[ $1 == "--nodistract" ]]; then
 	no_distract=true
 fi
@@ -59,14 +72,28 @@ if [ -n "$pecl_upgrade" ]; then
 	fi
 fi
 
+# si modif des extensions, les .ini dans conf.d/ ne sont pas modifiés, juste le php.ini
+
 # php.ini a été modifié il y a moins de 5mn
 v_php=$(php --info | grep -E 'usr.*ini')
 conf_php=$(echo "$v_php" | grep 'Loaded Configuration File' | awk '{print $NF}')
 dir=$(dirname $conf_php)
 name=$(basename $conf_php)
+notif2="$conf_php was modified in the last 5 minutes"
 
-test=$(find $dir -name "$name"  -mmin -5 -maxdepth 1)
-[ ! -z $test ] && echo -e "\033[1;31m❗️ ️$name was modified in the last 5 minutes\033[0m"
+test=$(find $dir -name "$name"  -mmin -500 -maxdepth 1)
+
+if [ ! -z $test ]; then
+	echo -e "\033[1;31m❗️ ️$notif2\033[0m"
+	notification "$notif2"
+	echo ""
+	
+	a=$(echo -e "Do you want to edit \033[1m$conf_php\033[0m file ? (y/n)")
+	read -p "$a" choice
+	if [ "$choice" == "y" ]; then
+		$EDITOR $conf_php
+	fi
+fi
 
 echo ""
 echo ""
