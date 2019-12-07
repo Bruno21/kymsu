@@ -56,14 +56,16 @@ echo ""
 
 # Pinned packages
 
-brew_pinned=$(brew list --pinned)
+brew_pinned=$(brew list --pinned | xargs)
+#brew_pinned=`echo $brew_pinned | sed 's/ *$//g'`
+#brew_pinned=`echo $brew_pinned | xargs`
 
 if [ -n "$brew_pinned" ]; then
 
-	echo -e "\033[4mList of pinned packages:\033[0m"
+	nbp=$(echo "$brew_pinned" | wc -w | xargs)
 
-	pinned=$(echo "$brew_pinned" | tr '\n' ' ')
-	echo -e "\033[1;31m️$pinned\033[0m"
+	echo -e "\033[4mList of\033[0m \033[1;41m $nbp \033[0m \033[4mpinned packages:\033[0m"
+	echo -e "\033[1;31m$brew_pinned\033[0m"
 	echo "To update a pinned package, you need to un-pin it manually (brew unpin <formula>)"
 	echo ""
 
@@ -71,25 +73,72 @@ fi
 
 # A pinned package is in 'brew outdated'
 
+declare -A array_info
+
 if [ -x "$(command -v jq)" ]; then
 	brew_outdated=$(brew outdated --json)	
-	upd3=$(echo "$brew_outdated" )	
+	upd_json=$(echo "$brew_outdated" )
+	
+	for row in $(jq -c '.[]' <<< "$upd_json");
+	do
+		name=$(echo "$row" | jq -j '.name, "\n"'); 
+		upd3+="$name "
+	done
+	upd3=$(echo "$upd3" | sed 's/.$//')
+	
+	# Only 1 request 'brew info' for all updated packages
+	info=$(brew info --json=v1 $upd3)
+	
+	i=0
+	for row in $(echo "${info}" | jq -r '.[] | @base64');
+	do
+	    _jq() {
+	     echo ${row} | base64 --decode | jq -r ${1}
+	    }
+
+		name=$(_jq '.name')
+		homepage=$(_jq '.homepage')
+		# encoding to base64 to prevent errors with some characters (')
+		desc=$(_jq '.desc' | base64 --break=0)	# BSD: break=0 GNU: wrap=0
+		pinned=$(_jq '.pinned')
+		installed_v=$(_jq '.installed[].version')
+		stable=$(_jq '.versions.stable')
+		#linked=$(_jq '.linked_keg')
+
+		eval "declare -a array_info$i=($name $homepage $desc $pinned $installed_v $stable)"
+
+		((i++))
+	done
+	nb=$i
+	i=0
+
 else
 	brew_outdated=$(brew outdated)	
-	upd3=$(echo "$brew_outdated" | awk '{print $1}')	
+	upd3=$(echo "$brew_outdated" | awk '{print $1}')
+	
+	info=$(brew info $upd3)
+	for i in $upd3
+	do
+		a=$(grep -A 3 "$i: stable" <<< "$info")
+		array_info["$i"]="$a"
+	done
+	nb=${#array_info[@]}
 fi
+
+# Get infos for all updated packages
 
 if [ -n "$upd3" ]; then
 		
 	# Display info on outdated packages
 	
 	if [ "$display_info" = true ]; then
-		echo -e "\033[4mInfo on updated packages:\033[0m"
+		echo -e "\033[4mInfo on\033[0m \033[1;41m $nb \033[0m \033[4mupdated packages:\033[0m"
 		
 		if [ -x "$(command -v jq)" ]; then
 		# ok avec jq installé
 		
-			for row in $(jq -c '.[]' <<< "$upd3");
+			i=0
+			for row in $(jq -c '.[]' <<< "$upd_json");
 			do
 			
 				name=$(echo "$row" | jq -j '.name, "\n"'); 
@@ -97,12 +146,18 @@ if [ -n "$upd3" ]; then
 				pinned_v=$(echo "$row" | jq -j '.pinned_version, "\n"');
 				iv=$(echo "$row" | jq -j '.installed_versions, "\n"');
 				installed_v=$(echo "$iv" | jq -j '.[]');
-				#echo "$iv"
 				current_v=$(echo "$row" | jq -j '.current_version, "\n"');
-	
-				info_pkg=$(brew info --json=v1 "$name")
-				homepage=$(echo "$info_pkg" | jq -r .[].homepage)
-				desc=$(echo "$info_pkg" | jq -r .[].desc)
+
+				#n="array_info$i[0]"
+				#name=$(echo ${!n})
+				h="array_info$i[1]"
+				homepage=$(echo ${!h})
+				d="array_info$i[2]"
+				desc=$(echo ${!d} | base64 --decode)
+				
+				#info_pkg=$(brew info --json=v1 "$name")
+				#homepage=$(echo "$info_pkg" | jq -r .[].homepage)
+				#desc=$(echo "$info_pkg" | jq -r .[].desc)
 				#current=$(echo "$info_pkg" | jq -r .[].installed[].version | tail -n 1 | awk '{print $1}')
 				#stable=$(echo "$info_pkg" | jq -r .[].versions.stable)
 				#pined=$(echo "$info_pkg" | jq -r .[].pinned)
@@ -112,18 +167,21 @@ if [ -n "$upd3" ]; then
 				if [ "$pinned" = "true" ]; then echo -e "\033[1;31m$name: installed: $installed_v stable: $current_v [pinned at $pinned_v]\033[0m";
 				else echo -e "\033[1;37m$name: installed: $installed_v stable: $current_v\033[0m";
 				fi
-				echo "$desc"
-				echo "$homepage"
+				if [ "$desc" != "null" ]; then echo "$desc"; fi;
+				echo -e "\033[4m$homepage\033[0m"
 				echo ""
+				
+				((i++))
 			done
 			upd3=$upd
 		else
-		# test sans jq
+		# ok sans jq
 		
 			for pkg in $upd3
 			do
-				info=$(brew info $pkg | head -n 4)
-				ligne1=$(echo "$info" | head -n 1)
+				info_pkg="${array_info[$pkg]}"
+				ligne1=$(echo "$info_pkg" | head -n 1)
+				desc=$(echo "$info_pkg"| sed '1d')
 				
 				if [[ $ligne1 =~ "pinned" ]]; then # same as if [[ $ligne1 == *"pinned"* ]]; then
 					echo -e "\033[1;31m$ligne1\033[0m"
@@ -131,7 +189,7 @@ if [ -n "$upd3" ]; then
 					echo -e "\033[1m$ligne1\033[0m"		
 				fi
 				
-				echo "$info" | sed -n -e '2,3p'
+				echo "$desc"
 				echo ""
 			done
 		fi
@@ -151,7 +209,6 @@ if [ -n "$upd3" ]; then
 		fi
 	done
 	not_pinned=$(echo "$not_pinned" | sed 's/.$//')
-	#echo "Not pinned: $not_pinned"
 
 	# Update outdated packages
 	
@@ -173,8 +230,8 @@ if [ -n "$upd3" ]; then
 				do	
 					FOUND=`echo ${do_not_update[*]} | grep "$i"`
 					if [ "${FOUND}" = "" ]; then
-							#echo "$i" | awk '{print $1}' | xargs -p -n 1 brew upgrade
-							echo "Running update package $i "
+							echo "$i" | awk '{print $1}' | xargs -p -n 1 brew upgrade
+							#echo "Running update package $i "
 						#fi
 					fi
 				done
@@ -188,8 +245,8 @@ if [ -n "$upd3" ]; then
 	else	# no distract = true
 	
 		if [ -n "$not_pinned" ]; then
-			#echo "$not_pinned" | awk '{print $1}' | xargs -n 1 brew upgrade
-			echo "Running update package $not_pinned"
+			echo "$not_pinned" | awk '{print $1}' | xargs -n 1 brew upgrade
+			#echo "Running update package $not_pinned"
 		else
 			echo "No package to update"
 		fi
