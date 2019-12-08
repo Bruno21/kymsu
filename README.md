@@ -2,6 +2,10 @@
 altKYMSU is a fork from **KYMSU** (Keep Your macOs Stuff Updated)
 https://github.com/welcoMattic/kymsu
 
+Each plugin notifie you about available update and upgrade apps and packages.
+
+homebrew and pecl plugins notifie you if apache/php configuration files have been modified.
+
 
 
 ## Plug-ins:
@@ -20,7 +24,12 @@ https://github.com/welcoMattic/kymsu
 ## Requirements
 
 - [Homebrew](https://brew.sh/)
-- [pipdeptree](https://pypi.python.org/pypi/pipdeptree) for checking dependancies (pip plugin)
+
+Optionnal:
+
+- [pipdeptree](https://pypi.python.org/pypi/pipdeptree) *(pip install pipdeptree)* for checking dependancies (pip plugin)
+- [jq](https://github.com/stedolan/jq) *(brew install jq)* for processing JSON data (homebrew plugin)
+- [terminal-notifier](https://github.com/julienXX/terminal-notifier) *(brew install terminal-notifier)* for sending macOS notification (all plugins)
 
 
 
