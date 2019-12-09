@@ -19,8 +19,7 @@ if hash mas 2>/dev/null; then
 	echo ""
 	echo "$massy"
 
-	#if [ -n "$massy" ]; then
-	if [ ! -z "$(mas outdated)" ]; then
+	if [ -n "$(mas outdated)" ]; then
 		echo -e "\033[4mAvailables updates:\033[0m"
 		echo "$massy" | cut -d " " -f2-5
 		echo ""
@@ -28,7 +27,7 @@ if hash mas 2>/dev/null; then
 		if [ "$no_distract" = false ]; then
 	
 			a=$(echo -e "Do you wanna run \033[1mmas upgrade\033[0m ? (y/n)")
-			read -p "$a" choice
+			read -pr "$a" choice
 			case "$choice" in
 				y|Y|o ) mas upgrade;;
 	 		   	n|N ) echo "Ok, let's continue";;

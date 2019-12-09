@@ -77,13 +77,13 @@ fi
 # php.ini a été modifié il y a moins de 5mn
 v_php=$(php --info | grep -E 'usr.*ini')
 conf_php=$(echo "$v_php" | grep 'Loaded Configuration File' | awk '{print $NF}')
-dir=$(dirname $conf_php)
-name=$(basename $conf_php)
+dir=$(dirname "$conf_php")
+name=$(basename "$conf_php")
 notif2="$conf_php was modified in the last 5 minutes"
 
-test=$(find $dir -name "$name"  -mmin -500 -maxdepth 1)
+test=$(find "$dir" -name "$name"  -mmin -50000 -maxdepth 1)
 
-if [ ! -z $test ]; then
+if [ -n "$test" ]; then
 	echo -e "\033[1;31m❗️ ️$notif2\033[0m"
 	notification "$notif2"
 	echo ""
@@ -91,7 +91,7 @@ if [ ! -z $test ]; then
 	a=$(echo -e "Do you want to edit \033[1m$conf_php\033[0m file ? (y/n)")
 	read -p "$a" choice
 	if [ "$choice" == "y" ]; then
-		$EDITOR $conf_php
+		$EDITOR "$conf_php"
 	fi
 fi
 

@@ -45,7 +45,7 @@ if [ -n "$upd" ]; then
 	
 	for i in $upd
 		do
-			info=$($version show $i)
+			info=$($version show "$i")
 			#info=$($version show $i | sed -n 4q)
 			#info=$($version show $i | head -5)
 			#info=$($version show $i | tail -n +5)
@@ -80,7 +80,7 @@ if [ -n "$upd" ]; then
 				
 			else
 				c=$(echo -e "Do you want to install pipdeptree to check dependancies ? (y/n)")
-  				read -p "$c" choice
+  				read -pr "$c" choice
   				case "$choice" in
     				y|Y|o ) $version install $user pipdeptree ;;
     				n|N ) echo "Ok, let's continue";;
@@ -94,10 +94,10 @@ if [ -n "$upd" ]; then
 			FOUND=`echo ${do_not_update[*]} | grep "$i"`
 			if [ "${FOUND}" = "" ] && [ "$no_distract" = false ]; then
 			
-				b=$(echo -e "Do you wanna run \033[1m$version install $user --upgrade "$i"\033[0m ? (y/n)")
+				b=$(echo -e "Do you wanna run \033[1m$version install $user --upgrade $i\033[0m ? (y/n)")
   				read -p "$b" choice
   				case "$choice" in
-    				y|Y|o ) echo $i | xargs $version install $user --upgrade ;;
+    				y|Y|o ) echo "$i" | xargs $version install $user --upgrade ;;
     				n|N ) echo "Ok, let's continue";;
     				* ) echo "invalid";;
   				esac
@@ -105,7 +105,7 @@ if [ -n "$upd" ]; then
 
 			elif  [ "${FOUND}" = "" ]; then
 			
-				echo $i | xargs $version install $user --upgrade
+				echo "$i" | xargs $version install $user --upgrade
 				
 			fi			
 		done

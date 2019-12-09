@@ -75,7 +75,7 @@ echo
 
 # Local packages
 if [ -d "$local_path" ]; then
-	cd $local_path
+	cd "$local_path" || return
 	echo -e "\033[4m🌿  Local installed scripts:\033[0m"
 	npm ls
 	outdated=$(npm outdated)
