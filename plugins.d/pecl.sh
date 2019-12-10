@@ -81,7 +81,7 @@ dir=$(dirname "$conf_php")
 name=$(basename "$conf_php")
 notif2="$conf_php was modified in the last 5 minutes"
 
-test=$(find "$dir" -name "$name"  -mmin -50000 -maxdepth 1)
+test=$(find "$dir" -name "$name" -mmin -5 -maxdepth 1)
 
 if [ -n "$test" ]; then
 	echo -e "\033[1;31m❗️ ️$notif2\033[0m"
