@@ -12,6 +12,7 @@ if [[ $1 == "--nodistract" ]]; then
 	no_distract=true
 fi
 
+# https://github.com/mas-cli/mas
 # On teste si mas est installé
 if hash mas 2>/dev/null; then
 

@@ -86,43 +86,46 @@ if [ -x "$(command -v jq)" ]; then
 	done
 	upd3=$(echo "$upd3" | sed 's/.$//')
 	
-	# Only 1 request 'brew info' for all updated packages
-	info=$(brew info --json=v1 $upd3)
+	if [ -n "$upd3" ]; then
+		# Only 1 request 'brew info' for all updated packages
+		info=$(brew info --json=v1 $upd3)
 	
-	i=0
-	for row in $(echo "${info}" | jq -r '.[] | @base64');
-	do
-	    _jq() {
-	     echo ${row} | base64 --decode | jq -r ${1}
-	    }
+		i=0
+		for row in $(echo "${info}" | jq -r '.[] | @base64');
+		do
+		    _jq() {
+		     echo ${row} | base64 --decode | jq -r ${1}
+	    	}
 
-		name=$(_jq '.name')
-		homepage=$(_jq '.homepage')
-		# encoding to base64 to prevent errors with some characters (')
-		desc=$(_jq '.desc' | base64 --break=0)	# BSD: break=0 GNU: wrap=0
-		pinned=$(_jq '.pinned')
-		installed_v=$(_jq '.installed[].version')
-		stable=$(_jq '.versions.stable')
-		#linked=$(_jq '.linked_keg')
+			name=$(_jq '.name')
+			homepage=$(_jq '.homepage')
+			# encoding to base64 to prevent errors with some characters (')
+			desc=$(_jq '.desc' | base64 --break=0)	# BSD: break=0 GNU: wrap=0
+			pinned=$(_jq '.pinned')
+			installed_v=$(_jq '.installed[].version')
+			stable=$(_jq '.versions.stable')
+			#linked=$(_jq '.linked_keg')
 
-		eval "declare -a array_info$i=($name $homepage $desc $pinned $installed_v $stable)"
+			eval "declare -a array_info$i=($name $homepage $desc $pinned $installed_v $stable)"
 
-		((i++))
-	done
-	nb=$i
-	i=0
-
+			((i++))
+		done
+		nb=$i
+		i=0
+	fi
 else
 	brew_outdated=$(brew outdated)	
 	upd3=$(echo "$brew_outdated" | awk '{print $1}')
 	
-	info=$(brew info $upd3)
-	for i in $upd3
-	do
-		a=$(grep -A 3 "$i: stable" <<< "$info")
-		array_info["$i"]="$a"
-	done
-	nb=${#array_info[@]}
+	if [ -n "$upd3" ]; then
+		info=$(brew info $upd3)
+		for i in $upd3
+		do
+			a=$(grep -A 3 "$i: stable" <<< "$info")
+			array_info["$i"]="$a"
+		done
+		nb=${#array_info[@]}
+	fi
 fi
 
 # Get infos for all updated packages
@@ -209,6 +212,8 @@ if [ -n "$upd3" ]; then
 		fi
 	done
 	not_pinned=$(echo "$not_pinned" | sed 's/.$//')
+	
+	echo "np:$not_pinned:"
 
 	# Update outdated packages
 	
@@ -238,8 +243,8 @@ if [ -n "$upd3" ]; then
 			else
 				echo "Ok, let's continue"		
 			fi
-		else
-			echo "No package to update"
+		#else
+		#	echo "No package to update"
 		fi
 		
 	else	# no distract = true
@@ -247,14 +252,19 @@ if [ -n "$upd3" ]; then
 		if [ -n "$not_pinned" ]; then
 			echo "$not_pinned" | awk '{print $1}' | xargs -n 1 brew upgrade
 			#echo "Running update package $not_pinned"
-		else
-			echo "No package to update"
+		#else
+		#	echo "No package to update"
 		fi
 		
 	fi
 	
 	echo ""
+
+else
+	echo -e "\033[4mNo package to update.\033[0m"
 fi
+
+echo ""
 
 # Casks
 
@@ -313,6 +323,9 @@ name=$(basename $conf_apa)
 notif1="$dir has been modified in the last 5 minutes"
 
 test=$(find $dir -name "$name" -mmin -5 -maxdepth 1)
+
+echo "$test"
+
 [ ! -z $test ] && echo -e "\033[1;31m❗️ ️$notif1\033[0m"
 [ ! -z $test ] && notification "$notif1"
 
@@ -327,6 +340,8 @@ do
 	php_modified=$(find /usr/local/etc/php/$php/ -name php.ini -newer /tmp/checkpoint)
 	php_ini=/usr/local/etc/php/$php/php.ini
 	notif2="$php_ini has been modified"
+	
+	echo "$php_modified"
 	
 	[ ! -z $php_modified ] && echo -e "\033[1;31m❗️ ️$notif2\033[0m"
 	[ ! -z $php_modified ] && notification "$notif2"
