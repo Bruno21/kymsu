@@ -86,7 +86,7 @@ if [ -x "$(command -v jq)" ]; then
 	done
 	upd3=$(echo "$upd3" | sed 's/.$//')
 	
-	echo "upd3:$upd3:"
+	#echo "upd3:$upd3:"
 	if [ -n "$upd3" ]; then
 		# Only 1 request 'brew info' for all updated packages
 		info=$(brew info --json=v1 $upd3)
@@ -214,8 +214,6 @@ if [ -n "$upd3" ]; then
 	done
 	not_pinned=$(echo "$not_pinned" | sed 's/.$//')
 	
-	echo "np:$not_pinned:"
-
 	# Update outdated packages
 	
 	if [ "$no_distract" = false ]; then
@@ -236,25 +234,18 @@ if [ -n "$upd3" ]; then
 				do	
 					FOUND=`echo ${do_not_update[*]} | grep "$i"`
 					if [ "${FOUND}" = "" ]; then
-							echo "$i" | awk '{print $1}' | xargs -p -n 1 brew upgrade
-							#echo "Running update package $i "
-						#fi
+						echo "$i" | awk '{print $1}' | xargs -p -n 1 brew upgrade
 					fi
 				done
 			else
 				echo "Ok, let's continue"		
 			fi
-		#else
-		#	echo "No package to update"
 		fi
 		
 	else	# no distract = true
 	
 		if [ -n "$not_pinned" ]; then
 			echo "$not_pinned" | awk '{print $1}' | xargs -n 1 brew upgrade
-			#echo "Running update package $not_pinned"
-		#else
-		#	echo "No package to update"
 		fi
 		
 	fi
@@ -306,7 +297,6 @@ if [ -n "$latest" ] && [ "$no_distract" = false ]; then
 		for i in "$latest"
 		do	
 			echo "$i" | awk '{print $1}' | xargs -p -n 1 brew cask upgrade --greedy
-			echo $?
 		done
 	else
 		echo "Ok, let's continue"		
