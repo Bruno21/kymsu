@@ -104,10 +104,10 @@ if [ -n "$g_outdated" ]; then
 	if [ "$no_distract" = false ]; then
 		echo "$g_outdated"
 		#echo "$g_outdated" | sed '1d' | awk '{print $1}' | xargs -p -n 1  npm install -g 
-		echo "$g_outdated" | sed '1d' | awk '{print $1}' | xargs -p -n 1  npm update -g 
+		echo "$g_outdated" | sed '1d' | awk '{print $1}' | xargs -p -n 1 npm update -g
 	else
 		#echo "$g_outdated" | sed '1d' | awk '{print $1}' | xargs -n 1  npm install -g
-		echo "$g_outdated" | sed '1d' | awk '{print $1}' | xargs -n 1  npm update -g
+		echo "$g_outdated" | sed '1d' | awk '{print $1}' | xargs -n 1 npm update -g
 	fi
 else
 	echo -e "\033[4mNo global packages updates.\033[0m"

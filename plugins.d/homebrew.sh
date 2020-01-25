@@ -86,6 +86,7 @@ if [ -x "$(command -v jq)" ]; then
 	done
 	upd3=$(echo "$upd3" | sed 's/.$//')
 	
+	echo "upd3:$upd3:"
 	if [ -n "$upd3" ]; then
 		# Only 1 request 'brew info' for all updated packages
 		info=$(brew info --json=v1 $upd3)
