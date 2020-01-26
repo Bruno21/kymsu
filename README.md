@@ -30,6 +30,7 @@ Optionnal:
 - [pipdeptree](https://pypi.python.org/pypi/pipdeptree) *(pip install pipdeptree)* for checking dependancies (pip plugin)
 - [jq](https://github.com/stedolan/jq) *(brew install jq)* for processing JSON data (homebrew plugin)
 - [terminal-notifier](https://github.com/julienXX/terminal-notifier) *(brew install terminal-notifier)* for sending macOS notification (all plugins)
+- [Bash 5](https://www.gnu.org/software/bash/) *(brew install bash)* for associative array (homebrew plugin)
 
 
 
