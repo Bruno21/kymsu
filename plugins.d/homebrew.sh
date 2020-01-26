@@ -220,7 +220,8 @@ if [ -n "$upd3" ]; then
 	
 		if [ -n "$not_pinned" ]; then
 		
-			a=$(echo -e "Do you wanna run \033[1mbrew upgrade "$not_pinned"\033[0m ? (y/n)")
+			a=$(echo -e "Do you wanna run \033[1mbrew upgrade "$not_pinned"\033[0m ? (y/n/a)")
+			# yes/no/all
 			read -p "$a" choice
 			#case "$choice" in
 			#	y|Y ) echo "$brew_outdated" | awk '{print $1}' | xargs -p -n 1 brew upgrade ;;
@@ -228,13 +229,17 @@ if [ -n "$upd3" ]; then
     		#	* ) echo "invalid";;
 			#esac
 		
-			if [ "$choice" == "y" ]; then
+			if [ "$choice" == "y" ] || [ "$choice" == "Y" ] || [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
 		
 				for i in $not_pinned
 				do	
 					FOUND=`echo ${do_not_update[*]} | grep "$i"`
 					if [ "${FOUND}" = "" ]; then
-						echo "$i" | awk '{print $1}' | xargs -p -n 1 brew upgrade
+						if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
+							echo "$i" | awk '{print $1}' | xargs -p -n 1 brew upgrade
+						elif [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
+							echo "$i" | awk '{print $1}' | xargs -n 1 brew upgrade
+						fi
 					fi
 				done
 			else
