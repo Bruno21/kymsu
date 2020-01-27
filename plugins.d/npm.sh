@@ -46,30 +46,64 @@ echo -e "\033[4m🌿  node.js\033[0m (current version): $node_v"
 npm_v=$(npm -v)
 echo -e "\033[4m🌿  npm\033[0m (current version): $npm_v"
 
-# versions installées de node.js
+# version installée de nvm par Homebrew
 nvm_installed=$(brew info nvm | grep Cellar)
+# version actuelle de nvm sur GitHub
+version_nvm=$(git ls-remote --tags --refs --sort="v:refname" git://github.com/nvm-sh/nvm.git | tail -n1 | sed 's/.*\///' | sed 's/v//')
 
+# github
 if [ -f "$NVM_DIR/nvm.sh" ]; then
 	source $NVM_DIR/nvm.sh
 	# version courante de nvm
 	nvm_v=$(nvm --version)
+	#echo "$nvm_v,$version_nvm" | tr ',' '\n' | sort -V
+	
 	echo -e "\033[4m🌿  nvm install is:\033[0m $NVM_DIR/nvm.sh"
 	echo "nvm $nvm_v is installed from https://github.com/nvm-sh/nvm"
+
+	if [ "$nvm_v" != "$version_nvm" ]; then
+		echo "Current nvm version on GitHub: $version_nvm"
+		echo "Current nvm installed version: $nvm_v"
+		
+		read -p "Do you want to update nvm from GitHub repo? (y/n)" choice
+
+		if [ "$choice" == "y" ]; then
+			echo "Updating nvm from GitHub..."
+			#curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v"$version_nvm"/install.sh | bash
+			
+			#curl: native on Catalina, wget installed by homebrew
+			#wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash
+			#curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash
+		fi
+	fi
 	
 	node_install=$(nvm list)
 	echo -e "\033[4m🌿  node.js\033[0m (installed versions): \n$node_install"
 
+# homebrew
 elif [ -f "/usr/local/opt/nvm/nvm.sh" ]; then
 	source $(brew --prefix nvm)/nvm.sh
 	# version courante de nvm
 	nvm_v=$(nvm --version)
 	echo -e "\033[4m🌿  nvm install is:\033[0m /usr/local/opt/nvm/nvm.sh"
 	echo "nvm $nvm_v is installed from homebrew"
-	
+
+	if [ "$nvm_v" != "$version_nvm" ]; then
+		echo "Current nvm version on GitHub: $version_nvm"
+		echo "Current nvm installed version: $nvm_v"
+		
+		echo -e "nvm is outdated ! You should run \033[1;3mbrew update && brew upgrade nvm\033[0m"
+		echo -e "or run \033[1;3mKymsu's homebrew.sh script\033[0m."
+	fi
+		
 	node_install=$(nvm list)
 	echo -e "\033[4m🌿  node.js\033[0m (installed versions): \n$node_install"
 
 fi
+
+echo -e "\033[3mNote:"
+echo -e "N/A: version \"10.18.0 -> N/A\" is not yet installed."
+echo -e "You need to run \"nvm install 10.18.0\" to install it before using it.\033[0m"
 
 echo
 
@@ -93,7 +127,8 @@ echo ""
 echo -e "\033[4m🌿  Global installed scripts:\033[0m"
 npm list -g --depth=0
 
-g_outdated=$(npm outdated -g)
+#g_outdated=$(npm outdated -g)
+g_outdated=$(npm outdated -g --parseable=true)
 
 # => npm ERR! Cannot read property 'length' of undefined -> https://stackoverflow.com/questions/55172700/npm-outdated-g-error-cannot-read-property-length-of-undefined
 # /Users/bruno/.nvm/versions/node/v10.16.2/lib/node_modules/npm/lib/outdated.js
@@ -102,12 +137,17 @@ g_outdated=$(npm outdated -g)
 # update -> wanted ; install -> latest
 if [ -n "$g_outdated" ]; then
 	if [ "$no_distract" = false ]; then
-		echo "$g_outdated"
 		#echo "$g_outdated" | sed '1d' | awk '{print $1}' | xargs -p -n 1  npm install -g 
-		echo "$g_outdated" | sed '1d' | awk '{print $1}' | xargs -p -n 1 npm update -g
+		#echo "$g_outdated" | sed '1d' | awk '{print $1}' | xargs -p -n 1 npm update -g --verbose
+		# npm verb outdated not updating @angular/cli because it's currently at the maximum version that matches its specified semver range
+
+		echo "$g_outdated" | cut -d : -f 4 | xargs -p -n 1 npm -g install
+		
 	else
 		#echo "$g_outdated" | sed '1d' | awk '{print $1}' | xargs -n 1  npm install -g
-		echo "$g_outdated" | sed '1d' | awk '{print $1}' | xargs -n 1 npm update -g
+		#echo "$g_outdated" | sed '1d' | awk '{print $1}' | xargs -n 1 npm update -g
+		
+		echo "$g_outdated" | cut -d : -f 4 | xargs -n 1 npm -g install
 	fi
 else
 	echo -e "\033[4mNo global packages updates.\033[0m"

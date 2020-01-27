@@ -73,7 +73,7 @@ fi
 
 # A pinned package is in 'brew outdated'
 
-declare -A array_info
+declare -A array_info 	# bash 5
 
 if [ -x "$(command -v jq)" ]; then
 	brew_outdated=$(brew outdated --json)	
@@ -360,6 +360,9 @@ if [[ $1 == "--cleanup" ]]; then
   echo "🍺  Cleaning brewery"
   ##brew cleanup -s
   # keep 30 days
+  
+  #HOMEBREW_NO_INSTALL_CLEANUP
+  
   brew cleanup --prune=30
   ##brew cask cleanup: deprecated - merged with brew cleanup
   #brew cask cleanup --outdated
