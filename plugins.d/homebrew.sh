@@ -330,17 +330,20 @@ echo "$test"
 php_versions=$(ls /usr/local/etc/php/)
 for php in $php_versions
 do 	
-	# file modified since it was last read
-	#if [ -N /usr/local/etc/php/$php/php.ini ]; then echo "modified"; fi
+	if [ -n "$upd3" ]; then
+
+		# file modified since it was last read
 	
-	php_modified=$(find /usr/local/etc/php/$php/ -name php.ini -newer /tmp/checkpoint)
-	php_ini=/usr/local/etc/php/$php/php.ini
-	notif2="$php_ini has been modified"
+		php_modified=$(find /usr/local/etc/php/$php/ -name php.ini -newer /tmp/checkpoint)
+		php_ini=/usr/local/etc/php/$php/php.ini
+		notif2="$php_ini has been modified"
 	
-	echo "$php_modified"
+		echo "$php_modified"
 	
-	[ ! -z $php_modified ] && echo -e "\033[1;31m❗️ ️$notif2\033[0m"
-	[ ! -z $php_modified ] && notification "$notif2"
+		[ ! -z $php_modified ] && echo -e "\033[1;31m❗️ ️$notif2\033[0m"
+		[ ! -z $php_modified ] && notification "$notif2"
+		
+	fi
 	
 done
 echo ""
