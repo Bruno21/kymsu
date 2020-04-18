@@ -27,6 +27,9 @@ if [[ $1 == "--nodistract" ]]; then
 	no_distract=true
 fi
 
+# Set ls_color to '' for output nvm list in colors, else '--no-colors'
+ls_color='--no-colors'
+
 # Set doctor=true to run 'npm doctor' and 'npm cache verify' each time
 doctor=true
 
@@ -77,7 +80,7 @@ if [ -f "$NVM_DIR/nvm.sh" ]; then
 		fi
 	fi
 	
-	node_install=$(nvm list)
+	node_install=$(nvm list "$ls_color")
 	echo -e "\033[4m🌿  node.js\033[0m (installed versions): \n$node_install"
 
 # homebrew
@@ -96,7 +99,7 @@ elif [ -f "/usr/local/opt/nvm/nvm.sh" ]; then
 		echo -e "or run \033[1;3mKymsu's homebrew.sh script\033[0m."
 	fi
 		
-	node_install=$(nvm list)
+	node_install=$(nvm list "$ls_color")
 	echo -e "\033[4m🌿  node.js\033[0m (installed versions): \n$node_install"
 
 fi
