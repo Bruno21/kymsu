@@ -53,20 +53,28 @@ if [ -n "$pecl_upgrade" ]; then
 	if [ -n "$available" ]; then
 		while read ligne 
 		do 
-			#echo "$ligne"
+			echo "$ligne"
+			
+			# Channel pear.php.net
 			a=$(echo "$ligne" | grep "pear")
 			if [ -n "$a" ]; then
 				pecl channel-update pear.php.net
-			else
+			fi
+			
+			# Channel pecl.php.net
+			b=$(echo "$ligne" | grep "pecl")
+			if [ -n "$b" ]; then
+				pecl channel-update pecl.php.net
+				
 				#(pecl or doc) update available
-				b=$(echo "$ligne" | awk '{print $2}')
-				pecl info "$b"
-				echo ""
-				if [ "$no_distract" = false ]; then
-					echo "$b" | xargs -p -n 1 pecl upgrade
-				else
-					echo "$b" | xargs -n 1 pecl upgrade
-				fi
+				#b=$(echo "$ligne" | awk '{print $2}')
+				#pecl info "$b"
+				#echo ""
+				#if [ "$no_distract" = false ]; then
+				#	echo "$b" | xargs -p -n 1 pecl upgrade
+				#else
+				#	echo "$b" | xargs -n 1 pecl upgrade
+				#fi
 			fi
 		done <<< "$available"
 	fi
