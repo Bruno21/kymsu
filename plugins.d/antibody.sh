@@ -28,13 +28,16 @@ no_distract=false
 
 notification() {
     sound="Basso"
-    title="Homebrew"
+    title="Antibody"
     #subtitle="Attention !!!"
 	message="$1"
-	image="error.png"
+	image_err="error.png"
+	image_ok="success.png"
 
-	if [[ "$OSTYPE" == "darwin"* ]] && [ -x "$(command -v terminal-notifier)" ]; then
-    	terminal-notifier -title "$title" -message "$message" -sound "$sound" -contentImage "$image"
+	if [[ "$OSTYPE" == "darwin"* ]] && [ -x "$(command -v terminal-notifiera)" ]; then
+    	terminal-notifier -title "$title" -message "$message" -sound "$sound" -contentImage "$image_ok"
+ 	elif [[ "$OSTYPE" == "darwin"* ]] && [ -n "$(which alerter)" ]; then
+    	alerter -title "$title" -subtitle "" -message "$message" -sound "$sound" -contentImage "$image_ok" -timeout 3
 	fi
 }
 
@@ -46,7 +49,7 @@ fi
 echo -e "\033[1m🙏 Antibody \033[0m"
 echo ""
 
-#update=$(antibody update 2>&1)
+update=$(antibody update 2>&1)
 
 installed=$(echo "$update" | grep "updating")
 updated=$(echo "$update" | grep "updated")
@@ -87,19 +90,6 @@ if [ -n "$updated" ]; then
 	for j in $(echo "$updated")
 	do
 		url=$(echo "$j" | awk '{print $3}')
-		module=$(echo "$j" | awk -F "/" '{print $NF}')
-		commit=$(echo "$j" | awk -F "$url" '{print $NF}')
-		echo "$commit"
-		echo -e "\033[1m$module\033[0m ($url)"
-	done
-else
-	echo -e "\033[4mNo Antibody modules to update.\033[0m"
-	echo ""
-
-	IFS=$'\n'
-	for j in $(cat updated.txt)
-	do
-		url=$(echo "$j" | awk '{print $3}')
 		module=$(echo "$j" | awk -F "/" '{print $NF}' | awk '{print $1}')
 		commit=$(echo "$j" | awk -F "$url" '{print $NF}')
 		last_commit=$(echo "$commit" | awk '{print $NF}')
@@ -107,8 +97,13 @@ else
 		echo "Commits: $commit"
 		echo "Last commit: "$url"/commits/"$last_commit
 		# https://github.com/zsh-users/zsh-completions/commits/
+		
+		notif="$module has been updated"
+		notification "$notif"
 	done
-	
+else
+	echo -e "\033[4mNo Antibody modules to update.\033[0m"
+	echo ""	
 fi
 
 <<COMMENT
