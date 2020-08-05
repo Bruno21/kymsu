@@ -3,12 +3,19 @@
 # pip plugin for KYMSU
 # https://github.com/welcoMattic/kymsu
 
+# upgrade pip:
+# python -m pip install --upgrade pip
+
+#export PIP_USE_FEATURE=2020-resolver
+#export PIP_USE_FEATURE=fast-deps
+# pip config edit
+
 #########################################
 #
 # Settings:
 
 #version: pip ou pip3
-version=pip3
+pip_version=pip3
 #user: "" or "--user"
 user=""
 # No distract mode
@@ -22,18 +29,21 @@ if [[ $1 == "--nodistract" ]]; then
 	no_distract=true
 fi
 
-if ! [ -x "$(command -v $version)" ]; then
-	echo "Error: $version is not installed." >&2
+if ! [ -x "$(command -v $pip_version)" ]; then
+	echo "Error: $pip_version is not installed." >&2
 	exit 1
 fi
 
-echo -e "\033[1m🐍  $version (Python 3) \033[0m"
+echo -e "\033[1m🐍  $pip_version (Python 3) \033[0m"
 
 echo ""
-$version install --upgrade pip
+echo -e "\033[31mpip use features 2020-resolver & fast-deps for testings. pip 20.3 (10/2020) pip definitively this features.\033[0m"
+
+echo ""
+$pip_version install --upgrade pip
 echo ""
 
-pip_outdated=$($version list --outdated --format columns)
+pip_outdated=$($pip_version list --outdated --format columns)
 upd=$(echo "$pip_outdated" | sed '1,2d' | awk '{print $1}')
 
 if [ -n "$upd" ]; then
@@ -45,10 +55,10 @@ if [ -n "$upd" ]; then
 	
 	for i in $upd
 		do
-			info=$($version show "$i")
-			#info=$($version show $i | sed -n 4q)
-			#info=$($version show $i | head -5)
-			#info=$($version show $i | tail -n +5)
+			info=$($pip_version show "$i")
+			#info=$($pip_version show $i | sed -n 4q)
+			#info=$($pip_version show $i | head -5)
+			#info=$($pip_version show $i | tail -n +5)
 			echo "$info" | head -4
 			echo ''
 			#echo "$i"
@@ -82,7 +92,7 @@ if [ -n "$upd" ]; then
 				c=$(echo -e "Do you want to install pipdeptree to check dependancies ? (y/n)")
   				read -pr "$c" choice
   				case "$choice" in
-    				y|Y|o ) $version install $user pipdeptree ;;
+    				y|Y|o ) $pip_version install $user pipdeptree ;;
     				n|N ) echo "Ok, let's continue";;
     				* ) echo "invalid";;
   				esac
@@ -94,10 +104,10 @@ if [ -n "$upd" ]; then
 			FOUND=`echo ${do_not_update[*]} | grep "$i"`
 			if [ "${FOUND}" = "" ] && [ "$no_distract" = false ]; then
 			
-				b=$(echo -e "Do you wanna run \033[1m$version install $user --upgrade $i\033[0m ? (y/n)")
+				b=$(echo -e "Do you wanna run \033[1m$pip_version install $user --upgrade $i\033[0m ? (y/n)")
   				read -p "$b" choice
   				case "$choice" in
-    				y|Y|o ) echo "$i" | xargs $version install $user --upgrade ;;
+    				y|Y|o ) echo "$i" | xargs $pip_version install $user --upgrade ;;
     				n|N ) echo "Ok, let's continue";;
     				* ) echo "invalid";;
   				esac
@@ -105,7 +115,8 @@ if [ -n "$upd" ]; then
 
 			elif  [ "${FOUND}" = "" ]; then
 			
-				echo "$i" | xargs $version install $user --upgrade
+				echo "$i" | xargs $pip_version install $user --upgrade
+				#echo "$i" | xargs $pip_version install $user --use-feature=2020-resolver --upgrade
 				
 			fi			
 		done
@@ -113,6 +124,11 @@ if [ -n "$upd" ]; then
 else
 	echo -e "\033[4mNo availables updates.\033[0m"
 fi
+
+
+echo -e "🐍  Running \033[1mpip check\033[0m for checking that everything is ok."
+
+$pip_version check
 
 echo ""
 echo ""
