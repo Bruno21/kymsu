@@ -49,6 +49,8 @@ fi
 echo -e "\033[1m🙏 Antibody \033[0m"
 echo ""
 
+antibody_folder=$(antibody home)
+
 update=$(antibody update 2>&1)
 
 installed=$(echo "$update" | grep "updating")
@@ -66,6 +68,9 @@ if [ -n "$installed" ]; then
 		module=$(echo "$i" | awk -F "/" '{print $NF}')
 		echo -e "\033[1m$module\033[0m ($url)"
 	done
+	
+	echo ""
+	echo "Modules are installed in $antibody_folder folder."
 else
 	echo -e "\033[4mNo Antibody modules installed.\033[0m"
 fi
