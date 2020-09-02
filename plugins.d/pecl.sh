@@ -67,15 +67,17 @@ if [ -n "$pecl_upgrade" ]; then
 				pecl channel-update pecl.php.net
 				
 				#(pecl or doc) update available
-				#b=$(echo "$ligne" | awk '{print $2}')
-				#pecl info "$b"
-				#echo ""
-				#if [ "$no_distract" = false ]; then
-				#	echo "$b" | xargs -p -n 1 pecl upgrade
-				#else
-				#	echo "$b" | xargs -n 1 pecl upgrade
-				#fi
+				b=$(echo "$ligne" | awk '{print $2}')
+				pecl info "$b"
+				echo ""
+				if [ "$no_distract" = false ]; then
+					echo "$b" | xargs -p -n 1 pecl upgrade
+				else
+					echo "$b" | xargs -n 1 pecl upgrade
+				fi
 			fi
+			echo ""
+			
 		done <<< "$available"
 	fi
 fi

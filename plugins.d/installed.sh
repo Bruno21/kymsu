@@ -10,7 +10,7 @@
 local_path=/Users/bruno/Sites/node_modules/
 chemin=$(pwd)
 #version: pip ou pip3
-version=pip3
+pip_version=pip3
 #
 #########################################
 
@@ -136,7 +136,7 @@ echo -e "🐍  Get pip \033[3m\033[93mPython 3 packages\033[0m installed list"
 echo '## 🐍  Python packages' >> Installed.md
 echo '' >> Installed.md
 
-pip_packages=$($version list | sed '1,2d' | awk '{print $1}')
+pip_packages=$($pip_version list | sed '1,2d' | awk '{print $1}')
 {
 echo "\`\`\`bash"
 echo "$pip_packages"
