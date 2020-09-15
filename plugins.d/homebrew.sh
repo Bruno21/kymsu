@@ -18,7 +18,7 @@ display_info=true
 
 # Casks don't have pinned cask. So add Cask to the do_not_update array for prevent to update.
 # Also add package for prevent to update whitout pin it.
-declare -a do_not_update=('')
+declare -a do_not_update=("xnconvert" "yate")
 
 # No distract mode (no user interaction)(Casks with 'latest' version number won't be updated)
 no_distract=false
@@ -49,47 +49,60 @@ if [[ $1 == "--nodistract" ]]; then
 fi
 
 echo -e "\033[1m🍺  Homebrew \033[0m"
+echo ""
 
 brew update
 
+echo "Search for packages update..."
 echo ""
 
-# Pinned packages
-
-brew_pinned=$(brew list --pinned | xargs)
-#brew_pinned=`echo $brew_pinned | sed 's/ *$//g'`
-#brew_pinned=`echo $brew_pinned | xargs`
-
-if [ -n "$brew_pinned" ]; then
-
-	nbp=$(echo "$brew_pinned" | wc -w | xargs)
-
-	echo -e "\033[4mList of\033[0m \033[1;41m $nbp \033[0m \033[4mpinned packages:\033[0m"
-	echo -e "\033[1;31m$brew_pinned\033[0m"
-	echo "To update a pinned package, you need to un-pin it manually (brew unpin <formula>)"
-	echo ""
-
-fi
-
-# A pinned package is in 'brew outdated'
-
 declare -A array_info 	# bash 5
+declare -A array_info_cask
 
 if [ -x "$(command -v jq)" ]; then
-	brew_outdated=$(brew outdated --json)	
-	upd_json=$(echo "$brew_outdated" )
+
+	### Recherche des mises-à-jour ###
 	
-	for row in $(jq -c '.[]' <<< "$upd_json");
+	brew_outdated2=$(brew outdated --greedy --json=v2)
+	upd_json=$(echo "$brew_outdated2")
+	
+	upd_package=$(echo "$upd_json" | jq '{formulae} | .[]')
+
+	upd_cask=$(echo "$upd_json" | jq '{casks} | .[]')
+
+	
+	### Liste des mises-à-jour (paquets et casks) ###
+		
+	for row in $(jq -c '{formulae} | .[] | .[]' <<< "$upd_json");
 	do
-		name=$(echo "$row" | jq -j '.name, "\n"'); 
-		upd3+="$name "
+		name=$(echo "$row" | jq -j '.name')
+		pinned=$(echo "$row" | jq -j '.pinned')
+		
+		upd_pkg+="$name "
+		if [ "$pinned" = true ]; then
+			upd_pkg_pinned+="$name "
+		fi
 	done
-	upd3=$(echo "$upd3" | sed 's/.$//')
+	upd_pkg=$(echo "$upd_pkg" | sed 's/.$//')
+	upd_pkg_pinned=$(echo "$upd_pkg_pinned" | sed 's/.$//')
 	
-	#echo "upd3:$upd3:"
-	if [ -n "$upd3" ]; then
+	pkg_pinned=$(brew list --pinned | xargs)
+
+<<COMMENT
+	for row2 in $(jq -c '{casks} | .[] | .[]' <<< "$upd_json");
+	do
+		name=$(echo "$row2" | jq -j '.name')
+		upd_casks+="$name "
+	done
+	upd_casks=$(echo "$upd_casks" | sed 's/.$//')	
+	echo "$upd_casks"
+COMMENT
+
+	### Recherche des infos sur les paquets ###
+
+	if [ -n "$upd_pkg" ]; then
 		# Only 1 request 'brew info' for all updated packages
-		info=$(brew info --json=v1 $upd3)
+		info=$(brew info --json=v1 $upd_pkg)
 	
 		i=0
 		for row in $(echo "${info}" | jq -r '.[] | @base64');
@@ -105,46 +118,62 @@ if [ -x "$(command -v jq)" ]; then
 			pinned=$(_jq '.pinned')
 			installed_v=$(_jq '.installed[].version')
 			stable=$(_jq '.versions.stable')
-			#linked=$(_jq '.linked_keg')
-
+			
 			eval "declare -a array_info$i=($name $homepage $desc $pinned $installed_v $stable)"
-
 			((i++))
 		done
-		nb=$i
+		nb_upd_pkg=$i
 		i=0
 	fi
+
 else
 	brew_outdated=$(brew outdated)	
-	upd3=$(echo "$brew_outdated" | awk '{print $1}')
+	upd_pkg=$(echo "$brew_outdated" | awk '{print $1}')
 	
-	if [ -n "$upd3" ]; then
-		info=$(brew info $upd3)
-		for i in $upd3
+	if [ -n "$upd_pkg" ]; then
+		info=$(brew info $upd_pkg)
+		for i in $upd_pkg
 		do
 			a=$(grep -A 3 "$i: stable" <<< "$info")
 			array_info["$i"]="$a"
 		done
-		nb=${#array_info[@]}
+		nb_upd_pkg=${#array_info[@]}
 	fi
 fi
 
-# Get infos for all updated packages
+#echo "$upd_pkg"
+#echo "$upd_pkg_pinned"
 
-if [ -n "$upd3" ]; then
+
+### Display pinned packages ##
+
+if [ -n "$pkg_pinned" ]; then
+
+	nbp=$(echo "$pkg_pinned" | wc -w | xargs)
+
+	echo -e "\033[4mList of\033[0m \033[1;41m $nbp \033[0m \033[4mpinned packages:\033[0m"
+	echo -e "\033[1;31m$pkg_pinned\033[0m"
+	echo "To update a pinned package, you need to un-pin it manually (brew unpin <formula>)"
+	echo ""
+
+fi
+
+
+### Display infos for all updated packages ##
+
+if [ -n "$upd_pkg" ]; then
 		
 	# Display info on outdated packages
 	
 	if [ "$display_info" = true ]; then
-		echo -e "\033[4mInfo on\033[0m \033[1;41m $nb \033[0m \033[4mupdated packages:\033[0m"
+		echo -e "\033[4mInfo on\033[0m \033[1;41m $nb_upd_pkg \033[0m \033[4mupdated packages:\033[0m"
 		
 		if [ -x "$(command -v jq)" ]; then
 		# ok avec jq installé
 		
 			i=0
-			for row in $(jq -c '.[]' <<< "$upd_json");
+			for row in $(jq -c '.[]' <<< "$upd_package");
 			do
-			
 				name=$(echo "$row" | jq -j '.name, "\n"'); 
 				pinned=$(echo "$row" | jq -j '.pinned, "\n"');
 				pinned_v=$(echo "$row" | jq -j '.pinned_version, "\n"');
@@ -156,8 +185,11 @@ if [ -n "$upd3" ]; then
 				#name=$(echo ${!n})
 				h="array_info$i[1]"
 				homepage=$(echo ${!h})
+				
 				d="array_info$i[2]"
 				desc=$(echo ${!d} | base64 --decode)
+				
+				#echo "$name - $homepage - $desc"
 				
 				#info_pkg=$(brew info --json=v1 "$name")
 				#homepage=$(echo "$info_pkg" | jq -r .[].homepage)
@@ -166,22 +198,23 @@ if [ -n "$upd3" ]; then
 				#stable=$(echo "$info_pkg" | jq -r .[].versions.stable)
 				#pined=$(echo "$info_pkg" | jq -r .[].pinned)
 				
-				upd+="$name "
-					
-				if [ "$pinned" = "true" ]; then echo -e "\033[1;31m$name: installed: $installed_v stable: $current_v [pinned at $pinned_v]\033[0m";
-				else echo -e "\033[1;37m$name: installed: $installed_v stable: $current_v\033[0m";
+				if [ "$pinned" = "true" ]; then 
+					l1+="\033[1;31m$name: installed: $installed_v stable: $current_v [pinned at $pinned_v]\033[0m\n";
+				else 
+					l1+="\033[1;37m$name: installed: $installed_v stable: $current_v\033[0m\n";
 				fi
-				if [ "$desc" != "null" ]; then echo "$desc"; fi;
-				echo -e "\033[4m$homepage\033[0m"
-				echo ""
-				
+				if [ "$desc" != "null" ]; then l1+="$desc\n"; fi;
+				l1+="\033[4m$homepage\033[0m\n"
+				l1+="\n"
+
 				((i++))
 			done
-			upd3=$upd
+			
+			echo -e "$l1"
 		else
 		# ok sans jq
 		
-			for pkg in $upd3
+			for pkg in $upd_pkg
 			do
 				info_pkg="${array_info[$pkg]}"
 				ligne1=$(echo "$info_pkg" | head -n 1)
@@ -199,22 +232,27 @@ if [ -n "$upd3" ]; then
 		fi
 
 	fi
-	
-	# Usefull for notify recent modification of apache/mysql/php conf files.
+
+
+	### Usefull for notify recent modification of apache/mysql/php conf files. ###
 	touch /tmp/checkpoint
 
-	# Remove pinned packages from outdated packages list
+
+	### Remove pinned packages from outdated packages list ###
 
 	not_pinned=""
-	for i in $upd3
+	for i in $upd_pkg
 	do
-		if [[ $brew_pinned != *"$i"* ]]; then
-		not_pinned+="$i "
+		if [[ ! " ${upd_pkg_pinned[@]} " =~ " ${i} " ]]; then
+   			# whatever you want to do when array doesn't contain value
+   			not_pinned+="$i "
 		fi
+
 	done
 	not_pinned=$(echo "$not_pinned" | sed 's/.$//')
-	
-	# Update outdated packages
+
+
+	### Update outdated packages ###
 	
 	if [ "$no_distract" = false ]; then
 	
@@ -237,8 +275,10 @@ if [ -n "$upd3" ]; then
 					if [ "${FOUND}" = "" ]; then
 						if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
 							echo "$i" | awk '{print $1}' | xargs -p -n 1 brew upgrade
+							echo ""
 						elif [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
 							echo "$i" | awk '{print $1}' | xargs -n 1 brew upgrade
+							echo ""
 						fi
 					fi
 				done
@@ -251,9 +291,11 @@ if [ -n "$upd3" ]; then
 	
 		if [ -n "$not_pinned" ]; then
 			echo "$not_pinned" | awk '{print $1}' | xargs -n 1 brew upgrade
+			echo ""
 		fi
 		
 	fi
+	
 	
 	echo ""
 
@@ -263,54 +305,189 @@ fi
 
 echo ""
 
-# Casks
+#################
+##### CASKS #####
+#################
 
-echo "🍺  Casks upgrade."
+echo -e "\033[1m🍺  Casks upgrade \033[0m"
+echo ""
 
-cask_outdated=$(brew cask outdated --greedy --verbose)
+echo "Search for Casks update..."
+echo ""
 
-outdated=$(echo "$cask_outdated" | grep -v '(latest)')
-if [ -n "$outdated" ]; then
-
-	# don't stop multiples updates if one block (bad checksum, not compatible with OS version (Onyx))
-	sea=$(echo "$outdated" | awk '{print $1}')
-	
-	for i in $sea
-	do
-		FOUND=`echo ${do_not_update[*]} | grep "$i"`
+i=0
+for row in $(jq -c '.[]' <<< "$upd_cask");
+do
+	name=$(echo "$row" | jq -j '.name')
+	installed_versions=$(echo "$row" | jq -j '.installed_versions')
+	current_version=$(echo "$row" | jq -j '.current_version')
 		
-		if [ "${FOUND}" == "" ]; then
-			echo "$i" | xargs brew cask reinstall
-		fi
-	done
+	if [ "$current_version" != "latest" ]; then
+		upd_casks+="$name "
+		
+		eval "declare -a array_info_cask$i=($name $installed_versions $current_version)"
+		((i++))
+		
+	elif [ "$current_version" == "latest" ]; then
+		upd_casks_latest+="$name "
+	fi
+
+done
+
+upd_casks=$(echo "$upd_casks" | sed 's/.$//')	
+upd_casks_latest=$(echo "$upd_casks_latest" | sed 's/.$//')	
+
+nb_upd_casks=$(echo "$upd_casks" | wc -w | xargs)
+nb_upd_casks_latest=$(echo "$upd_casks_latest" | wc -w | xargs)
+
+
+if [ -z "$upd_casks" ] && [ -z "$upd_casks_latest" ]; then
+
+	echo -e "\033[4mNo availables Cask updates.\033[0m"
 	
 else
-	echo -e "\033[4mNo availables Cask updates.\033[0m"
-fi
 
-echo ""
-latest=$(echo "$cask_outdated" | grep '(latest)')
+	if [ -n "$upd_casks" ]; then
 
-if [ -n "$latest" ] && [ "$no_distract" = false ]; then
-	echo -e "\033[4mCasks (latest):\033[0m"
-	echo "$latest" | cut -d " " -f1,2
+		echo -e "\033[1;41m $nb_upd_casks \033[0m \033[4mAvailables Casks updates:\033[0m"
+		#echo "upd_casks: $upd_casks"
+		
+		# Display info on outdated packages
+	
+		if [ "$display_info" = true ]; then
+
+			info_cask=$(brew cask info $upd_casks)
+
+			for i in $upd_casks
+			do
+				b=$(grep -A 1 "$i:" <<< "$info_cask")
+				bb=$(echo "$b" | tail -n 1)
+				#echo "b: $b - bb: $bb"
+				array_info_cask["$i"]="$bb"
+			done
+
+			l1=""
+			for row in $(jq -c '.[]' <<< "$upd_cask");
+			do		
+				installed_versions=$(echo "$row" | jq -j '.installed_versions')
+				if [ "$installed_versions" != "latest" ]; then
+					name=$(echo "$row" | jq -j '.name')
+					current_version=$(echo "$row" | jq -j '.current_version')
+					url=${array_info_cask[$name]}
+					
+					if [[ ! " ${do_not_update[@]} " =~ " ${name} " ]]; then
+				    	#echo "$name est à updater"
+						l1+="\033[1;37m$name: installed: $installed_versions current: $current_version\033[0m\n"
+					else
+						l1+="\033[1;31m$name: installed: $installed_versions current: $current_version [Do not update]\033[0m\n"
+					fi					
+					l1+="$url\n\n"
+				fi
+			done
+			
+			echo -e "$l1" | sed ':a;N;$!ba;s/\n//g'
+
+		fi
+		
+		echo ""
+		
+		#brew cask info betterzip
+		
+		# boucle for: don't stop multiples updates if one block (bad checksum, not compatible with OS version (Onyx))
+
+		for i in $upd_casks
+		do
+			FOUND=`echo ${do_not_update[*]} | grep "$i"`
+		
+			if [ "${FOUND}" == "" ]; then
+				#echo "$i" | xargs brew cask reinstall
+				#echo "$i" | xargs -p -n 1 brew reinstall
+				#echo "$i" | xargs -p -n 1 brew upgrade --cask
+
+				b=$(echo -e "Do you wanna run \033[1;37mbrew upgrade homebrew/cask/$i\033[0m ? (y/n)")
+  				read -p "$b" choice				
+				#read -p "\033[1;37mbrew upgrade homebrew/cask/$i\033[0m ? (y/n)" choice
+				if [ "$choice" == "y" ]; then
+					brew upgrade homebrew/cask/$i
+					echo ""
+				fi
+				
+			fi
+		done
+	fi
+	
 	echo ""
 	
-	read -p "Do you wanna run Cask (latest) upgrade? (y/n)" choice
+	if [ -n "$upd_casks_latest" ] && [ "$no_distract" = false ]; then
 
-	if [ "$choice" == "y" ]; then
-		for i in "$latest"
-		do	
-			echo "$i" | awk '{print $1}' | xargs -p -n 1 brew cask upgrade --greedy
-		done
-	else
-		echo "Ok, let's continue"		
+		echo -e "\033[1;41m $nb_upd_casks_latest \033[0m \033[4mCasks (latest) updates:\033[0m"
+		#echo "upd_casks_latest: $upd_casks_latest"
+
+		# Display info on outdated packages
+	
+		if [ "$display_info" = true ]; then
+
+			info_cask_latest=$(brew cask info $upd_casks_latest)
+			
+			for i in $upd_casks_latest
+			do
+				c=$(grep -A 1 "$i:" <<< "$info_cask_latest")
+				cc=$(echo "$c" | tail -n 1)
+				array_info_cask["$i"]="$cc"
+			done
+
+			l2=""
+			for row in $(jq -c '.[]' <<< "$upd_cask");
+			do		
+				installed_versions=$(echo "$row" | jq -j '.installed_versions')
+				if [ "$installed_versions" = "latest" ]; then
+					name=$(echo "$row" | jq -j '.name')
+					current_version=$(echo "$row" | jq -j '.current_version')
+					url=${array_info_cask[$name]}
+
+					if [[ ! " ${do_not_update[@]} " =~ " ${name} " ]]; then
+				    	#echo "$name est à updater"
+						l2+="\033[1;37m$name: installed: $installed_versions current: $current_version\033[0m\n"
+				    else
+						l2+="\033[1;31m$name: installed: $installed_versions current: $current_version [Do not update]\033[0m\n"	    
+					fi
+					l2+="$url\n\n"
+				fi
+			done
+			
+			echo -e "$l2" | sed ':a;N;$!ba;s/\n//g'
+			
+		fi
+		
+		echo ""
+	
+		q=$(echo -e "Do you wanna run \033[1;37mbrew upgrade --cask --greedy <cask>\033[0m ? (y/n)")
+		read -p "$q" choice
+		#read -p "Do you wanna run Casks (latest) upgrade? (y/n)" choice
+
+		if [ "$choice" == "y" ]; then
+			for i in $upd_casks_latest
+			do
+				FOUND=`echo ${do_not_update[*]} | grep "$i"`
+		
+				if [ "${FOUND}" == "" ]; then
+					#echo "$i" | awk '{print $1}' | xargs -p -n 1 brew cask upgrade --greedy
+					echo "$i" | xargs -p -n 1 brew upgrade --cask --greedy
+					echo ""
+				fi
+			done
+		else
+			echo "Ok, let's continue..."		
+		fi
+
 	fi
 
 fi
+
 echo ""
 
-# Test if Apache conf file has been modified by Homebrew (Apache, PHP or Python updates)
+
+### Test if Apache conf file has been modified by Homebrew (Apache, PHP or Python updates) ###
 
 v_apa=$(httpd -V | grep 'SERVER_CONFIG_FILE')
 conf_apa=$(echo "$v_apa" | awk -F "\"" '{print $2}')
@@ -330,7 +507,7 @@ echo "$test"
 php_versions=$(ls /usr/local/etc/php/)
 for php in $php_versions
 do 	
-	if [ -n "$upd3" ]; then
+	if [ -n "$upd_pkg" ]; then
 
 		# file modified since it was last read
 	
@@ -348,14 +525,18 @@ do
 done
 echo ""
 
-# Doctor
+
+### Doctor ###
 
 echo "🍺  ️The Doc is checking that everything is ok."
 brew doctor
+
 brew missing
 status=$?
 if [ $status -ne 0 ]; then brew missing --verbose; fi
 echo ""
+<<COMMENT2
+COMMENT2
 
 # Homebrew 2.0.0+ run a cleanup every 30 days
 
