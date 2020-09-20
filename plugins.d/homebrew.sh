@@ -53,6 +53,7 @@ echo ""
 
 brew update
 
+echo ""
 echo "Search for packages update..."
 echo ""
 
@@ -88,15 +89,6 @@ if [ -x "$(command -v jq)" ]; then
 	
 	pkg_pinned=$(brew list --pinned | xargs)
 
-<<COMMENT
-	for row2 in $(jq -c '{casks} | .[] | .[]' <<< "$upd_json");
-	do
-		name=$(echo "$row2" | jq -j '.name')
-		upd_casks+="$name "
-	done
-	upd_casks=$(echo "$upd_casks" | sed 's/.$//')	
-	echo "$upd_casks"
-COMMENT
 
 	### Recherche des infos sur les paquets ###
 
@@ -140,9 +132,6 @@ else
 		nb_upd_pkg=${#array_info[@]}
 	fi
 fi
-
-#echo "$upd_pkg"
-#echo "$upd_pkg_pinned"
 
 
 ### Display pinned packages ##
@@ -261,11 +250,6 @@ if [ -n "$upd_pkg" ]; then
 			a=$(echo -e "Do you wanna run \033[1mbrew upgrade "$not_pinned"\033[0m ? (y/n/a)")
 			# yes/no/all
 			read -p "$a" choice
-			#case "$choice" in
-			#	y|Y ) echo "$brew_outdated" | awk '{print $1}' | xargs -p -n 1 brew upgrade ;;
-  			#  	n|N ) echo "Ok, let's continue";;
-    		#	* ) echo "invalid";;
-			#esac
 		
 			if [ "$choice" == "y" ] || [ "$choice" == "Y" ] || [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
 		
@@ -350,7 +334,6 @@ else
 	if [ -n "$upd_casks" ]; then
 
 		echo -e "\033[1;41m $nb_upd_casks \033[0m \033[4mAvailables Casks updates:\033[0m"
-		#echo "upd_casks: $upd_casks"
 		
 		# Display info on outdated packages
 	
@@ -362,7 +345,6 @@ else
 			do
 				b=$(grep -A 1 "$i:" <<< "$info_cask")
 				bb=$(echo "$b" | tail -n 1)
-				#echo "b: $b - bb: $bb"
 				array_info_cask["$i"]="$bb"
 			done
 
@@ -376,7 +358,6 @@ else
 					url=${array_info_cask[$name]}
 					
 					if [[ ! " ${do_not_update[@]} " =~ " ${name} " ]]; then
-				    	#echo "$name est à updater"
 						l1+="\033[1;37m$name: installed: $installed_versions current: $current_version\033[0m\n"
 					else
 						l1+="\033[1;31m$name: installed: $installed_versions current: $current_version [Do not update]\033[0m\n"
@@ -406,7 +387,7 @@ else
 
 				b=$(echo -e "Do you wanna run \033[1;37mbrew upgrade homebrew/cask/$i\033[0m ? (y/n)")
   				read -p "$b" choice				
-				#read -p "\033[1;37mbrew upgrade homebrew/cask/$i\033[0m ? (y/n)" choice
+
 				if [ "$choice" == "y" ]; then
 					brew upgrade homebrew/cask/$i
 					echo ""
@@ -421,7 +402,6 @@ else
 	if [ -n "$upd_casks_latest" ] && [ "$no_distract" = false ]; then
 
 		echo -e "\033[1;41m $nb_upd_casks_latest \033[0m \033[4mCasks (latest) updates:\033[0m"
-		#echo "upd_casks_latest: $upd_casks_latest"
 
 		# Display info on outdated packages
 	
@@ -446,7 +426,6 @@ else
 					url=${array_info_cask[$name]}
 
 					if [[ ! " ${do_not_update[@]} " =~ " ${name} " ]]; then
-				    	#echo "$name est à updater"
 						l2+="\033[1;37m$name: installed: $installed_versions current: $current_version\033[0m\n"
 				    else
 						l2+="\033[1;31m$name: installed: $installed_versions current: $current_version [Do not update]\033[0m\n"	    
@@ -463,7 +442,6 @@ else
 	
 		q=$(echo -e "Do you wanna run \033[1;37mbrew upgrade --cask --greedy <cask>\033[0m ? (y/n)")
 		read -p "$q" choice
-		#read -p "Do you wanna run Casks (latest) upgrade? (y/n)" choice
 
 		if [ "$choice" == "y" ]; then
 			for i in $upd_casks_latest
@@ -471,7 +449,6 @@ else
 				FOUND=`echo ${do_not_update[*]} | grep "$i"`
 		
 				if [ "${FOUND}" == "" ]; then
-					#echo "$i" | awk '{print $1}' | xargs -p -n 1 brew cask upgrade --greedy
 					echo "$i" | xargs -p -n 1 brew upgrade --cask --greedy
 					echo ""
 				fi
@@ -526,30 +503,28 @@ done
 echo ""
 
 
+##############
 ### Doctor ###
+##############
 
 echo "🍺  ️The Doc is checking that everything is ok."
+echo ""
+
 brew doctor
 
 brew missing
 status=$?
 if [ $status -ne 0 ]; then brew missing --verbose; fi
 echo ""
-<<COMMENT2
-COMMENT2
 
 # Homebrew 2.0.0+ run a cleanup every 30 days
 
 if [[ $1 == "--cleanup" ]]; then
   echo "🍺  Cleaning brewery"
-  ##brew cleanup -s
-  # keep 30 days
   
   #HOMEBREW_NO_INSTALL_CLEANUP
   
   brew cleanup --prune=30
-  ##brew cask cleanup: deprecated - merged with brew cleanup
-  #brew cask cleanup --outdated
   echo ""
 fi
 
