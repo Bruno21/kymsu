@@ -21,7 +21,8 @@ user=""
 # No distract mode
 no_distract=false
 #add module to do_not_update array
-declare -a do_not_update=()
+#declare -a do_not_update=()
+declare -a do_not_update=('parso')
 #
 #########################################
 
@@ -43,12 +44,25 @@ echo ""
 $pip_version install --upgrade pip
 echo ""
 
+if (( ${#do_not_update[@]} )); then
+
+	nbp=$(echo "$do_not_update" | wc -w | xargs)
+
+	echo -e "\033[4mList of\033[0m \033[1;41m $nbp \033[0m \033[4m'do not update' packages:\033[0m"
+	echo -e "\033[1;31m$do_not_update\033[0m"
+	echo "To remove package from this list, you need to edit the do_not_update array."
+	echo ""
+
+fi
+
 pip_outdated=$($pip_version list --outdated --format columns)
 upd=$(echo "$pip_outdated" | sed '1,2d' | awk '{print $1}')
 
 if [ -n "$upd" ]; then
 
-	echo -e "\033[4mAvailables updates:\033[0m"
+	nb=$(echo "$upd" | wc -w | xargs)
+
+	echo -e "\\033[1;41m $nb \033[0m \033[4mavailables updates:\033[0m"
 	#echo $pip3_outdated_freeze | tr [:space:] '\n'
 	echo "$pip_outdated"
 	echo ""
@@ -126,6 +140,7 @@ else
 fi
 
 
+echo ""
 echo -e "🐍  Running \033[1mpip check\033[0m for checking that everything is ok."
 
 $pip_version check

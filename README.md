@@ -11,9 +11,10 @@ homebrew and pecl plugins notifie you if apache/php configuration files have bee
 ## Plug-ins:
 
 - **atom** (plug-ins)
+- **antibody** (zsh plug-ins)
 - **homebrew**  (brew and cask)
 - **installed** (create a list of all your brew, pip, npm... stuffs and a Brewfile). 
-- **npm** (javascript package) (local or global packages)
+- **npm** (javascript package) (local or global packages) (can update nvm script)
 - **mas** (Mac Appstore)
 - **pip** (Python Package index) (pip or pip3)
 - **PECL** (PHP modules)

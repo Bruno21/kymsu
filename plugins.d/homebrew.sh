@@ -18,7 +18,8 @@ display_info=true
 
 # Casks don't have pinned cask. So add Cask to the do_not_update array for prevent to update.
 # Also add package for prevent to update whitout pin it.
-declare -a do_not_update=("xnconvert" "yate")
+# 	do_not_update=("xnconvert" "yate")
+declare -a do_not_update=("xnconvert")
 
 # No distract mode (no user interaction)(Casks with 'latest' version number won't be updated)
 no_distract=false
@@ -296,6 +297,17 @@ echo ""
 echo -e "\033[1m🍺  Casks upgrade \033[0m"
 echo ""
 
+if (( ${#do_not_update[@]} )); then
+
+	nbp=$(echo "$do_not_update" | wc -w | xargs)
+
+	echo -e "\033[4mList of\033[0m \033[1;41m $nbp \033[0m \033[4m'do not update' packages:\033[0m"
+	echo -e "\033[1;31m$do_not_update\033[0m"
+	echo "To remove package from this list, you need to edit the do_not_update array."
+	echo ""
+
+fi
+
 echo "Search for Casks update..."
 echo ""
 
@@ -373,28 +385,48 @@ else
 		echo ""
 		
 		#brew cask info betterzip
-		
-		# boucle for: don't stop multiples updates if one block (bad checksum, not compatible with OS version (Onyx))
 
-		for i in $upd_casks
-		do
-			FOUND=`echo ${do_not_update[*]} | grep "$i"`
+		##########
+		if [ "$no_distract" = false ]; then
 		
-			if [ "${FOUND}" == "" ]; then
+			a=$(echo -e "Do you wanna run \033[1;37mbrew upgrade homebrew/cask/$upd_casks\033[0m ? (y/n/a)")
+			# yes/no/all
+			read -p "$a" choice
+		
+			if [ "$choice" == "y" ] || [ "$choice" == "Y" ] || [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
+		
+				# boucle for: don't stop multiples updates if one block (bad checksum, not compatible with OS version (Onyx))
+
+				for i in $upd_casks
+				do
+					FOUND=`echo ${do_not_update[*]} | grep "$i"`
+		
+					if [ "${FOUND}" == "" ]; then
 				#echo "$i" | xargs brew cask reinstall
 				#echo "$i" | xargs -p -n 1 brew reinstall
 				#echo "$i" | xargs -p -n 1 brew upgrade --cask
 
-				b=$(echo -e "Do you wanna run \033[1;37mbrew upgrade homebrew/cask/$i\033[0m ? (y/n)")
-  				read -p "$b" choice				
+						#b=$(echo -e "Do you wanna run \033[1;37mbrew upgrade homebrew/cask/$i\033[0m ? (y/n)")
+  						#read -p "$b" choice				
 
-				if [ "$choice" == "y" ]; then
-					brew upgrade homebrew/cask/$i
-					echo ""
-				fi
+						if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
+							echo "$i" | awk '{print $1}' | xargs -p -n 1 brew upgrade homebrew/cask/$i
+							echo ""
+						elif [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
+							brew upgrade homebrew/cask/$i
+							echo ""
+						fi
 				
+					fi
+				done
+			else
+				echo "Ok, let's continue"		
 			fi
-		done
+		else	# no distract = true
+			echo "no distract"
+		
+		fi
+		#########
 	fi
 	
 	echo ""
@@ -440,17 +472,23 @@ else
 		
 		echo ""
 	
-		q=$(echo -e "Do you wanna run \033[1;37mbrew upgrade --cask --greedy <cask>\033[0m ? (y/n)")
+		q=$(echo -e "Do you wanna run \033[1;37mbrew upgrade --cask --greedy <cask>\033[0m ? (y/n/a)")
 		read -p "$q" choice
 
-		if [ "$choice" == "y" ]; then
+		if [ "$choice" == "y" ] || [ "$choice" == "Y" ] || [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
 			for i in $upd_casks_latest
 			do
 				FOUND=`echo ${do_not_update[*]} | grep "$i"`
 		
 				if [ "${FOUND}" == "" ]; then
-					echo "$i" | xargs -p -n 1 brew upgrade --cask --greedy
-					echo ""
+				
+					if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
+						echo "$i" | xargs -p -n 1 brew upgrade --cask --greedy
+						echo ""
+					elif [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
+						echo "$i" | xargs -n 1 brew upgrade --cask --greedy
+						echo ""
+					fi
 				fi
 			done
 		else
