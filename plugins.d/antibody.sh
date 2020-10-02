@@ -103,9 +103,13 @@ if [ -n "$updated" ]; then
 		echo "Last commit: "$url"/commits/"$last_commit
 		# https://github.com/zsh-users/zsh-completions/commits/
 		
-		notif="$module has been updated"
-		notification "$notif"
+		#notif="$module has been updated"
+		#notification "$notif"
+		modules+="$module "
 	done
+	notif="$modules has been updated"
+	notification "$notif"
+
 else
 	echo -e "\033[4mNo Antibody modules to update.\033[0m"
 	echo ""	
