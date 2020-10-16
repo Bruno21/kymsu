@@ -18,8 +18,8 @@ display_info=true
 
 # Casks don't have pinned cask. So add Cask to the do_not_update array for prevent to update.
 # Also add package for prevent to update whitout pin it.
-# 	do_not_update=("xnconvert" "yate")
-declare -a do_not_update=("xnconvert")
+# declare -a do_not_update=("xnconvert" "yate")
+declare -a do_not_update=()
 
 # No distract mode (no user interaction)(Casks with 'latest' version number won't be updated)
 no_distract=false
@@ -299,10 +299,10 @@ echo ""
 
 if (( ${#do_not_update[@]} )); then
 
-	nbp=$(echo "$do_not_update" | wc -w | xargs)
-
+	nbp=${#do_not_update[*]}
+	
 	echo -e "\033[4mList of\033[0m \033[1;41m $nbp \033[0m \033[4m'do not update' packages:\033[0m"
-	echo -e "\033[1;31m$do_not_update\033[0m"
+	echo -e "\033[1;31m${do_not_update[*]}\033[0m"
 	echo "To remove package from this list, you need to edit the do_not_update array."
 	echo ""
 
