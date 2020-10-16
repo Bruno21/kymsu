@@ -15,14 +15,15 @@
 # Settings:
 
 #version: pip ou pip3
-pip_version=pip3
+# pip: python3.8 - pip3: python3.9
+pip_version=pip
 #user: "" or "--user"
 user=""
 # No distract mode
 no_distract=false
 #add module to do_not_update array
 #declare -a do_not_update=()
-declare -a do_not_update=('parso')
+declare -a do_not_update=("parso" "asgiref")
 #
 #########################################
 
@@ -46,10 +47,10 @@ echo ""
 
 if (( ${#do_not_update[@]} )); then
 
-	nbp=$(echo "$do_not_update" | wc -w | xargs)
-
+	nbp=${#do_not_update[*]}
+	
 	echo -e "\033[4mList of\033[0m \033[1;41m $nbp \033[0m \033[4m'do not update' packages:\033[0m"
-	echo -e "\033[1;31m$do_not_update\033[0m"
+	echo -e "\033[1;31m${do_not_update[*]}\033[0m"
 	echo "To remove package from this list, you need to edit the do_not_update array."
 	echo ""
 
@@ -74,7 +75,7 @@ if [ -n "$upd" ]; then
 			#info=$($pip_version show $i | head -5)
 			#info=$($pip_version show $i | tail -n +5)
 			echo "$info" | head -4
-			echo ''
+			echo ""
 			#echo "$i"
 		done
 
@@ -87,11 +88,19 @@ if [ -n "$upd" ]; then
 		do
 			if [ -x "$(command -v pipdeptree)" ]; then
 				dependencies=$(echo "$i" | xargs pipdeptree -r -p | grep "$upd")
+				
+				#asgiref==3.2.10
+  				#	- Django==3.1.2 [requires: asgiref~=3.2.10]
+  				
+  				#parso==0.7.1
+ 				#	 - jedi==0.17.2 [requires: parso>=0.7.0,<0.8.0]
 
 				z=0
 				while read -r line; do
 					if [[ $line = *"<"* ]]; then
 						echo -e "\033[31m$line\033[0m"
+					elif [[ $line = *"~="* ]]; then
+						echo -e "\033[33m$line\033[0m"
 					else
 						if [ "$z" -eq 0 ]; then
 							echo -e "\033[3m$line\033[0m"
@@ -101,6 +110,7 @@ if [ -n "$upd" ]; then
 						z=$((z+1))
 					fi
 				done <<< "$dependencies"
+				echo ""
 				
 			else
 				c=$(echo -e "Do you want to install pipdeptree to check dependancies ? (y/n)")
