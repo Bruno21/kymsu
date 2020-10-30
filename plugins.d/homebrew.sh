@@ -23,6 +23,8 @@ declare -a do_not_update=()
 
 # No distract mode (no user interaction)(Casks with 'latest' version number won't be updated)
 no_distract=false
+
+latest=false
 #
 ###############################################################################################
 #
@@ -47,6 +49,10 @@ notification() {
 
 if [[ $1 == "--nodistract" ]]; then
 	no_distract=true
+fi
+
+if [[ $1 == "--latest" ]]; then
+	latest=true
 fi
 
 echo -e "\033[1m🍺  Homebrew \033[0m"
@@ -411,9 +417,13 @@ else
 
 						if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
 							echo "$i" | awk '{print $1}' | xargs -p -n 1 brew upgrade homebrew/cask/$i
+							retCode=$?
+							echo "code retour: $retCode"
 							echo ""
 						elif [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
 							brew upgrade homebrew/cask/$i
+							retCode=$?
+							echo "code retour: $retCode"
 							echo ""
 						fi
 				
@@ -431,7 +441,7 @@ else
 	
 	echo ""
 	
-	if [ -n "$upd_casks_latest" ] && [ "$no_distract" = false ]; then
+	if [ -n "$upd_casks_latest" ] && [ "$latest" == true ]; then
 
 		echo -e "\033[1;41m $nb_upd_casks_latest \033[0m \033[4mCasks (latest) updates:\033[0m"
 
