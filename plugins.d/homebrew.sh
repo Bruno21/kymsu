@@ -94,7 +94,8 @@ if [ -x "$(command -v jq)" ]; then
 	upd_pkg=$(echo "$upd_pkg" | sed 's/.$//')
 	upd_pkg_pinned=$(echo "$upd_pkg_pinned" | sed 's/.$//')
 	
-	pkg_pinned=$(brew list --pinned | xargs)
+	#pkg_pinned=$(brew list --pinned | xargs)
+	pkg_pinned=$(brew list --formulae --pinned | xargs)
 
 
 	### Recherche des infos sur les paquets ###
@@ -265,10 +266,10 @@ if [ -n "$upd_pkg" ]; then
 					FOUND=`echo ${do_not_update[*]} | grep "$i"`
 					if [ "${FOUND}" = "" ]; then
 						if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
-							echo "$i" | awk '{print $1}' | xargs -p -n 1 brew upgrade
+							echo "$i" | awk '{print $1}' | xargs -p -n 1 brew upgrade --formula 
 							echo ""
 						elif [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
-							echo "$i" | awk '{print $1}' | xargs -n 1 brew upgrade
+							echo "$i" | awk '{print $1}' | xargs -n 1 brew upgrade --formula 
 							echo ""
 						fi
 					fi
@@ -281,7 +282,7 @@ if [ -n "$upd_pkg" ]; then
 	else	# no distract = true
 	
 		if [ -n "$not_pinned" ]; then
-			echo "$not_pinned" | awk '{print $1}' | xargs -n 1 brew upgrade
+			echo "$not_pinned" | awk '{print $1}' | xargs -n 1 brew upgrade --formula 
 			echo ""
 		fi
 		
@@ -395,7 +396,7 @@ else
 		##########
 		if [ "$no_distract" = false ]; then
 		
-			a=$(echo -e "Do you wanna run \033[1;37mbrew upgrade homebrew/cask/$upd_casks\033[0m ? (y/n/a)")
+			a=$(echo -e "Do you wanna run \033[1;37mbrew upgrade $upd_casks\033[0m ? (y/n/a)")
 			# yes/no/all
 			read -p "$a" choice
 		
@@ -416,12 +417,15 @@ else
   						#read -p "$b" choice				
 
 						if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
-							echo "$i" | awk '{print $1}' | xargs -p -n 1 brew upgrade homebrew/cask/$i
+							#echo "$i" | awk '{print $1}' | xargs -p -n 1 brew upgrade homebrew/cask/$i
+							echo "$i" | awk '{print $1}' | xargs -p -n 1 brew upgrade --cask 
+
 							retCode=$?
 							echo "code retour: $retCode"
 							echo ""
 						elif [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
-							brew upgrade homebrew/cask/$i
+							#brew upgrade homebrew/cask/$i
+							brew upgrade  --cask $i
 							retCode=$?
 							echo "code retour: $retCode"
 							echo ""
