@@ -358,7 +358,8 @@ else
 	
 		if [ "$display_info" = true ]; then
 
-			info_cask=$(brew cask info $upd_casks)
+			#info_cask=$(brew cask info $upd_casks)
+			info_cask=$(brew info --cask $upd_casks)
 
 			for i in $upd_casks
 			do
@@ -453,7 +454,8 @@ else
 	
 		if [ "$display_info" = true ]; then
 
-			info_cask_latest=$(brew cask info $upd_casks_latest)
+			#info_cask_latest=$(brew cask info $upd_casks_latest)
+			info_cask_latest=$(brew info --cask $upd_casks_latest)
 			
 			for i in $upd_casks_latest
 			do

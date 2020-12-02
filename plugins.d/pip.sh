@@ -6,8 +6,7 @@
 # upgrade pip:
 # python -m pip install --upgrade pip
 
-#export PIP_USE_FEATURE=2020-resolver
-#export PIP_USE_FEATURE=fast-deps
+# Configurer pip3:
 # pip config edit
 
 #########################################
@@ -37,9 +36,6 @@ if ! [ -x "$(command -v $pip_version)" ]; then
 fi
 
 echo -e "\033[1m🐍  $pip_version (Python 3) \033[0m"
-
-echo ""
-echo -e "\033[31mpip use features 2020-resolver & fast-deps for testings. pip 20.3 (10/2020) pip definitively this features.\033[0m"
 
 echo ""
 $pip_version install --upgrade pip
@@ -140,7 +136,6 @@ if [ -n "$upd" ]; then
 			elif  [ "${FOUND}" = "" ]; then
 			
 				echo "$i" | xargs $pip_version install $user --upgrade
-				#echo "$i" | xargs $pip_version install $user --use-feature=2020-resolver --upgrade
 				
 			fi			
 		done
