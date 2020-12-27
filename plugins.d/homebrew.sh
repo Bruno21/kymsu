@@ -386,8 +386,9 @@ else
 				fi
 			done
 			
-			echo -e "$l1" | sed ':a;N;$!ba;s/\n//g'
-
+			echo -e "$l1"
+			#echo -e "$l1" | sed ':a;N;$!ba;s/\n//g'	# supprimer les sauts de ligne
+			#echo -e "$l1" | tr -d '\n'				# supprimer les sauts de ligne
 		fi
 		
 		echo ""
