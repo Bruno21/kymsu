@@ -15,14 +15,15 @@
 
 #version: pip ou pip3
 # pip: python3.8 - pip3: python3.9
-pip_version=pip
+pip_version=pip3
 #user: "" or "--user"
 user=""
 # No distract mode
 no_distract=false
 #add module to do_not_update array
 #declare -a do_not_update=()
-declare -a do_not_update=("parso" "asgiref")
+#declare -a do_not_update=("parso" "asgiref")
+declare -a do_not_update=("asgiref")
 #
 #########################################
 
