@@ -8,11 +8,16 @@
 
 # npm local install
 local_path=/Users/bruno/Sites/node_modules/
-chemin=$(pwd)
+# folder contains Brewfile and Installer.md
+#chemin=$(pwd)
+chemin=$HOME/Documents/kymsu
 #version: pip ou pip3
 pip_version=pip3
 #
 #########################################
+
+#if [ ! -d chemin ]; then mkdir $chemin; fi
+mkdir -p $chemin
 
 now=$(date +"%d-%m-%Y_%T")
 mac=$(hostname -s)
@@ -23,19 +28,19 @@ echo -e "\033[1m🛠  Installed \033[0m"
 
 echo ''
 
-Installed=$(find . -name 'Installed*.md' -maxdepth 1)
+Installed=$(find $chemin -name 'Installed*.md' -maxdepth 1)
 if [ -n "$Installed" ]; then
 	echo -e "A file \033[93mInstalled*.md\033[0m already exist! We remove it."
 	a=$(echo "$Installed" | xargs rm)
 fi
 
 
-if [ -f Brewfile ]; then
+if [ -f $chemin/Brewfile ]; then
 	echo -e "The \033[93mBrewfile\033[0m already exist! We rename it."
-	find . -name 'Brewfile_*' -maxdepth 1 -print0 | xargs rm
-	d=$(date -r Brewfile  "+%d-%m-%Y_%H:%M:%S")
+	find $chemin -name 'Brewfile_*' -maxdepth 1 -print0 | xargs rm
+	d=$(date -r $chemin/Brewfile  "+%d-%m-%Y_%H:%M:%S")
 	
-	mv Brewfile "Brewfile_$mac@$d"
+	mv "$chemin/Brewfile" "$chemin/Brewfile_$mac@$d"
 fi
 
 {
@@ -50,11 +55,11 @@ echo ''
 
 echo '## 🍺  Homebrew'
 echo ''
-}  >> Installed.md
+}  >> $chemin/Installed.md
 
 echo -e "🍺  Get Homebrew \033[3m\033[93mtap\033[0m list"
 
-echo '### Tap:' >> Installed.md
+echo '### Tap:' >> $chemin/Installed.md
 tap=$(brew tap)
 {
 echo "\`\`\`bash"
@@ -62,49 +67,49 @@ echo "$tap"
 echo "\`\`\`"
 echo ""
 echo ''
-} >> Installed.md
+} >> $chemin/Installed.md
 
 echo -e "🍺  Get Homebrew \033[3m\033[93mpackages\033[0m installed list"
 	
-echo '### Packages:' >> Installed.md
-brew=$(brew list)
+echo '### Packages:' >> $chemin/Installed.md
+brew=$(brew list --formula)
 {
 echo "\`\`\`bash"
 echo "$brew"
 echo "\`\`\`"
 echo ""
 echo ''
-} >> Installed.md
+} >> $chemin/Installed.md
 
 echo -e "🍺  Get Homebrew \033[3m\033[93mCask\033[0m installed list"
 
-echo '### Casks:' >> Installed.md
-cask=$(brew cask list)
+echo '### Casks:' >> $chemin/Installed.md
+cask=$(brew list --cask)
 {
 echo "\`\`\`bash"
 echo "$cask"
 echo "\`\`\`"
 echo ""
 echo ''
-} >> Installed.md
+} >> $chemin/Installed.md
 
 # liste des apps de l'Appstore installées (nom & numéro)
 
 echo -e "🍏  Get mas \033[3m\033[93mApp Store applications\033[0m list"
 
-echo '## 🍏  mas (Mac App Store)' >> Installed.md
-echo '' >> Installed.md
+echo '## 🍏  mas (Mac App Store)' >> $chemin/Installed.md
+echo '' >> $chemin/Installed.md
 
 appfrommas=$(mas list | sort -k2)
 #echo "$appfrommas"
 #declare -a appstore
-echo "\`\`\`bash" >> Installed.md
+echo "\`\`\`bash" >> $chemin/Installed.md
 # todo: trier la liste par nom
 while read -r line; do
 	number=$(echo "$line" | awk '{print $1}')
 	#name=$(echo "$line" | awk -F  "(" '{print $1}' | awk {'first = $1; $1=""; print $0'} | sed 's/^ //g')
 	name=$(echo "$line" | awk -F  "(" '{print $1}' | awk '{first = $1; $1=""; print $0}' | sed 's/^ //g')
-	echo "$name ($number)" >> Installed.md
+	echo "$name ($number)" >> $chemin/Installed.md
 	#echo " " >> Installed.md
 	#appstore["$name"]="${number}"
 done <<< "$appfrommas"
@@ -112,14 +117,14 @@ done <<< "$appfrommas"
 echo "\`\`\`"
 echo ""
 echo ''
-} >> Installed.md
+} >> $chemin/Installed.md
 
 # Extensions PHP PECL
 
 echo -e "🐘  Get PECL \033[3m\033[93mPHP extensions\033[0m list"
 
-echo '## 🐘  PECL extensions' >> Installed.md
-echo '' >> Installed.md
+echo '## 🐘  PECL extensions' >> $chemin/Installed.md
+echo '' >> $chemin/Installed.md
 
 ext_pecl=$(pecl list | sed '1,3d' | awk '{print $1}')
 {
@@ -128,13 +133,13 @@ echo "$ext_pecl"
 echo "\`\`\`"
 echo ""
 echo ''
-} >> Installed.md
+} >> $chemin/Installed.md
 
 # Python packages (pip)
 
 echo -e "🐍  Get pip \033[3m\033[93mPython 3 packages\033[0m installed list"
-echo '## 🐍  Python packages' >> Installed.md
-echo '' >> Installed.md
+echo '## 🐍  Python packages' >> $chemin/Installed.md
+echo '' >> $chemin/Installed.md
 
 pip_packages=$($pip_version list | sed '1,2d' | awk '{print $1}')
 {
@@ -143,7 +148,7 @@ echo "$pip_packages"
 echo "\`\`\`"
 echo ""
 echo ''
-} >> Installed.md
+} >> $chemin/Installed.md
 
 # atom
 
@@ -163,7 +168,7 @@ done <<< "$atom"
 echo "\`\`\`"
 echo ""
 echo ''
-} >> Installed.md
+} >> $chemin/Installed.md
 
 # Node.js packages (npm)
 
@@ -179,7 +184,7 @@ echo '### Global:'
 echo "\`\`\`bash"
 echo "$pkg_global_npm"
 echo "\`\`\`"
-} >> Installed.md
+} >> $chemin/Installed.md
 
 if [ -d "$local_path" ]; then
 	cd "$local_path" || exit
@@ -202,7 +207,26 @@ if [ -d "$local_path" ]; then
 	cd "$chemin" || exit
 fi
 
-echo "" >> Installed.md
+echo "" >> $chemin/Installed.md
+
+# gem
+
+echo -e "💍  Get \033[3m\033[93mgem\033[0m installed list"
+gems=$(gem list --no-versions)
+{
+echo '## 💍 Gem packages'
+echo ''
+echo "\`\`\`bash"
+
+while read -r line; do
+	a=$(echo "$line")
+	echo "$a"	
+done <<< "$gems"
+
+echo "\`\`\`"
+echo ""
+echo ''
+} >> $chemin/Installed.md
 
 echo ''
 
@@ -215,10 +239,12 @@ echo ''
 echo -e "To restore everything listed in that file, run \033[3m\033[93m'$ brew bundle'\033[0m in folder that contains the Brewfile."
 echo ''
 
+mv Brewfile "$chemin/Brewfile"
+
 #iconv -f macroman -t utf-8  Installed.md > Installed-utf8.md
 #mv Installed-utf8.md "$filename".md
 #rm Installed.md
 
-mv Installed.md "$filename".md
+mv $chemin/Installed.md "$chemin/$filename".md
 
-open "$filename".md
+open "$chemin/$filename".md
