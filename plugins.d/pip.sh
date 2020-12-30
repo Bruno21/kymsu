@@ -27,6 +27,15 @@ declare -a do_not_update=("asgiref")
 #
 #########################################
 
+italic="\033[3m"
+underline="\033[4m"
+bold="\033[1m"
+redbox="\033[1;41m"
+redbold="\033[1;31m"
+red="\033[31m"
+yellow="\033[33m"
+reset="\033[0m"
+
 if [[ $1 == "--nodistract" ]]; then
 	no_distract=true
 fi
@@ -36,18 +45,23 @@ if ! [ -x "$(command -v $pip_version)" ]; then
 	exit 1
 fi
 
-echo -e "\033[1m🐍  $pip_version (Python 3) \033[0m"
+echo -e "${bold}🐍  $pip_version (Python 3) ${reset}"
 
 echo ""
-$pip_version install --upgrade pip
+
+echo -e "Current ${underline}Python3${reset} version: $(python3 -V | awk '{print $2}')"
+echo -e "Current ${underline}pip3${reset} version: $(pip3 -V)"
+
+#$pip_version install --upgrade pip
+$pip_version install --upgrade pip > /dev/null
 echo ""
 
 if (( ${#do_not_update[@]} )); then
 
 	nbp=${#do_not_update[*]}
 	
-	echo -e "\033[4mList of\033[0m \033[1;41m $nbp \033[0m \033[4m'do not update' packages:\033[0m"
-	echo -e "\033[1;31m${do_not_update[*]}\033[0m"
+	echo -e "${underline}List of${reset} ${redbox} $nbp ${reset} ${underline}'do not update' packages:${reset}"
+	echo -e "${redbold}${do_not_update[*]}${reset}"
 	echo "To remove package from this list, you need to edit the do_not_update array."
 	echo ""
 
@@ -60,7 +74,7 @@ if [ -n "$upd" ]; then
 
 	nb=$(echo "$upd" | wc -w | xargs)
 
-	echo -e "\\033[1;41m $nb \033[0m \033[4mavailables updates:\033[0m"
+	echo -e "${redbox} $nb ${reset} ${underline}availables updates:${reset}"
 	#echo $pip3_outdated_freeze | tr [:space:] '\n'
 	echo "$pip_outdated"
 	echo ""
@@ -68,16 +82,12 @@ if [ -n "$upd" ]; then
 	for i in $upd
 		do
 			info=$($pip_version show "$i")
-			#info=$($pip_version show $i | sed -n 4q)
-			#info=$($pip_version show $i | head -5)
-			#info=$($pip_version show $i | tail -n +5)
 			echo "$info" | head -4
 			echo ""
-			#echo "$i"
 		done
 
 	if [ -x "$(command -v pipdeptree)" ]; then
-		echo -e "\033[4mCheck dependancies:\033[0m"
+		echo -e "${underline}Check dependancies:${reset}"
 		echo "Be carefull!! This updates can be a dependancie for some modules. Check for any incompatible version."
 	fi
 	echo ""
@@ -95,12 +105,12 @@ if [ -n "$upd" ]; then
 				z=0
 				while read -r line; do
 					if [[ $line = *"<"* ]]; then
-						echo -e "\033[31m$line\033[0m"
+						echo -e "${red}$line${reset}"
 					elif [[ $line = *"~="* ]]; then
-						echo -e "\033[33m$line\033[0m"
+						echo -e "${yellow}$line${reset}"
 					else
 						if [ "$z" -eq 0 ]; then
-							echo -e "\033[3m$line\033[0m"
+							echo -e "${italic}$line${reset}"
 						else
 							echo "$line"
 						fi
@@ -125,7 +135,7 @@ if [ -n "$upd" ]; then
 			FOUND=`echo ${do_not_update[*]} | grep "$i"`
 			if [ "${FOUND}" = "" ] && [ "$no_distract" = false ]; then
 			
-				b=$(echo -e "Do you wanna run \033[1m$pip_version install $user --upgrade $i\033[0m ? (y/n)")
+				b=$(echo -e "Do you wanna run ${bold}$pip_version install $user --upgrade $i${reset} ? (y/n)")
   				read -p "$b" choice
   				case "$choice" in
     				y|Y|o ) echo "$i" | xargs $pip_version install $user --upgrade ;;
@@ -142,12 +152,11 @@ if [ -n "$upd" ]; then
 		done
 
 else
-	echo -e "\033[4mNo availables updates.\033[0m"
+	echo -e "${underline}No availables updates.${reset}"
 fi
 
-
 echo ""
-echo -e "🐍  Running \033[1mpip check\033[0m for checking that everything is ok."
+echo -e "🐍  Running ${bold}pip check${reset} for checking that everything is ok."
 
 $pip_version check
 
