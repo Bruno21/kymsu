@@ -27,8 +27,10 @@ if [[ $1 == "--nodistract" ]]; then
 	no_distract=true
 fi
 
-# Set ls_color to '' for output nvm list in colors, else '--no-colors'
-ls_color='--no-colors'
+# Set ls_color to '' for output nvm list in default colors, else '--no-colors'
+# ls_color='--no-colors'
+# ls_color='BrGcm' for custom colors
+# export NVM_COLORS='BrGcm' in .zshrc for persistant custom colors
 
 # Set doctor=true to run 'npm doctor' and 'npm cache verify' each time
 doctor=true
