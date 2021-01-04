@@ -390,6 +390,48 @@ if [ -n "$casks_latest_not_pinned" ] && [ "$latest" == true ]; then
 	fi
 fi
 
+
+###############################################################
+### Test if Apache conf file has been modified by Homebrew  ###
+###                   (Apache, PHP or Python updates)       ###
+###############################################################
+
+v_apa=$(httpd -V | grep 'SERVER_CONFIG_FILE')
+conf_apa=$(echo "$v_apa" | awk -F "\"" '{print $2}')
+dir=$(dirname $conf_apa)
+name=$(basename $conf_apa)
+notif1="$dir has been modified in the last 5 minutes"
+
+test=$(find $dir -name "$name" -mmin -5 -maxdepth 1)
+
+echo "$test"
+
+[ ! -z $test ] && echo -e "\033[1;31m❗️ ️$notif1\033[0m"
+[ ! -z $test ] && notification "$notif1"
+
+# Test if PHP.ini file has been modified by Homebrew (PECL)
+
+php_versions=$(ls /usr/local/etc/php/)
+for php in $php_versions
+do 	
+	if [ -n "$upd_pkg" ]; then
+
+		# file modified since it was last read
+	
+		php_modified=$(find /usr/local/etc/php/$php/ -name php.ini -newer /tmp/checkpoint)
+		php_ini=/usr/local/etc/php/$php/php.ini
+		notif2="$php_ini has been modified"
+	
+		echo "$php_modified"
+	
+		[ ! -z $php_modified ] && echo -e "\033[1;31m❗️ ️$notif2\033[0m"
+		[ ! -z $php_modified ] && notification "$notif2"
+		
+	fi
+done
+echo ""
+
+
 ##############
 ### Doctor ###
 ##############
