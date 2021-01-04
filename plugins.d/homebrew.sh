@@ -7,7 +7,7 @@
 #
 # Settings:
 
-# Display info on updated pakages 
+# Display info on updated pakages / casks
 display_info=true
 
 # Casks don't have pinned cask. So add Cask to the do_not_update array for prevent to update.
@@ -24,15 +24,17 @@ latest=false
 #
 ###############################################################################################
 #
-# Recommended software (brew install):
+# Require software (brew install):
 #	-jq (Lightweight and flexible command-line JSON processor)
+#
+# Recommended software (brew install):
 #	-terminal-notifier (Send macOS User Notifications from the command-line)
 #
 ###############################################################################################
+
 : <<'END_COMMENT'
 blabla
 END_COMMENT
-
 
 italic="\033[3m"
 underline="\033[4m"
@@ -42,6 +44,9 @@ red="\033[1;31m"
 bold="\033[1m"
 box="\033[1;41m"
 reset="\033[0m"
+
+command -v terminal-notifier >/dev/null 2>&1 || { echo -e "You shoud intall ${bold}terminal-notifier${reset} for notification ${italic}(brew install terminal-notifier)${reset}.\n"; }
+command -v jq >/dev/null 2>&1 || { echo -e "${bold}kymsu2${reset} require ${bold}jq${reset} but it's not installed.\nRun ${italic}(brew install jq)${reset}\nAborting..." >&2; exit 1; }
 
 notification() {
     sound="Basso"
@@ -124,7 +129,7 @@ get_info_pkg() {
 echo -e "${bold}🍺  Homebrew ${reset}"
 
 echo -e "\n🍺 ${underline}Updating brew...${reset}\n"
-brew update
+#brew update
 
 echo ""
 brew_outdated=$(brew outdated --greedy --json=v2)
@@ -153,24 +158,34 @@ do
 		upd_pkg_pinned+="$name "
 	elif [ "$pinned" = false ]; then
 		upd_pkg_notpinned+="$name "
-	fi
-		
+	fi	
 done
 upd_pkgs=$(echo "$upd_pkgs" | sed 's/.$//')
 upd_pkg_pinned=$(echo "$upd_pkg_pinned" | sed 's/.$//')
 upd_pkg_notpinned=$(echo "$upd_pkg_notpinned" | sed 's/.$//')
 
 # Find infos about updated packages
-upd_pkgs_info=$(brew info --json=v2 $upd_pkgs | jq '{formulae} | .[]')
-#echo $upd_pkgs_info | jq
-for row in $upd_pkgs;
-do
-	#echo "PKG: $row"
-	get_info_pkg "$upd_pkgs_info" "$row"
-done
+nb_pkg_upd=$(echo "$upd_pkgs" | wc -w | xargs)
+if [ "$nb_pkg_upd" -gt 0 ]; then
+	a="available package update"
+	array=($a)
+	if [ "$display_info" = true ]; then
+		[ "$nb_pkg_upd" -gt 1 ] && echo -e "${box} $nb_pkg_upd ${reset} ${array[@]/%/s}:\n" || echo -e "${box} $nb_pkg_upd ${reset} ${array[@]}:\n"
+		upd_pkgs_info=$(brew info --json=v2 $upd_pkgs | jq '{formulae} | .[]')
+		#echo $upd_pkgs_info | jq
+		for row in $upd_pkgs;
+		do
+			get_info_pkg "$upd_pkgs_info" "$row"
+		done
+	else
+		#a="available package update"
+		#array=($a)
+		[ "$nb_pkg_upd" -gt 1 ] && echo -e "${box} $nb_pkg_upd ${reset} ${array[@]/%/s}: ${bold}$upd_pkgs${reset}" || echo -e "${box} $nb_pkg_upd ${reset} ${array[@]}: ${bold}$upd_pkgs${reset}"
+	fi
+fi
 
 # Pinned packages
-pkg_pinned=$(brew list --formulae --pinned | xargs)
+pkg_pinned=$(brew list --pinned | xargs)
 if [ -n "$pkg_pinned" ]; then
 
 	nbp=$(echo "$pkg_pinned" | wc -w | xargs)
@@ -234,17 +249,11 @@ do
 	installed_versions=$(echo "$row" | jq -j '.installed_versions')
 	current_version=$(echo "$row" | jq -j '.current_version')
 	
-	#echo "name: $name installed_versions: $installed_versions current_version: $current_version"
-	#eval "declare -a array_casks_versions$i=($name $installed_versions $current_version)"
-	#((i++))
-	
 	if [ "$current_version" != "latest" ]; then
 		upd_casks+="$name "
-
 	elif [ "$current_version" == "latest" ]; then
 		upd_casks_latest+="$name "
 	fi
-
 done
 upd_casks=$(echo "$upd_casks" | sed 's/.$//')
 upd_casks_latest=$(echo "$upd_casks_latest" | sed 's/.$//')
@@ -292,12 +301,22 @@ fi
 echo -e "🍺 ${underline}Search for casks update...${reset}\n"
 
 # Find infos about updated casks
-upd_casks_info=$(brew info --json=v2 $upd_casks | jq '{casks} | .[]')
-for row in $upd_casks;
-do
-	get_info_cask "$upd_casks_info" "$row"
-done
-
+nb_casks_upd=$(echo "$upd_casks" | wc -w | xargs)
+if [ "$nb_casks_upd" -gt 0 ]; then
+	a="available cask update"
+	array=($a)
+	if [ "$display_info" = true ]; then
+		[ "$nb_casks_upd" -gt 1 ] && echo -e "${box} $nb_casks_upd ${reset} ${array[@]/%/s}:\n" || echo -e "${box} $nb_casks_upd ${reset} ${array[@]}:\n"
+		upd_casks_info=$(brew info --json=v2 $upd_casks | jq '{casks} | .[]')
+		#echo "$upd_casks_info" | jq
+		for row in $upd_casks;
+		do
+			get_info_cask "$upd_casks_info" "$row"
+		done
+	else
+		[ "$nb_casks_upd" -gt 1 ] && echo -e "${box} $nb_casks_upd ${reset} ${array[@]/%/s}: ${bold}$upd_casks${reset}" || echo -e "${box} $nb_casks_upd ${reset} ${array[@]}: ${bold}$upd_casks${reset}"
+	fi
+fi
 
 # Updating casks
 echo -e "\n🍺 ${underline}Updating casks...${reset}\n"
