@@ -20,7 +20,7 @@ no_distract=false
 
 # Some Casks have auto_updates true or version :latest. Homebrew Cask cannot track versions of those apps.
 # 'latest=true' force Homebrew to update those apps.
-latest=true
+latest=false
 #
 ###############################################################################################
 #
@@ -58,18 +58,79 @@ notification() {
 if [[ $1 == "--nodistract" ]]; then no_distract=true; fi
 if [[ $1 == "--latest" ]]; then latest=true; fi
 
+get_info_cask() {
+	info="$1"
+	app="$2"
+	l1=""
+	nom=""
+	
+	token=$(echo "$info" | jq -r '.[] | select(.token == "'${app}'") | (.token)')
+	name=$(echo "$info" | jq -r '.[] | select(.token == "'${app}'") | (.name)' | jq -r '.[0]')
+	homepage=$(echo "$info" | jq -r '.[] | select(.token == "'${app}'") | (.homepage)')
+	url=$(echo "$info" | jq -r '.[] | select(.token == "'${app}'") | (.url)')
+	desc=$(echo "$info" | jq -r '.[] | select(.token == "'${app}'") | (.desc)')
+	version=$(echo "$info" | jq -r '.[] | select(.token == "'${app}'") | (.version)')
+	auto_updates=$(echo "$info" | jq -r '.[] | select(.token == "'${app}'") | (.auto_updates)')
+	caveats=$(echo "$info" | jq -r '.[] | select(.token == "'${app}'") | (.caveats)')
+
+	installed_versions=$(echo "$upd_cask" | jq -r '.[] | select(.name == "'${app}'") | (.installed_versions)')
+	current_version=$(echo "$upd_cask" | jq -r '.[] | select(.name == "'${app}'") | (.current_version)')
+	
+	if [[ ! " ${casks_not_pinned} " =~ " ${token} " ]]; then
+		l1+="${red}$name ($token): installed: $installed_versions current: $current_version  [Do not update]${reset}\n"
+	else
+		l1+="${bold}$name ($token): installed: $installed_versions current: $current_version${reset}\n"	
+	fi
+	l1+="$desc\n"
+	l1+="$homepage"
+	
+	echo -e "$l1\n"
+}
+
+get_info_pkg() {
+	info="$1"
+	pkg="$2"
+	l1=""
+	
+	name=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.name)')
+	full_name=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.full_name)')
+	desc=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.desc)')
+	homepage=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.homepage)')
+	
+	#urls=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.urls)' | jq -r '.stable | .url')
+	keg_only=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.keg_only)')
+	caveats=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.caveats)')
+	stable=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.versions)' | jq -r '.stable')
+	installed=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.installed)' | jq -r '.[].version')
+	pinned=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.pinned)')
+
+	if [ "$pinned" = "true" ]; then 	
+		pinned_v=$(echo "$upd_package" | jq -r '.[] | select(.name == "'${pkg}'") | (.pinned_version)')
+	
+		l1+="${red}$name: installed: $installed stable: $stable [pinned at $pinned_v]"
+		[ "$keg_only" = true ] && l1+=" [keg-only]"
+		l1+="${reset}\n"
+	else 
+		l1+="${bold}$name: installed: $installed stable: $stable"
+		[ "$keg_only" = true ] && l1+=" [keg-only]"
+		l1+="${reset}\n"
+	fi
+	if [ "$desc" != "null" ]; then l1+="$desc\n"; fi;
+	l1+="$homepage"
+	
+	echo -e "$l1\n"
+}
 
 echo -e "${bold}🍺  Homebrew ${reset}"
 
-echo -e "\n🍺 ${underline}Updating brew...${reset}"
-#brew update
+echo -e "\n🍺 ${underline}Updating brew...${reset}\n"
+brew update
 
 echo ""
 brew_outdated=$(brew outdated --greedy --json=v2)
 	
 #echo "\nSearch for brew update...\n"
 upd_json=$(echo "$brew_outdated")
-#echo "$upd_json"
 
 ################
 ### Packages ###
@@ -78,7 +139,6 @@ upd_json=$(echo "$brew_outdated")
 # Packages update:
 echo -e "\n🍺 ${underline}Search for packages update...${reset}\n"
 upd_package=$(echo "$brew_outdated" | jq '{formulae} | .[]')
-#echo "$upd_package"
 
 for row in $(jq -c '.[]' <<< "$upd_package");
 do
@@ -86,9 +146,7 @@ do
 	installed_versions=$(echo "$row" | jq -j '.installed_versions' | jq -r '.[]')
 	current_version=$(echo "$row" | jq -j '.current_version')
 	pinned=$(echo "$row" | jq -j '.pinned')
-	pinned_version=$(echo "$row" | jq -j '.pinned_version')
-		
-	echo "$name - $installed_versions - $current_version - $pinned - $pinned_version"
+	#pinned_version=$(echo "$row" | jq -j '.pinned_version')
 		
 	upd_pkgs+="$name "
 	if [ "$pinned" = true ]; then
@@ -101,6 +159,15 @@ done
 upd_pkgs=$(echo "$upd_pkgs" | sed 's/.$//')
 upd_pkg_pinned=$(echo "$upd_pkg_pinned" | sed 's/.$//')
 upd_pkg_notpinned=$(echo "$upd_pkg_notpinned" | sed 's/.$//')
+
+# Find infos about updated packages
+upd_pkgs_info=$(brew info --json=v2 $upd_pkgs | jq '{formulae} | .[]')
+#echo $upd_pkgs_info | jq
+for row in $upd_pkgs;
+do
+	#echo "PKG: $row"
+	get_info_pkg "$upd_pkgs_info" "$row"
+done
 
 # Pinned packages
 pkg_pinned=$(brew list --formulae --pinned | xargs)
@@ -133,9 +200,9 @@ if [ -n "$upd_pkg_notpinned" ]; then
 			for i in $upd_pkg_notpinned;
 			do
 				if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
-					echo "$i"
+					echo "$i" | xargs -p -n 1 brew upgrade --dry-run 
 				elif [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
-					echo "$i"
+					echo "$i" | xargs -n 1 brew upgrade --dry-run
 				fi
 			done
 		else
@@ -156,7 +223,7 @@ fi
 #############
 
 #Casks update	
-echo -e "\n🍺 ${underline}Search for casks update...${reset}\n"
+echo -e "\n🍺 ${underline}Casks...${reset}"
 upd_cask=$(echo "$brew_outdated" | jq '{casks} | .[]')
 #echo "$upd_cask"
 
@@ -167,8 +234,9 @@ do
 	installed_versions=$(echo "$row" | jq -j '.installed_versions')
 	current_version=$(echo "$row" | jq -j '.current_version')
 	
-	#upd_casks+="$name "
-	echo "$name - $installed_versions - $current_version"
+	#echo "name: $name installed_versions: $installed_versions current_version: $current_version"
+	#eval "declare -a array_casks_versions$i=($name $installed_versions $current_version)"
+	#((i++))
 	
 	if [ "$current_version" != "latest" ]; then
 		upd_casks+="$name "
@@ -190,7 +258,7 @@ if (( ${#cask_to_not_update[@]} )); then
 	
 	echo -e "\n${underline}List of${reset} ${box} $nbp ${reset} ${underline}'do not update' packages:${reset}"
 	echo -e "${red}${cask_to_not_update[*]}${reset}"
-	echo -e "To remove package from this list, you need to edit the do_not_update array."
+	echo -e "To remove package from this list, you need to edit the ${italic}do_not_update${reset} array."
 	echo ""
 
 	casks_not_pinned=""
@@ -220,9 +288,23 @@ else
 	casks_latest_not_pinned=$upd_casks_latest
 fi
 
+#Casks update	
+echo -e "🍺 ${underline}Search for casks update...${reset}\n"
+
+# Find infos about updated casks
+upd_casks_info=$(brew info --json=v2 $upd_casks | jq '{casks} | .[]')
+for row in $upd_casks;
+do
+	get_info_cask "$upd_casks_info" "$row"
+done
+
+
 # Updating casks
 echo -e "\n🍺 ${underline}Updating casks...${reset}\n"
 [ -n "$casks_not_pinned" ] && echo -e "${red}Do not update: ${cask_to_not_update[@]} . It won't be updated!'${reset}\n"
+[ -n "$casks_latest_not_pinned" ] && echo -e "Some Casks have ${italic}auto_updates true${reset} or ${italic}version :latest${reset}. Homebrew Cask cannot track versions of those apps."
+[ -n "$casks_latest_not_pinned" ] && echo -e "Edit this script and change the setting ${italic}latest=false${reset} to ${italic}true${reset}\n"
+
 
 if [ -n "$casks_not_pinned" ]; then
 
