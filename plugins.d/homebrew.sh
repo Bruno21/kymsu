@@ -20,7 +20,7 @@ no_distract=false
 
 # Some Casks have auto_updates true or version :latest. Homebrew Cask cannot track versions of those apps.
 # 'latest=true' force Homebrew to update those apps.
-latest=false
+latest=true
 #
 ###############################################################################################
 #
@@ -67,7 +67,6 @@ get_info_cask() {
 	info="$1"
 	app="$2"
 	l1=""
-	nom=""
 	
 	token=$(echo "$info" | jq -r '.[] | select(.token == "'${app}'") | (.token)')
 	name=$(echo "$info" | jq -r '.[] | select(.token == "'${app}'") | (.name)' | jq -r '.[0]')
@@ -75,13 +74,15 @@ get_info_cask() {
 	url=$(echo "$info" | jq -r '.[] | select(.token == "'${app}'") | (.url)')
 	desc=$(echo "$info" | jq -r '.[] | select(.token == "'${app}'") | (.desc)')
 	version=$(echo "$info" | jq -r '.[] | select(.token == "'${app}'") | (.version)')
-	auto_updates=$(echo "$info" | jq -r '.[] | select(.token == "'${app}'") | (.auto_updates)')
-	caveats=$(echo "$info" | jq -r '.[] | select(.token == "'${app}'") | (.caveats)')
+	#auto_updates=$(echo "$info" | jq -r '.[] | select(.token == "'${app}'") | (.auto_updates)')
+	#caveats=$(echo "$info" | jq -r '.[] | select(.token == "'${app}'") | (.caveats)')
 
 	installed_versions=$(echo "$upd_cask" | jq -r '.[] | select(.name == "'${app}'") | (.installed_versions)')
 	current_version=$(echo "$upd_cask" | jq -r '.[] | select(.name == "'${app}'") | (.current_version)')
 	
-	if [[ ! " ${casks_not_pinned} " =~ " ${token} " ]]; then
+	[[ "$desc" = "null" ]] && desc="${italic}No description${reset}"
+	
+	if [[ ! " ${casks_not_pinned} " =~ " ${token} " ]] && [[ ! " ${casks_latest_not_pinned} " =~ " ${token} " ]]; then
 		l1+="${red}$name ($token): installed: $installed_versions current: $current_version  [Do not update]${reset}\n"
 	else
 		l1+="${bold}$name ($token): installed: $installed_versions current: $current_version${reset}\n"	
@@ -215,7 +216,7 @@ if [ -n "$upd_pkg_notpinned" ]; then
 			for i in $upd_pkg_notpinned;
 			do
 				if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
-					echo "$i" | xargs -p -n 1 brew upgrade --dry-run 
+					echo "$i" | xargs -p -n 1 brew upgrade 
 				elif [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
 					echo "$i" | xargs -n 1 brew upgrade --dry-run
 				fi
@@ -336,7 +337,7 @@ if [ -n "$casks_not_pinned" ]; then
 			for i in $casks_not_pinned;
 			do
 				if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
-					echo "$i" | xargs -p -n 1 brew upgrade --dry-run
+					echo "$i" | xargs -p -n 1 brew upgrade
 					echo ""
 				elif [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
 					echo "$i" | xargs -n 1 brew upgrade --dry-run
@@ -359,8 +360,29 @@ fi
 # Updating casks latest
 if [ -n "$casks_latest_not_pinned" ] && [ "$latest" == true ]; then
 	echo -e "\n🍺 ${underline}Updating casks with 'latest' as version...${reset}\n"
-	echo -e "Some Casks have ${italic}auto_updates true${reset} or ${italic}version :latest${reset}. Homebrew Cask cannot track versions of those apps."
-	echo -e "Here you can force Homebrew to upgrade those apps.\n"
+	#echo -e "Some Casks have ${italic}auto_updates true${reset} or ${italic}version :latest${reset}. Homebrew Cask cannot track versions of those apps."
+	#echo -e "Here you can force Homebrew to upgrade those apps.\n"
+
+	# Find infos about updated casks
+	nb_casks_latest_upd=$(echo "$upd_casks_latest" | wc -w | xargs)
+	if [ "$nb_casks_latest_upd" -gt 0 ]; then
+		a="available cask update"
+		array=($a)
+		if [ "$display_info" = true ]; then
+			[ "$nb_casks_latest_upd" -gt 1 ] && echo -e "${box} $nb_casks_latest_upd ${reset} ${array[@]/%/s}:\n" || echo -e "${box} $nb_casks_latest_upd ${reset} ${array[@]}:\n"
+
+			upd_casks_latest_info=$(brew info --json=v2 $upd_casks_latest | jq '{casks} | .[]')
+			echo "$upd_casks_latest_info" | jq
+			for row in $upd_casks_latest;
+			do
+				get_info_cask "$upd_casks_latest_info" "$row"
+			done
+		
+		else
+			[ "$nb_casks_latest_upd" -gt 1 ] && echo -e "${box} $nb_casks_latest_upd ${reset} ${array[@]/%/s}: ${bold}$upd_casks_latest${reset}" || echo -e "${box} $nb_casks_upd ${reset} ${array[@]}: ${bold}$upd_casks_latest${reset}"
+		fi
+	
+	fi
 	
 	if [ "$no_distract" = false ]; then
 		q=$(echo -e "Do you wanna run ${bold}brew upgrade $casks_latest_not_pinned${reset} ? (y/n/a) ")
@@ -371,10 +393,10 @@ if [ -n "$casks_latest_not_pinned" ] && [ "$latest" == true ]; then
 			for i in $casks_latest_not_pinned
 			do
 				if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
-					echo "$i" | xargs -p -n 1 brew upgrade --dry-run
+					echo "\n$i" | xargs -p -n 1 brew upgrade --dry-run
 					echo ""
 				elif [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
-					echo "$i" | xargs -n 1 brew upgrade --dry-run
+					echo "\n$i" | xargs -n 1 brew upgrade --dry-run
 					echo ""
 				fi
 			done
