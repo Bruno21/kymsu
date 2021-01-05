@@ -13,7 +13,7 @@ display_info=true
 # Casks don't have pinned cask. So add Cask to the do_not_update array for prevent to update.
 # Also add package for prevent to update whitout pin it.
 # declare -a do_not_update=("xnconvert" "yate")
-declare -a cask_to_not_update=("xld" "webpquicklook")
+declare -a cask_to_not_update=()
 
 # No distract mode (no user interaction)(Casks with 'latest' version number won't be updated)
 no_distract=false
@@ -130,7 +130,7 @@ get_info_pkg() {
 echo -e "${bold}🍺  Homebrew ${reset}"
 
 echo -e "\n🍺 ${underline}Updating brew...${reset}\n"
-#brew update
+brew update
 
 echo ""
 brew_outdated=$(brew outdated --greedy --json=v2)
@@ -173,14 +173,11 @@ if [ "$nb_pkg_upd" -gt 0 ]; then
 	if [ "$display_info" = true ]; then
 		[ "$nb_pkg_upd" -gt 1 ] && echo -e "${box} $nb_pkg_upd ${reset} ${array[@]/%/s}:\n" || echo -e "${box} $nb_pkg_upd ${reset} ${array[@]}:\n"
 		upd_pkgs_info=$(brew info --json=v2 $upd_pkgs | jq '{formulae} | .[]')
-		#echo $upd_pkgs_info | jq
 		for row in $upd_pkgs;
 		do
 			get_info_pkg "$upd_pkgs_info" "$row"
 		done
 	else
-		#a="available package update"
-		#array=($a)
 		[ "$nb_pkg_upd" -gt 1 ] && echo -e "${box} $nb_pkg_upd ${reset} ${array[@]/%/s}: ${bold}$upd_pkgs${reset}" || echo -e "${box} $nb_pkg_upd ${reset} ${array[@]}: ${bold}$upd_pkgs${reset}"
 	fi
 fi
@@ -218,7 +215,7 @@ if [ -n "$upd_pkg_notpinned" ]; then
 				if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
 					echo "$i" | xargs -p -n 1 brew upgrade 
 				elif [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
-					echo "$i" | xargs -n 1 brew upgrade --dry-run
+					echo "$i" | xargs -n 1 brew upgrade
 				fi
 			done
 		else
@@ -239,11 +236,9 @@ fi
 #############
 
 #Casks update	
-echo -e "\n🍺 ${underline}Casks...${reset}"
+echo -e "\n🍺 ${underline}Casks...${reset}\n"
 upd_cask=$(echo "$brew_outdated" | jq '{casks} | .[]')
-#echo "$upd_cask"
 
-#i=0	
 for row in $(jq -c '.[]' <<< "$upd_cask");
 do
 	name=$(echo "$row" | jq -j '.name')
@@ -266,7 +261,7 @@ if (( ${#cask_to_not_update[@]} )); then
 
 	nbp=${#cask_to_not_update[*]}
 	
-	echo -e "\n${underline}List of${reset} ${box} $nbp ${reset} ${underline}'do not update' packages:${reset}"
+	echo -e "${underline}List of${reset} ${box} $nbp ${reset} ${underline}'do not update' packages:${reset}"
 	echo -e "${red}${cask_to_not_update[*]}${reset}"
 	echo -e "To remove package from this list, you need to edit the ${italic}do_not_update${reset} array."
 	echo ""
@@ -274,9 +269,7 @@ if (( ${#cask_to_not_update[@]} )); then
 	casks_not_pinned=""
 	for i in $upd_casks
 	do
-		#echo "$i"
 		if [[ ! " ${cask_to_not_update[@]} " =~ " ${i} " ]]; then
-			#echo "$i"
    			casks_not_pinned+="$i "
 		fi
 	done
@@ -285,9 +278,7 @@ if (( ${#cask_to_not_update[@]} )); then
 	casks_latest_not_pinned=""
 	for i in $upd_casks_latest
 	do
-		#echo "$i"
 		if [[ ! " ${cask_to_not_update[@]} " =~ " ${i} " ]]; then
-			#echo "$i"
    			casks_latest_not_pinned+="$i "
 		fi
 	done
@@ -309,7 +300,6 @@ if [ "$nb_casks_upd" -gt 0 ]; then
 	if [ "$display_info" = true ]; then
 		[ "$nb_casks_upd" -gt 1 ] && echo -e "${box} $nb_casks_upd ${reset} ${array[@]/%/s}:\n" || echo -e "${box} $nb_casks_upd ${reset} ${array[@]}:\n"
 		upd_casks_info=$(brew info --json=v2 $upd_casks | jq '{casks} | .[]')
-		#echo "$upd_casks_info" | jq
 		for row in $upd_casks;
 		do
 			get_info_cask "$upd_casks_info" "$row"
@@ -348,7 +338,6 @@ if [ -n "$casks_not_pinned" ]; then
 			echo -e "OK, let's continue..."
 		fi
 	else
-		#echo "No distract"
 		echo "$casks_not_pinned" | xargs -n 1 brew upgrade --dry-run
 	fi
 
@@ -372,7 +361,6 @@ if [ -n "$casks_latest_not_pinned" ] && [ "$latest" == true ]; then
 			[ "$nb_casks_latest_upd" -gt 1 ] && echo -e "${box} $nb_casks_latest_upd ${reset} ${array[@]/%/s}:\n" || echo -e "${box} $nb_casks_latest_upd ${reset} ${array[@]}:\n"
 
 			upd_casks_latest_info=$(brew info --json=v2 $upd_casks_latest | jq '{casks} | .[]')
-			echo "$upd_casks_latest_info" | jq
 			for row in $upd_casks_latest;
 			do
 				get_info_cask "$upd_casks_latest_info" "$row"
@@ -393,10 +381,10 @@ if [ -n "$casks_latest_not_pinned" ] && [ "$latest" == true ]; then
 			for i in $casks_latest_not_pinned
 			do
 				if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
-					echo "\n$i" | xargs -p -n 1 brew upgrade --dry-run
+					echo "\n$i" | xargs -p -n 1 brew upgrade
 					echo ""
 				elif [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
-					echo "\n$i" | xargs -n 1 brew upgrade --dry-run
+					echo "\n$i" | xargs -n 1 brew upgrade
 					echo ""
 				fi
 			done
@@ -406,9 +394,8 @@ if [ -n "$casks_latest_not_pinned" ] && [ "$latest" == true ]; then
 		fi
 
 	else
-		#echo "No distract"
 		echo -e "Running ${bold}brew upgrade $casks_latest_not_pinned${reset}..."
-		echo "$casks_latest_not_pinned" | xargs -n 1 brew upgrade --dry-run
+		echo "$casks_latest_not_pinned" | xargs -n 1 brew upgrade
 	fi
 fi
 
@@ -438,8 +425,7 @@ for php in $php_versions
 do 	
 	if [ -n "$upd_pkg" ]; then
 
-		# file modified since it was last read
-	
+		# file modified since it was last read	
 		php_modified=$(find /usr/local/etc/php/$php/ -name php.ini -newer /tmp/checkpoint)
 		php_ini=/usr/local/etc/php/$php/php.ini
 		notif2="$php_ini has been modified"
@@ -460,7 +446,7 @@ echo ""
 
 echo -e "\n🍺 ${underline}The Doc is checking that everything is ok...${reset}\n"
 
-#brew doctor
+brew doctor
 
 brew missing
 status=$?
