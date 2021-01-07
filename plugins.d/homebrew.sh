@@ -11,7 +11,6 @@
 display_info=true
 
 # Casks don't have pinned cask. So add Cask to the do_not_update array for prevent to update.
-# Also add package for prevent to update whitout pin it.
 # declare -a do_not_update=("xnconvert" "yate")
 declare -a cask_to_not_update=()
 
@@ -20,7 +19,7 @@ no_distract=false
 
 # Some Casks have auto_updates true or version :latest. Homebrew Cask cannot track versions of those apps.
 # 'latest=true' force Homebrew to update those apps.
-latest=true
+latest=false
 #
 ###############################################################################################
 #
@@ -130,7 +129,7 @@ get_info_pkg() {
 echo -e "${bold}🍺  Homebrew ${reset}"
 
 echo -e "\n🍺 ${underline}Updating brew...${reset}\n"
-brew update
+#brew update
 
 echo ""
 brew_outdated=$(brew outdated --greedy --json=v2)
@@ -231,6 +230,8 @@ else
 	echo -e "\n${italic}No update package available...${reset}\n"
 fi
 
+echo ""
+
 #############
 ### Casks ###
 #############
@@ -299,7 +300,7 @@ if [ "$nb_casks_upd" -gt 0 ]; then
 	array=($a)
 	if [ "$display_info" = true ]; then
 		[ "$nb_casks_upd" -gt 1 ] && echo -e "${box} $nb_casks_upd ${reset} ${array[@]/%/s}:\n" || echo -e "${box} $nb_casks_upd ${reset} ${array[@]}:\n"
-		upd_casks_info=$(brew info --json=v2 $upd_casks | jq '{casks} | .[]')
+		upd_casks_info=$(brew info --cask --json=v2 $upd_casks | jq '{casks} | .[]')
 		for row in $upd_casks;
 		do
 			get_info_cask "$upd_casks_info" "$row"
@@ -311,7 +312,8 @@ fi
 
 # Updating casks
 echo -e "\n🍺 ${underline}Updating casks...${reset}\n"
-[ -n "$casks_not_pinned" ] && echo -e "${red}Do not update: ${cask_to_not_update[@]} . It won't be updated!'${reset}\n"
+
+[ "${#cask_to_not_update[@]}" -gt 0 ] && echo -e "${red}Do not update: ${cask_to_not_update[@]} . It won't be updated!'${reset}\n"
 [ -n "$casks_latest_not_pinned" ] && echo -e "Some Casks have ${italic}auto_updates true${reset} or ${italic}version :latest${reset}. Homebrew Cask cannot track versions of those apps."
 [ -n "$casks_latest_not_pinned" ] && echo -e "Edit this script and change the setting ${italic}latest=false${reset} to ${italic}true${reset}\n"
 
@@ -324,13 +326,15 @@ if [ -n "$casks_not_pinned" ]; then
 		read -p "$a" choice
 
 		if [ "$choice" == "y" ] || [ "$choice" == "Y" ] || [ "$choice" == "a" ] || [ "$choice" == "A" ]; then		
+			echo ""
 			for i in $casks_not_pinned;
 			do
 				if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
-					echo "$i" | xargs -p -n 1 brew upgrade
+					# --cask required for Cask like 'docker'. It can be a formula or a cask.
+					echo "$i" | xargs -p -n 1 brew upgrade --cask
 					echo ""
 				elif [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
-					echo "$i" | xargs -n 1 brew upgrade --dry-run
+					echo "$i" | xargs -n 1 brew upgrade --cask
 					echo ""
 				fi
 			done
@@ -338,7 +342,7 @@ if [ -n "$casks_not_pinned" ]; then
 			echo -e "OK, let's continue..."
 		fi
 	else
-		echo "$casks_not_pinned" | xargs -n 1 brew upgrade --dry-run
+		echo "$casks_not_pinned" | xargs -n 1 brew upgrade --cask
 	fi
 
 else
@@ -360,7 +364,7 @@ if [ -n "$casks_latest_not_pinned" ] && [ "$latest" == true ]; then
 		if [ "$display_info" = true ]; then
 			[ "$nb_casks_latest_upd" -gt 1 ] && echo -e "${box} $nb_casks_latest_upd ${reset} ${array[@]/%/s}:\n" || echo -e "${box} $nb_casks_latest_upd ${reset} ${array[@]}:\n"
 
-			upd_casks_latest_info=$(brew info --json=v2 $upd_casks_latest | jq '{casks} | .[]')
+			upd_casks_latest_info=$(brew info --cask --json=v2 $upd_casks_latest | jq '{casks} | .[]')
 			for row in $upd_casks_latest;
 			do
 				get_info_cask "$upd_casks_latest_info" "$row"
@@ -377,14 +381,14 @@ if [ -n "$casks_latest_not_pinned" ] && [ "$latest" == true ]; then
 		read -p "$q" choice
 
 		if [ "$choice" == "y" ] || [ "$choice" == "Y" ] || [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
-
+			echo ""
 			for i in $casks_latest_not_pinned
 			do
 				if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
-					echo "\n$i" | xargs -p -n 1 brew upgrade
+					echo "$i" | xargs -p -n 1 brew upgrade --cask
 					echo ""
 				elif [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
-					echo "\n$i" | xargs -n 1 brew upgrade
+					echo "$i" | xargs -n 1 brew upgrade --cask
 					echo ""
 				fi
 			done
