@@ -3,16 +3,25 @@
 # Mac Appstore plugin for KYMSU
 # https://github.com/welcoMattic/kymsu
 
-echo -e "\033[1m🍏  Mac App Store updates come fast as lightning \033[0m"
-
 # No distract mode (no user interaction)
-no_distract=false
+[[ $@ =~ "--nodistract" ]] && no_distract=true || no_distract=false
 
-if [[ $1 == "--nodistract" ]]; then
-	no_distract=true
-fi
+italic="\033[3m"
+underline="\033[4m"
+ita_under="\033[3;4m"
+bold="\033[1m"
+bold_under="\033[1;4m"
+redbox="\033[1;41m"
+redbold="\033[1;31m"
+red="\033[31m"
+yellow="\033[33m"
+reset="\033[0m"
 
-# https://github.com/mas-cli/mas
+
+echo -e "${bold}🍏  Mac App Store updates come fast as lightning ${reset}"
+
+echo -e "https://github.com/mas-cli/mas"
+
 # On teste si mas est installé
 if hash mas 2>/dev/null; then
 
@@ -21,13 +30,13 @@ if hash mas 2>/dev/null; then
 	echo "$massy"
 
 	if [ -n "$(mas outdated)" ]; then
-		echo -e "\033[4mAvailables updates:\033[0m"
+		echo -e "${underline}Availables updates:${reset}"
 		echo "$massy" | cut -d " " -f2-5
 		echo ""
 	
 		if [ "$no_distract" = false ]; then
 	
-			a=$(echo -e "Do you wanna run \033[1mmas upgrade\033[0m ? (y/n)")
+			a=$(echo -e "Do you wanna run \033[1mmas upgrade${reset} ? (y/n)")
 			read -pr "$a" choice
 			case "$choice" in
 				y|Y|o ) mas upgrade;;
@@ -40,10 +49,10 @@ if hash mas 2>/dev/null; then
 		fi
 	
 	else
-		echo -e "\033[4mNo availables mas updates.\033[0m"
+		echo -e "${italic}No availables mas updates.${reset}"
 	fi
 else
-	echo "Please install mas: brew install mas"
+	echo -e "Please install mas: ${italic}brew install mas${reset}"
 fi
 
 echo ""

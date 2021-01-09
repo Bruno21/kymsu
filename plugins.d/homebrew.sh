@@ -15,7 +15,7 @@ display_info=true
 declare -a cask_to_not_update=()
 
 # No distract mode (no user interaction)(Casks with 'latest' version number won't be updated)
-no_distract=false
+[[ $@ =~ "--nodistract" ]] && no_distract=true || no_distract=false
 
 # Some Casks have auto_updates true or version :latest. Homebrew Cask cannot track versions of those apps.
 # 'latest=true' force Homebrew to update those apps.
@@ -58,9 +58,6 @@ notification() {
     	terminal-notifier -title "$title" -message "$message" -sound "$sound" -contentImage "$image"
 	fi
 }
-
-if [[ $1 == "--nodistract" ]]; then no_distract=true; fi
-if [[ $1 == "--latest" ]]; then latest=true; fi
 
 get_info_cask() {
 	info="$1"
@@ -204,7 +201,7 @@ echo -e "\n🍺 ${underline}Updating packages...${reset}\n"
 if [ -n "$upd_pkg_notpinned" ]; then
 
 	if [ "$no_distract" = false ]; then
-		a=$(echo -e "Do you wanna run \033[1mbrew upgrade "$upd_pkg_notpinned"\033[0m ? (y/n/a) ")
+		a=$(echo -e "Do you wanna run ${bold}brew upgrade "$upd_pkg_notpinned"${reset} ? (y/n/a) ")
 		# yes/no/all
 		read -p "$a" choice
 

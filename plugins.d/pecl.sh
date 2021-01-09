@@ -10,9 +10,18 @@
 # Settings:
 
 # No distract mode (no user interaction)
-no_distract=false
+[[ $@ =~ "--nodistract" ]] && no_distract=true || no_distract=false
 #
 #########################################
+
+italic="\033[3m"
+underline="\033[4m"
+ita_under="\033[3;4m"
+bgd="\033[1;4;31m"
+red="\033[1;31m"
+bold="\033[1m"
+box="\033[1;41m"
+reset="\033[0m"
 
 notification() {
     sound="Basso"
@@ -27,15 +36,11 @@ notification() {
 }
 
 
-if [[ $1 == "--nodistract" ]]; then
-	no_distract=true
-fi
-
-echo -e "\033[1m🐘 pecl \033[0m"
+echo -e "${bold}🐘 pecl ${reset}"
 
 echo ""
 
-echo -e "\033[1m❗️ plugin en test (beta) \033[0m"
+echo -e "${bold}❗️ plugin en test (beta) ${reset}"
 echo ""
 
 # /usr/local/Cellar/php/7.4.11/bin/pecl
@@ -60,7 +65,7 @@ pecl_upgrade=$($php_path/pecl list-upgrades)
 
 if [ -n "$pecl_upgrade" ]; then
 	
-	echo -e "\033[4mExtensions update:\033[0m"
+	echo -e "${underline}Extensions update:${reset}"
 	
 	echo ""
 	echo "$pecl_upgrade"
@@ -117,11 +122,11 @@ notif2="$conf_php was modified in the last 5 minutes"
 test=$(find "$dir" -name "$name" -mmin -5 -maxdepth 1)
 
 if [ -n "$test" ]; then
-	echo -e "\033[1;31m❗️ ️$notif2\033[0m"
+	echo -e "${red}❗️ ️$notif2${reset}"
 	notification "$notif2"
 	echo ""
 	
-	a=$(echo -e "Do you want to edit \033[1m$conf_php\033[0m file ? (y/n)")
+	a=$(echo -e "Do you want to edit ${bold}$conf_php${reset} file ? (y/n)")
 	read -p "$a" choice
 	if [ "$choice" == "y" ]; then
 		$EDITOR "$conf_php"

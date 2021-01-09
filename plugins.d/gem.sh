@@ -5,13 +5,20 @@
 # https://guides.rubygems.org/what-is-a-gem/
 
 # No distract mode
-no_distract=false
+[[ $@ =~ "--nodistract" ]] && no_distract=true || no_distract=false
 
-if [[ $1 == "--nodistract" ]]; then
-	no_distract=true
-fi
+italic="\033[3m"
+underline="\033[4m"
+ita_under="\033[3;4m"
+bold="\033[1m"
+bold_under="\033[1;4m"
+redbox="\033[1;41m"
+redbold="\033[1;31m"
+red="\033[31m"
+yellow="\033[33m"
+reset="\033[0m"
 
-echo -e "\033[1m 💍  Gem (Ruby) \033[0m"
+echo -e "${bold} 💍  Gem (Ruby) ${reset}"
 
 echo ""
 
@@ -21,7 +28,7 @@ upd=$(echo "$gem_outdated" | awk '{print $1}')
 if [ -n "$upd" ]; then
 	nb=$(echo "$upd" | wc -w | xargs)
 	
-	echo -e "\\033[1;41m $nb \033[0m \033[4mavailables updates:\033[0m"
+	echo -e "${redbox} $nb ${reset} ${underline}availables updates:${reset}"
 	echo "$gem_outdated"
 	echo ""
 	
@@ -38,5 +45,5 @@ if [ -n "$upd" ]; then
 			fi
 		done	
 else
-	echo -e "\033[4mNo gem updates.\033[0m"
+	echo -e "${underline}No gem updates.${reset}"
 fi

@@ -12,7 +12,7 @@ display_info=true
 
 # No distract mode (no user interaction)
 
-[[ $1 == "--nodistract" ]] && no_distract=true || no_distract=false
+[[ $@ =~ "--nodistract" ]] && no_distract=true || no_distract=false
 
 # Set ls_color to '' for output nvm list in default colors, else '--no-colors'
 # ls_color='--no-colors'
@@ -125,9 +125,9 @@ elif [ -f "/usr/local/opt/nvm/nvm.sh" ]; then
 
 fi
 
-echo -e "\033[3mNote:"
+echo -e "${italic}Note:"
 echo -e "N/A: version \"10.18.0 -> N/A\" is not yet installed."
-echo -e "You need to run \"nvm install 10.18.0\" to install it before using it.\033[0m"
+echo -e "You need to run \"nvm install 10.18.0\" to install it before using it.${reset}"
 
 echo ""
 
