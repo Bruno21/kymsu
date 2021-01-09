@@ -154,9 +154,13 @@ if [ -d "$local_path" ]; then
 		npm ls
 	fi
 	
-	
+
+	echo -e "\n${underline}🌿 Search for local packages update...${reset}\n"	
 	outdated=$(npm outdated)
 	if [ -n "$outdated" ]; then
+	
+		echo -e "\n${underline}🌿 Updating local packages...${reset}\n"
+
 		if [ "$no_distract" = false ]; then
 			#echo "$outdated"
 			echo "$outdated" | awk '{print $1}' | xargs -p -n 1 npm update
@@ -166,7 +170,7 @@ if [ -d "$local_path" ]; then
 		fi
 		
 	else
-		echo -e "\n${underline}No local packages updates.${reset}"
+		echo -e "${italic}No local packages updates.${reset}"
 	fi
 fi
 	
@@ -187,28 +191,45 @@ if [ "$display_info" = true ]; then
 			echo -e "${bold}${line}${reset}"
 		else
 			echo -e "${line}"
-	fi
+		fi
 	done <<< "$lg"
 else
 	npm list -g --depth=0
 fi
 
-# ========================================================================
-# Tester npm outdated -g --long
 
-g_outdated=$(npm outdated -g --parseable=true)
+#Packages update	
+echo -e "\n${underline}🌿 Search for global packages update...${reset}\n"
 
-echo "$g_outdated"
+glong_outdated=$(npm outdated -g --long | sed '1d')
 
-# update -> wanted ; install -> latest
-if [ -n "$g_outdated" ]; then
-	if [ "$no_distract" = false ]; then
-		echo "$g_outdated" | cut -d : -f 4 | xargs -p -n 1 npm -g install
-	else
-		echo "$g_outdated" | cut -d : -f 4 | xargs -n 1 npm -g install
-	fi
+if [ -n "$glong_outdated" ]; then
+	echo -e "$glong_outdated\n"
+	echo -e "\n${underline}🌿 Updating global packages...${reset}\n"
+	
+	while IFS= read -r line
+	do 
+		pkg=$(echo "$line" | awk '{print $1}')
+		vers=$(echo "$line" | awk '{print $4}')
+		outdated="$pkg@$vers"
+
+		# TEST
+		version=$(echo "$line" | awk '{print $1 "@" $4}')
+		echo "$version"
+		# /test
+		
+		if [ "$no_distract" = false ]; then
+			echo "$outdated" | xargs -p -n 1 npm -g install
+			echo ""
+		else
+			echo "$outdated" | xargs -n 1 npm -g install
+			echo ""
+		fi
+
+	done <<< "$glong_outdated"
+
 else
-	echo -e "${underline}No global packages updates.${reset}"
+	echo -e "${italic}No global packages updates.${reset}"
 fi
 
 echo ""
@@ -218,11 +239,11 @@ echo ""
 ###############
 
 if [ "$doctor" = true ]; then
-	echo "🌿  The Doc is checking that everything is ok."
+	echo "${underline}🌿  The Doc is checking that everything is ok.${reset}\n"
 	npm doctor
 	echo ""
 	
-    echo "🔍   Verifying npm cache"
+    echo "🔍   Verifying npm cache\n"
     npm cache verify
     echo ""
 fi
