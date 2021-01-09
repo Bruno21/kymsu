@@ -129,7 +129,7 @@ get_info_pkg() {
 echo -e "${bold}🍺  Homebrew ${reset}"
 
 echo -e "\n🍺 ${underline}Updating brew...${reset}\n"
-#brew update
+brew update
 
 echo ""
 brew_outdated=$(brew outdated --greedy --json=v2)
@@ -262,9 +262,9 @@ if (( ${#cask_to_not_update[@]} )); then
 
 	nbp=${#cask_to_not_update[*]}
 	
-	echo -e "${underline}List of${reset} ${box} $nbp ${reset} ${underline}'do not update' packages:${reset}"
+	echo -e "${underline}List of${reset} ${box} $nbp ${reset} ${underline}'do not update' casks:${reset}"
 	echo -e "${red}${cask_to_not_update[*]}${reset}"
-	echo -e "To remove package from this list, you need to edit the ${italic}do_not_update${reset} array."
+	echo -e "To remove an app from this list, you need to edit the ${italic}do_not_update${reset} array."
 	echo ""
 
 	casks_not_pinned=""
