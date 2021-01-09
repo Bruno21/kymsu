@@ -15,8 +15,9 @@ display_info=true
 # Also add package for prevent to update whitout pin it.
 declare -a do_not_update=('')
 
-# No distract mode (no user interaction)(Casks with 'latest' version number won't be updated)
-no_distract=false
+# No distract mode (no user interaction)
+[[ $@ =~ "--nodistract" ]] && no_distract=true || no_distract=false
+
 #
 ###############################################################################################
 #
@@ -25,6 +26,15 @@ no_distract=false
 #	-terminal-notifier (Send macOS User Notifications from the command-line)
 #
 ###############################################################################################
+
+italic="\033[3m"
+underline="\033[4m"
+ita_under="\033[3;4m"
+bgd="\033[1;4;31m"
+red="\033[1;31m"
+bold="\033[1m"
+box="\033[1;41m"
+reset="\033[0m"
 
 notification() {
     sound="Basso"
@@ -42,14 +52,12 @@ notification() {
 }
 
 
-if [[ $1 == "--nodistract" ]]; then
-	no_distract=true
-fi
-
-echo -e "\033[1m🙏 Antibody \033[0m"
-echo ""
-
 antibody_folder=$(antibody home)
+antibody_version=$(antibody -v 2>&1 | awk '{print $3}')
+
+echo -e "${bold}🙏 Antibody ${reset}\n"
+
+echo -e "Current ${underline}Antibody${reset} version: $antibody_version\n"
 
 update=$(antibody update 2>&1)
 
@@ -57,7 +65,7 @@ installed=$(echo "$update" | grep "updating")
 updated=$(echo "$update" | grep "updated")
 
 if [ -n "$installed" ]; then
-	echo -e "\033[4mAntibody modules installed:\033[0m"
+	echo -e "${underline}Antibody modules installed:${reset}"
 	#echo "$installed"
 
 	IFS=$'\n'
@@ -66,16 +74,18 @@ if [ -n "$installed" ]; then
 	do
 		url=$(echo "$i" | awk '{print $3}')
 		module=$(echo "$i" | awk -F "/" '{print $NF}')
-		echo -e "\033[1m$module\033[0m ($url)"
+		echo -e "${bold}$module${reset} ($url)"
 	done
 	
 	echo ""
 	echo "Modules are installed in $antibody_folder folder."
 else
-	echo -e "\033[4mNo Antibody modules installed.\033[0m"
+	echo -e "${underline}No Antibody modules installed.${reset}"
 fi
 
 <<COMMENT
+antibody update:
+
 antibody: updating: https://github.com/zsh-users/zsh-history-substring-search
 antibody: updating: https://github.com/zsh-users/zsh-completions
 antibody: updating: https://github.com/zsh-users/zsh-autosuggestions
@@ -88,7 +98,7 @@ COMMENT
 echo ""
 
 if [ -n "$updated" ]; then
-	echo -e "\033[4mAntibody modules to update:\033[0m"
+	echo -e "${underline}Antibody modules to update:${reset}"
 	#echo "$updated"
 
 	IFS=$'\n'
@@ -98,20 +108,18 @@ if [ -n "$updated" ]; then
 		module=$(echo "$j" | awk -F "/" '{print $NF}' | awk '{print $1}')
 		commit=$(echo "$j" | awk -F "$url" '{print $NF}')
 		last_commit=$(echo "$commit" | awk '{print $NF}')
-		echo -e "\033[1m$module\033[0m ($url)"
+		echo -e "${bold}$module${reset} ($url)"
 		echo "Commits: $commit"
 		echo "Last commit: "$url"/commits/"$last_commit
 		# https://github.com/zsh-users/zsh-completions/commits/
 		
-		#notif="$module has been updated"
-		#notification "$notif"
 		modules+="$module "
 	done
 	notif="$modules has been updated"
 	notification "$notif"
 
 else
-	echo -e "\033[4mNo Antibody modules to update.\033[0m"
+	echo -e "${underline}No Antibody modules to update.${reset}"
 	echo ""	
 fi
 
