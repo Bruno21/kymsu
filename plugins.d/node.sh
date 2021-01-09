@@ -239,11 +239,11 @@ echo ""
 ###############
 
 if [ "$doctor" = true ]; then
-	echo "${underline}🌿  The Doc is checking that everything is ok.${reset}\n"
+	echo -e "${underline}🌿  The Doc is checking that everything is ok.${reset}\n"
 	npm doctor
 	echo ""
 	
-    echo "🔍   Verifying npm cache\n"
+    echo -e "🔍   Verifying npm cache\n"
     npm cache verify
     echo ""
 fi

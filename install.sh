@@ -8,7 +8,7 @@ reset="\033[0m"
 KYMSU_PATH=`pwd`
 
 # Make Kymsu accessible in PATH
-echo -e "Installing ${bold}kymsu2${reset} in ${bold}/usr/local/bin${reset} ..."
+echo -e "\nInstalling ${bold}kymsu2${reset} in ${bold}/usr/local/bin${reset} ..."
 ln -fs "${KYMSU_PATH}"/kymsu2.sh /usr/local/bin/kymsu2
 
 # Store Kymsu stuff in home directory
