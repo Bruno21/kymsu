@@ -12,6 +12,11 @@
 # No distract mode (no user interaction)
 [[ $@ =~ "--nodistract" ]] && no_distract=true || no_distract=false
 #
+# Display PHP informations
+display_info=true
+# Open PHP info in Safari
+php_info=true
+#
 #########################################
 
 italic="\033[3m"
@@ -43,20 +48,18 @@ echo ""
 echo -e "${bold}❗️ plugin en test (beta) ${reset}"
 echo ""
 
-# /usr/local/Cellar/php/7.4.11/bin/pecl
-# /usr/local/Cellar/php@7.3/7.3.23/bin/pecl
-# /usr/local/Cellar/php@7.2/7.2.33/bin/pecl
-
-#pecl_upgrade=$(pecl list-upgrades)
 
 version=$(php --info | grep 'PHP Version' | sed -n '1p' | awk -F" " '{print $NF}')
 v=${version:0:3}
+echo -e "Current PHP version: ${bold}$version${reset}\n"
 
 if [ "$v" = "7.3" ]; then
 	php_path=$(brew --prefix)/opt/php@7.3/bin
 elif [ "$v" = "7.2" ]; then	
 	php_path=$(brew --prefix)/opt/php@7.2/bin
 elif [ "$v" = "7.4" ]; then	
+	php_path=$(brew --prefix)/opt/php@7.4/bin
+elif [ "$v" = "8.0" ]; then	
 	php_path=$(brew --prefix)/opt/php/bin
 fi
 
@@ -99,9 +102,11 @@ if [ -n "$pecl_upgrade" ]; then
 				if [ "$no_distract" = false ]; then
 					#echo "$b" | xargs -p -n 1 pecl upgrade
 					echo "$b" | xargs -p -n 1 $php_path/pecl upgrade
+					php_info=true
 				else
 					#echo "$b" | xargs -n 1 pecl upgrade
 					echo "$b" | xargs -n 1 $php_path/pecl upgrade
+					php_info=true
 				fi
 			fi
 			echo ""
@@ -118,6 +123,16 @@ conf_php=$(echo "$v_php" | grep 'Loaded Configuration File' | awk '{print $NF}')
 dir=$(dirname "$conf_php")
 name=$(basename "$conf_php")
 notif2="$conf_php was modified in the last 5 minutes"
+
+if [ "$display_info" = true ]; then
+	echo -e "php.ini path: ${bold}$conf_php${reset}"
+	echo -e "Additionnals ini files:\n $(ls $dir/conf.d/*.ini)"
+	echo -e "\nTo change php version: ${italic}$ sphp 7.4${reset}"
+	echo -e "${italic}https://gist.github.com/rhukster/f4c04f1bf59e0b74e335ee5d186a98e2${reset}\n"
+	
+	host=$(hostname)
+	[ "$php_info" = true ] && echo -e "Opening PHP info in Safari..." && open "https://$host.local/info.php"
+fi
 
 test=$(find "$dir" -name "$name" -mmin -5 -maxdepth 1)
 
