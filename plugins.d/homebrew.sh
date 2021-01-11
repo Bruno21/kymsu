@@ -106,6 +106,14 @@ get_info_pkg() {
 	installed=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.installed)' | jq -r '.[].version')
 	pinned=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.pinned)')
 
+	# Python@3.9 : multiples versions
+	ins=""
+	for i in $installed
+	do
+		ins=$i
+	done
+	installed=$ins
+
 	if [ "$pinned" = "true" ]; then 	
 		pinned_v=$(echo "$upd_package" | jq -r '.[] | select(.name == "'${pkg}'") | (.pinned_version)')
 	
@@ -195,10 +203,11 @@ fi
 touch /tmp/checkpoint
 
 # Updating packages
-echo -e "\n🍺 ${underline}Updating packages...${reset}\n"
-[ -n "$upd_pkg_notpinned" ] && echo -e "${red}Pinned: $upd_pkg_pinned . It won't be updated!'${reset}\n"
-
 if [ -n "$upd_pkg_notpinned" ]; then
+
+	echo -e "\n🍺 ${underline}Updating packages...${reset}\n"
+
+	[ -n "$pkg_pinned" ] && echo -e "${red}Pinned: $upd_pkg_pinned . It won't be updated!'${reset}\n"
 
 	if [ "$no_distract" = false ]; then
 		a=$(echo -e "Do you wanna run ${bold}brew upgrade "$upd_pkg_notpinned"${reset} ? (y/n/a) ")
@@ -290,6 +299,9 @@ fi
 #Casks update	
 echo -e "🍺 ${underline}Search for casks update...${reset}\n"
 
+[ -n "$casks_latest_not_pinned" ] && echo -e "Some Casks have ${italic}auto_updates true${reset} or ${italic}version :latest${reset}. Homebrew Cask cannot track versions of those apps."
+[ -n "$casks_latest_not_pinned" ] && echo -e "Edit this script and change the setting ${italic}latest=false${reset} to ${italic}true${reset}\n"
+
 # Find infos about updated casks
 nb_casks_upd=$(echo "$upd_casks" | wc -w | xargs)
 if [ "$nb_casks_upd" -gt 0 ]; then
@@ -305,41 +317,40 @@ if [ "$nb_casks_upd" -gt 0 ]; then
 	else
 		[ "$nb_casks_upd" -gt 1 ] && echo -e "${box} $nb_casks_upd ${reset} ${array[@]/%/s}: ${bold}$upd_casks${reset}" || echo -e "${box} $nb_casks_upd ${reset} ${array[@]}: ${bold}$upd_casks${reset}"
 	fi
-fi
-
-# Updating casks
-echo -e "\n🍺 ${underline}Updating casks...${reset}\n"
-
-[ "${#cask_to_not_update[@]}" -gt 0 ] && echo -e "${red}Do not update: ${cask_to_not_update[@]} . It won't be updated!'${reset}\n"
-[ -n "$casks_latest_not_pinned" ] && echo -e "Some Casks have ${italic}auto_updates true${reset} or ${italic}version :latest${reset}. Homebrew Cask cannot track versions of those apps."
-[ -n "$casks_latest_not_pinned" ] && echo -e "Edit this script and change the setting ${italic}latest=false${reset} to ${italic}true${reset}\n"
 
 
-if [ -n "$casks_not_pinned" ]; then
+	# Updating casks
+	echo -e "\n🍺 ${underline}Updating casks...${reset}\n"
 
-	if [ "$no_distract" = false ]; then
-		a=$(echo -e "Do you wanna run ${bold}brew upgrade $casks_not_pinned${reset} ? (y/n/a) ")
-		# yes/no/all
-		read -p "$a" choice
+	[ "${#cask_to_not_update[@]}" -gt 0 ] && echo -e "${red}Do not update: ${cask_to_not_update[@]} . It won't be updated!'${reset}\n"
 
-		if [ "$choice" == "y" ] || [ "$choice" == "Y" ] || [ "$choice" == "a" ] || [ "$choice" == "A" ]; then		
-			echo ""
-			for i in $casks_not_pinned;
-			do
-				if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
-					# --cask required for Cask like 'docker'. It can be a formula or a cask.
-					echo "$i" | xargs -p -n 1 brew upgrade --cask
-					echo ""
-				elif [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
-					echo "$i" | xargs -n 1 brew upgrade --cask
-					echo ""
-				fi
-			done
+
+	if [ -n "$casks_not_pinned" ]; then
+
+		if [ "$no_distract" = false ]; then
+			a=$(echo -e "Do you wanna run ${bold}brew upgrade $casks_not_pinned${reset} ? (y/n/a) ")
+			# yes/no/all
+			read -p "$a" choice
+
+			if [ "$choice" == "y" ] || [ "$choice" == "Y" ] || [ "$choice" == "a" ] || [ "$choice" == "A" ]; then		
+				echo ""
+				for i in $casks_not_pinned;
+				do
+					if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
+						# --cask required for Cask like 'docker'. It can be a formula or a cask.
+						echo "$i" | xargs -p -n 1 brew upgrade --cask
+						echo ""
+					elif [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
+						echo "$i" | xargs -n 1 brew upgrade --cask
+						echo ""
+					fi
+				done
+			else
+				echo -e "OK, let's continue..."
+			fi
 		else
-			echo -e "OK, let's continue..."
+			echo "$casks_not_pinned" | xargs -n 1 brew upgrade --cask
 		fi
-	else
-		echo "$casks_not_pinned" | xargs -n 1 brew upgrade --cask
 	fi
 
 else
