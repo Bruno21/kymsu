@@ -102,13 +102,19 @@ get_info_pkg() {
 	#urls=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.urls)' | jq -r '.stable | .url')
 	keg_only=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.keg_only)')
 	caveats=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.caveats)')
-	stable=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.versions)' | jq -r '.stable')
-	installed=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.installed)' | jq -r '.[].version')
+	#stable=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.versions)' | jq -r '.stable')
+	#installed=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.installed)' | jq -r '.[].version')
 	pinned=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.pinned)')
-
+	#echo -e "installed: $installed\n"
+	
+	installed_versions=$(echo "$upd_package" | jq -r '.[] | select(.name == "'${pkg}'") | (.installed_versions)' | jq -r '.[]')
+	current_version=$(echo "$upd_package" | jq -r '.[] | select(.name == "'${pkg}'") | (.current_version)')
+	#echo -e "installed_versions: $installed_versions\n"
+	#echo "stable: $current_version"
+	
 	# Python@3.9 : multiples versions
 	ins=""
-	for i in $installed
+	for i in $installed_versions
 	do
 		ins=$i
 	done
@@ -117,11 +123,11 @@ get_info_pkg() {
 	if [ "$pinned" = "true" ]; then 	
 		pinned_v=$(echo "$upd_package" | jq -r '.[] | select(.name == "'${pkg}'") | (.pinned_version)')
 	
-		l1+="${red}$name: installed: $installed stable: $stable [pinned at $pinned_v]"
+		l1+="${red}$name: installed: $installed stable: $current_version [pinned at $pinned_v]"
 		[ "$keg_only" = true ] && l1+=" [keg-only]"
 		l1+="${reset}\n"
 	else 
-		l1+="${bold}$name: installed: $installed stable: $stable"
+		l1+="${bold}$name: installed: $installed stable: $current_version"
 		[ "$keg_only" = true ] && l1+=" [keg-only]"
 		l1+="${reset}\n"
 	fi
