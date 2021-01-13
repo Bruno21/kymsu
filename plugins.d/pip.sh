@@ -33,7 +33,7 @@ user=""
 # Add module to the do_not_update array for prevent to update.
 #declare -a do_not_update=()
 #declare -a do_not_update=("parso" "asgiref")
-declare -a do_not_update=("asgiref")
+declare -a do_not_update=("lunr")
 #
 #########################################
 
@@ -65,7 +65,7 @@ echo -e "Current ${underline}pip3${reset} version: $(pip3 -V)"
 #$pip_version install --upgrade pip > /dev/null
 echo ""
 
-# Do not update casks
+# Do not update packages
 if (( ${#do_not_update[@]} )); then
 
 	nbp=${#do_not_update[*]}
@@ -83,7 +83,6 @@ echo -e "🐍 ${underline}Search for packages update...${reset}\n"
 
 pip_outdated=$($pip_version list --outdated --format columns)
 upd=$(echo "$pip_outdated" | sed '1,2d' | awk '{print $1}')
-#upd="asgiref CairoSVG setuptools"
 
 # Find infos about updated packages
 if [ -n "$upd" ]; then
@@ -99,27 +98,44 @@ if [ -n "$upd" ]; then
 		info=$($pip_version show "$i")
 		
 		l=$(echo "$info" | sed -n '1p')
-		m=$(sed "1s/.*/\\${bold}$l\\${reset}/" <<< "$info")
+		
+		if [[ ! " ${do_not_update[@]} " =~ " ${i} " ]]; then
+			m=$(sed "1s/.*/\\${bold}$l\\${reset}/" <<< "$info")
+		else
+			m=$(sed "1s/.*/\\${redbold}$l\\${reset}/" <<< "$info")
+		fi
 		echo -e "$m"  | head -4
 		echo ""
 		
 		z+="$i "
 		
 	done
+	# z = asgiref setuptools lunr
 
 	# Check dependancies
 	if [ -x "$(command -v pipdeptree)" ] && [ "$display_depend" == true ]; then
 	
 		echo -e "🐍 ${underline}Check dependancies:${reset}\n"
 		echo -e "Be carefull!! This updates can be a dependancie for some modules. Check for any incompatible version.\n"
-	
-		z=$(echo "$z" | sed 's/.$//' | sed 's/ /,/g')
-		dependencies=$(echo "$z" | xargs pipdeptree -r -p )
+		
+		# packages dont on recherche les dépendances (x = asgiref,setuptools,lunr)
+		x=$(echo "$z" | sed 's/.$//' | sed 's/ /,/g')
+		# on filtre les lignes (y = asgiref|setuptools|lunr)
+		y=$(echo "$z" | sed 's/.$//' | sed 's/ /|/g')
 
+		dependencies=$(echo "$x" | xargs pipdeptree -r -p | grep -E $y)
+		# if [[ $line =~ $y ]]; then
+		
 		while IFS= read -r line; do
 			z=$(echo "${line}" | grep -i ^[a-z])
 			if [ -n "$z" ] ; then
-				echo -e "\n${bold}${line}${reset}"
+			
+				if [[ " ${do_not_update[@]} " =~ " ${line} " ]]; then
+					echo -e "\n${bold}${line}${reset}"
+				else
+					echo -e "\n${redbold}${line}${reset}"
+				fi
+				
 			elif [[ "${line}" = *"<"* ]]; then
 				echo -e "${red}${line}${reset}"
 			elif [[ "${line}" = *"~="* ]]; then
