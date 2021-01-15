@@ -126,7 +126,7 @@ notif2="$conf_php was modified in the last 5 minutes"
 
 if [ "$display_info" = true ]; then
 	echo -e "php.ini path: ${bold}$conf_php${reset}"
-	echo -e "Additionnals ini files:\n $(ls $dir/conf.d/*.ini)"
+	echo -e "Additionnals ini files:\n$(ls $dir/conf.d/*.ini)"
 	echo -e "\nTo change php version: ${italic}$ sphp 7.4${reset}"
 	echo -e "${italic}https://gist.github.com/rhukster/f4c04f1bf59e0b74e335ee5d186a98e2${reset}\n"
 	
@@ -141,10 +141,12 @@ if [ -n "$test" ]; then
 	notification "$notif2"
 	echo ""
 	
-	a=$(echo -e "Do you want to edit ${bold}$conf_php${reset} file ? (y/n)")
-	read -p "$a" choice
-	if [ "$choice" == "y" ]; then
-		$EDITOR "$conf_php"
+	if [ -n "$available" ]; then
+		a=$(echo -e "Do you want to edit ${bold}$conf_php${reset} file ? (y/n)")
+		read -p "$a" choice
+		if [ "$choice" == "y" ]; then
+			$EDITOR "$conf_php"
+		fi
 	fi
 fi
 
