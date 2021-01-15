@@ -33,7 +33,7 @@ user=""
 # Add module to the do_not_update array for prevent to update.
 #declare -a do_not_update=()
 #declare -a do_not_update=("parso" "asgiref")
-declare -a do_not_update=("lunr")
+declare -a do_not_update=("lunr" "idna")
 #
 #########################################
 
@@ -128,9 +128,12 @@ if [ -n "$upd" ]; then
 		
 		while IFS= read -r line; do
 			z=$(echo "${line}" | grep -i ^[a-z])
+			
 			if [ -n "$z" ] ; then
 			
-				if [[ " ${do_not_update[@]} " =~ " ${line} " ]]; then
+				k=$(echo "${line}" | awk -F'==' '{print $1}')
+				
+				if [[ ! " ${do_not_update[@]} " =~ " ${k} " ]]; then
 					echo -e "\n${bold}${line}${reset}"
 				else
 					echo -e "\n${redbold}${line}${reset}"
