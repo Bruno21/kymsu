@@ -156,7 +156,7 @@ if [ -d "$local_path" ]; then
 	
 
 	echo -e "\n${underline}🌿 Search for local packages update...${reset}\n"	
-	outdated=$(npm outdated)
+	outdated=$(npm outdated --long | sed '1d')
 	if [ -n "$outdated" ]; then
 	
 		echo -e "\n${underline}🌿 Updating local packages...${reset}\n"
