@@ -15,7 +15,7 @@
 # Display PHP informations
 display_info=true
 # Open PHP info in Safari
-php_info=true
+php_info=false
 #
 #########################################
 
@@ -63,6 +63,17 @@ elif [ "$v" = "8.0" ]; then
 	php_path=$(brew --prefix)/opt/php/bin
 fi
 
+pecl_list=$($php_path/pecl list)
+echo -e "$pecl_list\n"
+
+# Installation imagick:
+# https://github.com/Imagick/imagick
+#git clone https://github.com/Imagick/imagick
+#cd imagick
+#phpize && ./configure
+#make
+#make install
+
 pecl_upgrade=$($php_path/pecl list-upgrades)
 
 
@@ -75,14 +86,16 @@ if [ -n "$pecl_upgrade" ]; then
 
 	echo ""
 	available=$(echo "$pecl_upgrade" | grep -v 'No upgrades available' | grep 'kB')
+	#echo "available: $available"
 	
 	if [ -n "$available" ]; then
 		while read ligne 
 		do 
-			echo "$ligne"
+			#echo "$ligne"
 			
 			# Channel pear.php.net
 			a=$(echo "$ligne" | grep "pear")
+			#echo "a: $a"
 			if [ -n "$a" ]; then
 				#pecl channel-update pear.php.net
 				$php_path/pecl channel-update pear.php.net
@@ -90,6 +103,7 @@ if [ -n "$pecl_upgrade" ]; then
 			
 			# Channel pecl.php.net
 			b=$(echo "$ligne" | grep "pecl")
+			#echo "b: $b"
 			if [ -n "$b" ]; then
 				#pecl channel-update pecl.php.net
 				$php_path/pecl channel-update pecl.php.net
@@ -114,6 +128,8 @@ if [ -n "$pecl_upgrade" ]; then
 		done <<< "$available"
 	fi
 fi
+
+echo "php_info: $php_info"
 
 # si modif des extensions, les .ini dans conf.d/ ne sont pas modifiés, juste le php.ini
 

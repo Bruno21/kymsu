@@ -22,8 +22,9 @@ display_info=true
 # Set doctor=true to run 'npm doctor' and 'npm cache verify' each time
 doctor=true
 
-# Local install
-local_path=$HOME/Sites/node_modules/
+# Local install:
+# run 'npm init' in local_path to create package.json
+local_path=$HOME/Sites/
 
 #########################################
 
@@ -162,10 +163,8 @@ if [ -d "$local_path" ]; then
 		echo -e "\n${underline}🌿 Updating local packages...${reset}\n"
 
 		if [ "$no_distract" = false ]; then
-			#echo "$outdated"
 			echo "$outdated" | awk '{print $1}' | xargs -p -n 1 npm update
 		else
-			#echo "$outdated"
 			echo "$outdated" | awk '{print $1}' | xargs -n 1 npm update
 		fi
 		
@@ -207,6 +206,11 @@ if [ -n "$glong_outdated" ]; then
 	echo -e "$glong_outdated\n"
 	echo -e "\n${underline}🌿 Updating global packages...${reset}\n"
 	
+	# Disable: Would you like to share anonymous usage data with the Angular Team at Google ?
+	if [[ " $glong_outdated " =~ "angular" ]]; then 
+		export NG_CLI_ANALYTICS="false"
+	fi
+	
 	while IFS= read -r line
 	do 
 		pkg=$(echo "$line" | awk '{print $1}')
@@ -214,8 +218,8 @@ if [ -n "$glong_outdated" ]; then
 		outdated="$pkg@$vers"
 
 		# TEST
-		version=$(echo "$line" | awk '{print $1 "@" $4}')
-		echo "$version"
+		#version=$(echo "$line" | awk '{print $1 "@" $4}')
+		#echo "$version"
 		# /test
 		
 		if [ "$no_distract" = false ]; then

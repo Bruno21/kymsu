@@ -33,7 +33,7 @@ user=""
 # Add module to the do_not_update array for prevent to update.
 #declare -a do_not_update=()
 #declare -a do_not_update=("parso" "asgiref")
-declare -a do_not_update=("lunr" "idna")
+declare -a do_not_update=("lunr" "idna" "smmap")
 #
 #########################################
 
@@ -122,8 +122,10 @@ if [ -n "$upd" ]; then
 		x=$(echo "$z" | sed 's/.$//' | sed 's/ /,/g')
 		# on filtre les lignes (y = asgiref|setuptools|lunr)
 		y=$(echo "$z" | sed 's/.$//' | sed 's/ /|/g')
+		#echo "x: $x == y: $y"
 
 		dependencies=$(echo "$x" | xargs pipdeptree -r -p | grep -E $y)
+		echo -e "dependencies:\n $dependencies"
 		# if [[ $line =~ $y ]]; then
 		
 		while IFS= read -r line; do
