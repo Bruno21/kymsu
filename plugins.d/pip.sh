@@ -122,11 +122,9 @@ if [ -n "$upd" ]; then
 		x=$(echo "$z" | sed 's/.$//' | sed 's/ /,/g')
 		# on filtre les lignes (y = asgiref|setuptools|lunr)
 		y=$(echo "$z" | sed 's/.$//' | sed 's/ /|/g')
-		#echo "x: $x == y: $y"
 
 		dependencies=$(echo "$x" | xargs pipdeptree -r -p | grep -E $y)
-		echo -e "dependencies:\n $dependencies"
-		# if [[ $line =~ $y ]]; then
+		echo -e ""
 		
 		while IFS= read -r line; do
 			z=$(echo "${line}" | grep -i ^[a-z])
@@ -141,7 +139,7 @@ if [ -n "$upd" ]; then
 					echo -e "\n${redbold}${line}${reset}"
 				fi
 				
-			elif [[ "${line}" = *"<"* ]]; then
+			elif [[ "${line}" = *"<"* ]] || [[ "${line}" = *"=="* ]]; then
 				echo -e "${red}${line}${reset}"
 			elif [[ "${line}" = *"~="* ]]; then
 				echo -e "${yellow}${line}${reset}"

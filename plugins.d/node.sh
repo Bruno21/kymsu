@@ -244,7 +244,50 @@ echo ""
 
 if [ "$doctor" = true ]; then
 	echo -e "${underline}🌿  The Doc is checking that everything is ok.${reset}\n"
-	npm doctor
+	#npm doctor
+	doc=$(npm doctor)
+
+	echo -e "$doc\n"
+
+	npm_v=$(echo "$doc" | grep 'npm -v')
+	node_v=$(echo "$doc" | grep 'node -v')
+
+: <<'END_COMMENT'
+	if [[ " $npm_v " =~ " not ok " ]]; then
+	
+		# npm -v                              ok      current: v7.5.3, latest: v7.5.3
+		np=$(grep -o -E "v([0-9]{1,2}\.){2}[0-9]{1,2}" <<< "$npm_v")
+		new_npm=$(echo "${np:1}" | sed -n '1p')
+		old_npm=$(echo "${np:1}" | sed -n '$p')
+	
+		a=$(echo -e "\nCurrent npm: $old_npm. Update ${bold}npm${reset} to ${bold}$new_npm${reset} [y/n] ? ")
+		read -e -p "$a" rep1
+		if [ "$rep1" == "y" ] || [ "$rep1" == "Y" ]; then
+			echo "Updating npm..."
+			npm -g install npm
+		fi
+	fi
+END_COMMENT
+
+	if [[ " $node_v " =~ " not ok " ]]; then
+		no=$(grep -o -E "v([0-9]{1,2}\.){2}[0-9]{1,2}" <<< "$node_v")
+		new_node=$(echo "${no:1}" | sed -n '1p')
+		old_node=$(echo "${no:1}" | sed -n '$p')
+	
+		if [ "$new_node" != "$old_node" ]; then
+			b=$(echo -e "\nCurrent node: $old_node. Update ${bold}node${reset} to ${bold}$new_node${reset} [y/n] ? ")
+			read -e -p "$b" rep2
+			if [ "$rep2" == "y" ] || [ "$rep2" == "Y" ]; then
+				echo -e "Updating node to v$new_node..."
+				nvm update $new_node
+				echo -e "Updating npm..."
+				npm -g install npm
+				echo -e "Reinstall packages from v$old_node..."
+				nvm reinstall-packages $old_node
+			fi
+		fi
+	fi
+
 	echo ""
 	
     echo -e "🔍   Verifying npm cache\n"
