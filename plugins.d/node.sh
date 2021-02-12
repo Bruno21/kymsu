@@ -159,6 +159,10 @@ if [ -d "$local_path" ]; then
 	echo -e "\n${underline}🌿 Search for local packages update...${reset}\n"	
 	outdated=$(npm outdated --long | sed '1d')
 	if [ -n "$outdated" ]; then
+		nb_update=$(echo "outdated" | wc -l | xargs)
+		a="available package update"
+		array=($a)
+		[ "$nb_update" -gt 1 ] && echo -e "${box} $nb_update ${reset} ${array[@]/%/s}:\n" || echo -e "${box} $nb_update ${reset} ${array[@]}:\n"
 	
 		echo -e "\n${underline}🌿 Updating local packages...${reset}\n"
 
@@ -203,6 +207,11 @@ echo -e "\n${underline}🌿 Search for global packages update...${reset}\n"
 glong_outdated=$(npm outdated -g --long | sed '1d')
 
 if [ -n "$glong_outdated" ]; then
+	nb_update_global=$(echo "glong_outdated" | wc -l | xargs)
+	a="available package update"
+	array=($a)
+	[ "$nb_update_global" -gt 1 ] && echo -e "${box} $nb_update_global ${reset} ${array[@]/%/s}:\n" || echo -e "${box} $nb_update_global ${reset} ${array[@]}:\n"
+
 	echo -e "$glong_outdated\n"
 	echo -e "\n${underline}🌿 Updating global packages...${reset}\n"
 	
@@ -210,6 +219,8 @@ if [ -n "$glong_outdated" ]; then
 	if [[ " $glong_outdated " =~ "angular" ]]; then 
 		export NG_CLI_ANALYTICS="false"
 	fi
+	# 15 packages are looking for funding
+	
 	
 	while IFS= read -r line
 	do 
