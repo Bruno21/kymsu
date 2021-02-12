@@ -128,20 +128,23 @@ if [ -n "$upd" ]; then
 		
 		while IFS= read -r line; do
 			z=$(echo "${line}" | grep -i ^[a-z])
+				k=$(echo "${line}" | awk -F'==' '{print $1}')
+				l=$(echo "${line}" | awk -F':' '{print $2}')
 			
+			# Si la ligne commence par une lettre (aka. paquet à mettre à jour)
 			if [ -n "$z" ] ; then
 			
-				k=$(echo "${line}" | awk -F'==' '{print $1}')
-				
+				# Met en redbold le paquet si il est 'do_not_update'
 				if [[ ! " ${do_not_update[@]} " =~ " ${k} " ]]; then
 					echo -e "\n${bold}${line}${reset}"
 				else
 					echo -e "\n${redbold}${line}${reset}"
 				fi
-				
-			elif [[ "${line}" = *"<"* ]] || [[ "${line}" = *"=="* ]]; then
+			
+			# sinon dépendance	
+			elif [[ "${l}" = *"<"* ]] || [[ "${l}" = *"=="* ]]; then
 				echo -e "${red}${line}${reset}"
-			elif [[ "${line}" = *"~="* ]]; then
+			elif [[ "${l}" = *"~="* ]]; then
 				echo -e "${yellow}${line}${reset}"
 			else
 				echo "${line}"
