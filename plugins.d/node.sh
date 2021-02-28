@@ -49,6 +49,10 @@ upd_nvm() {(
 ) && \. "$NVM_DIR/nvm.sh"
 }
 
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
 
 echo -e "${bold}🌿  npm ${reset}"
 echo ""
@@ -207,7 +211,7 @@ echo -e "\n${underline}🌿 Search for global packages update...${reset}\n"
 glong_outdated=$(npm outdated -g --long | sed '1d')
 
 if [ -n "$glong_outdated" ]; then
-	nb_update_global=$(echo "glong_outdated" | wc -l | xargs)
+	nb_update_global=$(echo "$glong_outdated" | wc -l | xargs)
 	a="available package update"
 	array=($a)
 	[ "$nb_update_global" -gt 1 ] && echo -e "${box} $nb_update_global ${reset} ${array[@]/%/s}:\n" || echo -e "${box} $nb_update_global ${reset} ${array[@]}:\n"
@@ -263,39 +267,38 @@ if [ "$doctor" = true ]; then
 	npm_v=$(echo "$doc" | grep 'npm -v')
 	node_v=$(echo "$doc" | grep 'node -v')
 
-: <<'END_COMMENT'
-	if [[ " $npm_v " =~ " not ok " ]]; then
-	
-		# npm -v                              ok      current: v7.5.3, latest: v7.5.3
-		np=$(grep -o -E "v([0-9]{1,2}\.){2}[0-9]{1,2}" <<< "$npm_v")
-		new_npm=$(echo "${np:1}" | sed -n '1p')
-		old_npm=$(echo "${np:1}" | sed -n '$p')
-	
-		a=$(echo -e "\nCurrent npm: $old_npm. Update ${bold}npm${reset} to ${bold}$new_npm${reset} [y/n] ? ")
-		read -e -p "$a" rep1
-		if [ "$rep1" == "y" ] || [ "$rep1" == "Y" ]; then
-			echo "Updating npm..."
-			npm -g install npm
-		fi
-	fi
-END_COMMENT
-
 	if [[ " $node_v " =~ " not ok " ]]; then
 		no=$(grep -o -E "v([0-9]{1,2}\.){2}[0-9]{1,2}" <<< "$node_v")
 		new_node=$(echo "${no:1}" | sed -n '1p')
 		old_node=$(echo "${no:1}" | sed -n '$p')
 	
 		if [ "$new_node" != "$old_node" ]; then
+: <<'END_COMMENT'
 			b=$(echo -e "\nCurrent node: $old_node. Update ${bold}node${reset} to ${bold}$new_node${reset} [y/n] ? ")
 			read -e -p "$b" rep2
 			if [ "$rep2" == "y" ] || [ "$rep2" == "Y" ]; then
 				echo -e "Updating node to v$new_node..."
-				nvm update $new_node
+				#nvm update $new_node
 				echo -e "Updating npm..."
 				npm -g install npm
 				echo -e "Reinstall packages from v$old_node..."
-				nvm reinstall-packages $old_node
+				#nvm reinstall-packages $old_node
 			fi
+END_COMMENT
+			echo -e "${underline}Udpate available for node.${reset} You should run:"
+			echo -e "  - ${bold}nvm update $new_node${reset}"
+			echo -e "  - ${bold}nvm reinstall-packages $old_node${reset}"
+		fi
+	fi
+
+	if [[ " $npm_v " =~ " not ok " ]]; then
+		np=$(grep -o -E "v([0-9]{1,2}\.){2}[0-9]{1,2}" <<< "$npm_v")
+		new_npm=$(echo "${np:1}" | sed -n '1p')
+		old_npm=$(echo "${np:1}" | sed -n '$p')
+
+		if [ "$new_npm" != "$old_npm" ]; then
+			echo -e "${underline}Udpate available for npm.${reset} You should run:"
+			echo -e "  - ${bold}nnpm -g install npm${reset}"
 		fi
 	fi
 
