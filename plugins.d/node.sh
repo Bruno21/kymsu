@@ -273,21 +273,20 @@ if [ "$doctor" = true ]; then
 		old_node=$(echo "${no:1}" | sed -n '$p')
 	
 		if [ "$new_node" != "$old_node" ]; then
-: <<'END_COMMENT'
+
 			b=$(echo -e "\nCurrent node: $old_node. Update ${bold}node${reset} to ${bold}$new_node${reset} [y/n] ? ")
 			read -e -p "$b" rep2
 			if [ "$rep2" == "y" ] || [ "$rep2" == "Y" ]; then
-				echo -e "Updating node to v$new_node..."
-				#nvm update $new_node
-				echo -e "Updating npm..."
+				. $HOME/.nvm/nvm.sh
+				echo -e "\n${bold}Updating node to v$new_node...${reset}"
+				nvm install $new_node
+				echo -e "\n${bold}Updating npm...${reset}"
 				npm -g install npm
-				echo -e "Reinstall packages from v$old_node..."
-				#nvm reinstall-packages $old_node
+				#
+				nvm use $new_node
+				echo -e "\n${bold}Reinstall packages from v$old_node...${reset}"
+				nvm reinstall-packages $old_node
 			fi
-END_COMMENT
-			echo -e "${underline}Udpate available for node.${reset} You should run:"
-			echo -e "  - ${bold}nvm update $new_node${reset}"
-			echo -e "  - ${bold}nvm reinstall-packages $old_node${reset}"
 		fi
 	fi
 
