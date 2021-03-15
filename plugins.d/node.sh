@@ -87,20 +87,22 @@ if [ -f "$NVM_DIR/nvm.sh" ]; then
 	echo -e "\n${underline}🌿  nvm install is:${reset} $NVM_DIR/nvm.sh"
 	echo "     - nvm $nvm_v is installed from https://github.com/nvm-sh/nvm"
 
-	if [ "$nvm_v" != "$version_nvm" ]; then
-		echo "Current nvm version on GitHub: $version_nvm"
-		echo "Current nvm installed version: $nvm_v"
+	if [ -n "$version_nvm" ]; then
+		if [ "$nvm_v" != "$version_nvm" ]; then
+			echo "Current nvm version on GitHub: $version_nvm"
+			echo "Current nvm installed version: $nvm_v"
 		
-		read -p "Do you want to update nvm from GitHub repo? (y/n)" choice
+			read -p "Do you want to update nvm from GitHub repo? (y/n)" choice
 
-		if [ "$choice" == "y" ]; then
-			echo "Updating nvm from GitHub..."
-			#curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v"$version_nvm"/install.sh | bash
+			if [ "$choice" == "y" ]; then
+				echo "Updating nvm from GitHub..."
+				#curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v"$version_nvm"/install.sh | bash
 			
-			upd_nvm
-			#curl: native on Catalina, wget installed by homebrew
-			#wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash
-			#curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash
+				upd_nvm
+				#curl: native on Catalina, wget installed by homebrew
+				#wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash
+				#curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.2/install.sh | bash
+			fi
 		fi
 	fi
 	
