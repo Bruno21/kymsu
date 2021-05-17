@@ -92,9 +92,17 @@ get_info_cask() {
 get_info_pkg() {
 	info="$1"
 	pkg="$2"
+	pkg2="$2"
 	l1=""
 	
+	#echo "pkg: $pkg"
+	if [[ " ${pkg} " =~ "/" ]]; then
+		pkg=$(echo "$pkg" | awk -F"/" '{print $NF}')
+	fi
+	#echo "pkg: $pkg"
+	
 	name=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.name)')
+	#name=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'")')
 	full_name=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.full_name)')
 	desc=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.desc)')
 	homepage=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.homepage)')
@@ -107,10 +115,13 @@ get_info_pkg() {
 	pinned=$(echo "$info" | jq -r '.[] | select(.name == "'${pkg}'") | (.pinned)')
 	#echo -e "installed: $installed\n"
 	
-	installed_versions=$(echo "$upd_package" | jq -r '.[] | select(.name == "'${pkg}'") | (.installed_versions)' | jq -r '.[]')
-	current_version=$(echo "$upd_package" | jq -r '.[] | select(.name == "'${pkg}'") | (.current_version)')
+	installed_versions=$(echo "$upd_package" | jq -r '.[] | select(.name == "'${pkg2}'") | (.installed_versions)' | jq -r '.[]')
+	current_version=$(echo "$upd_package" | jq -r '.[] | select(.name == "'${pkg2}'") | (.current_version)')
 	#echo -e "installed_versions: $installed_versions\n"
 	#echo "stable: $current_version"
+	
+	#echo "name: $name"
+	#echo "desc: $desc"
 	
 	# Python@3.9 : multiples versions
 	ins=""
@@ -171,7 +182,10 @@ do
 		upd_pkg_notpinned+="$name "
 	fi	
 done
+
+#echo "$upd_pkgs"
 upd_pkgs=$(echo "$upd_pkgs" | sed 's/.$//')
+#echo "$upd_pkgs"
 upd_pkg_pinned=$(echo "$upd_pkg_pinned" | sed 's/.$//')
 upd_pkg_notpinned=$(echo "$upd_pkg_notpinned" | sed 's/.$//')
 
@@ -183,8 +197,10 @@ if [ "$nb_pkg_upd" -gt 0 ]; then
 	if [ "$display_info" = true ]; then
 		[ "$nb_pkg_upd" -gt 1 ] && echo -e "${box} $nb_pkg_upd ${reset} ${array[@]/%/s}:\n" || echo -e "${box} $nb_pkg_upd ${reset} ${array[@]}:\n"
 		upd_pkgs_info=$(brew info --json=v2 $upd_pkgs | jq '{formulae} | .[]')
+		#echo "$upd_pkgs_info"
 		for row in $upd_pkgs;
 		do
+			#echo "$row"
 			get_info_pkg "$upd_pkgs_info" "$row"
 		done
 	else
@@ -251,6 +267,10 @@ echo ""
 #Casks update	
 echo -e "\n🍺 ${underline}Casks...${reset}\n"
 upd_cask=$(echo "$brew_outdated" | jq '{casks} | .[]')
+# erreur avec PureVPN et plusieurs versions installées.
+# parse error: Unfinished string at EOF at line 2, column 0
+# parse error: Invalid numeric literal at line 1, column 7
+
 
 for row in $(jq -c '.[]' <<< "$upd_cask");
 do

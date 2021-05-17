@@ -152,7 +152,11 @@ if [ -d "$local_path" ]; then
 		while IFS= read -r line
 		do 
 			if [[ "${line}" =~ "──" ]] || [[ "${line}" =~ "─┬" ]]; then 
+				local_pkg=$(echo "${line}" | awk '{print $2}' | awk -F"@" '{print $1}')
 				echo -e "${bold}${line}${reset}"
+				info_pkg=$(npm view "$local_pkg" | sed -n '3,4p')
+				q=$(echo "$info_pkg" | sed "s/^/|     /")
+				echo -e "$q"
 			else
 				echo -e "${line}"
 			fi
@@ -264,7 +268,18 @@ if [ "$doctor" = true ]; then
 	#npm doctor
 	doc=$(npm doctor)
 
-	echo -e "$doc\n"
+	while IFS= read -r line
+	do 
+		if [[ "${line}" =~ "not ok" ]]; then 
+			echo -e "${red}${line}${reset}"
+		else
+			echo -e "${line}"
+		fi
+	done <<< "$doc"
+
+	#echo -e "$doc\n"
+	
+	# search not ok => red
 
 	npm_v=$(echo "$doc" | grep 'npm -v')
 	node_v=$(echo "$doc" | grep 'node -v')
@@ -286,7 +301,7 @@ if [ "$doctor" = true ]; then
 				npm -g install npm
 				#
 				nvm use $new_node
-				echo -e "\n${bold}Reinstall packages from v$old_node...${reset}"
+				echo -e "\n${bold}Reinstall packages from $old_node...${reset}"
 				nvm reinstall-packages $old_node
 			fi
 		fi

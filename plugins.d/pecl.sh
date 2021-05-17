@@ -63,8 +63,19 @@ elif [ "$v" = "8.0" ]; then
 	php_path=$(brew --prefix)/opt/php/bin
 fi
 
-pecl_list=$($php_path/pecl list)
-echo -e "$pecl_list\n"
+# Note that all public channels can be synced using "update-channels"
+echo -e "${underline}Updating all channels...${reset}"
+$php_path/pecl update-channels
+
+#pecl channel-update pecl.php.net
+#pecl channel-update pear.php.net
+
+
+# List Installed Packages In The Default Channel
+#pecl_list=$($php_path/pecl list)
+# List installed packages from all channels
+pecl_list=$($php_path/pecl list -a)
+echo -e "\n$pecl_list\n"
 
 # Installation imagick:
 # https://github.com/Imagick/imagick
@@ -73,6 +84,7 @@ echo -e "$pecl_list\n"
 #phpize && ./configure
 #make
 #make install
+
 
 pecl_upgrade=$($php_path/pecl list-upgrades)
 
@@ -168,6 +180,3 @@ fi
 
 echo ""
 echo ""
-
-# WARNING: channel "pear.php.net" has updated its protocols, 
-#   use "pecl channel-update pear.php.net" to update
