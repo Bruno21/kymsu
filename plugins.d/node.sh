@@ -22,6 +22,9 @@ display_info=true
 # Set doctor=true to run 'npm doctor' and 'npm cache verify' each time
 doctor=true
 
+# Set update_node to true to update node.
+update_node=false
+
 # Local install:
 # run 'npm init' in local_path to create package.json
 local_path=$HOME/Sites/
@@ -175,13 +178,36 @@ if [ -d "$local_path" ]; then
 		[ "$nb_update" -gt 1 ] && echo -e "${box} $nb_update ${reset} ${array[@]/%/s}:\n" || echo -e "${box} $nb_update ${reset} ${array[@]}:\n"
 	
 		echo -e "\n${underline}🌿 Updating local packages...${reset}\n"
-
-		if [ "$no_distract" = false ]; then
-			echo "$outdated" | awk '{print $1}' | xargs -p -n 1 npm update
-		else
-			echo "$outdated" | awk '{print $1}' | xargs -n 1 npm update
-		fi
 		
+		while IFS= read -r i
+		do
+		 package=$(echo "$i" | awk '{print $1}')
+		 current=$(echo "$i" | awk '{print $2}')
+		 wanted=$(echo "$i" | awk '{print $3}')
+		 latest=$(echo "$i" | awk '{print $4}')
+		 
+		 j=$(echo "$current" | awk -F "." '{print $1}')
+		 k=$(echo "$latest" | awk -F "." '{print $1}')
+		 
+		 # Update major version 1.x.y to 2.x.y
+		 if [ $current = $wanted ] && [ "$j" -lt "$k" ]; then
+		 	if [ "$no_distract" = false ]; then
+		 		echo "$package@latest" | xargs -p npm install
+		 	else
+		 		echo "$package@latest" | xargs npm install
+		 		#npm install "$package@latest"
+		 	fi
+		 # Update minor or patch version
+		 else
+		 	if [ "$no_distract" = false ]; then
+		 		echo "$package" | xargs -p npm update
+		 	else
+		 		echo "$package" | xargs npm update
+		 	fi
+		 fi
+		 
+		done <<< "$outdated"
+
 	else
 		echo -e "${italic}No local packages updates.${reset}"
 	fi
@@ -289,7 +315,9 @@ if [ "$doctor" = true ]; then
 		new_node=$(echo "${no:1}" | sed -n '1p')
 		old_node=$(echo "${no:1}" | sed -n '$p')
 	
-		if [ "$new_node" != "$old_node" ]; then
+		#if [ "$new_node" != "$old_node" ]; then
+		if [ "$new_node" != "$old_node" ] && [ "$update_node" = true ]; then
+		#if [ "$update_node" = true ]; then
 
 			b=$(echo -e "\nCurrent node: $old_node. Update ${bold}node${reset} to ${bold}$new_node${reset} [y/n] ? ")
 			read -e -p "$b" rep2
