@@ -458,7 +458,10 @@ echo "$test"
 
 # Test if PHP.ini file has been modified by Homebrew (PECL)
 
-php_versions=$(ls /usr/local/etc/php/)
+# Fichier php.ini courant
+# php -i | grep 'Loaded Configuration File' | awk '{print $NF}'
+
+php_versions=$(ls /usr/local/etc/php/ 2>/dev/null)
 for php in $php_versions
 do 	
 	if [ -n "$upd_pkg" ]; then

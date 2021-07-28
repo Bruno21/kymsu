@@ -9,7 +9,7 @@ KYMSU_PATH=`pwd`
 
 # Make Kymsu accessible in PATH
 echo -e "\nInstalling ${bold}kymsu2${reset} in ${bold}/usr/local/bin${reset} ..."
-ln -fs "${KYMSU_PATH}"/kymsu2.sh /usr/local/bin/kymsu2
+sudo ln -fs "${KYMSU_PATH}"/kymsu2.sh /usr/local/bin/kymsu2
 
 # Store Kymsu stuff in home directory
 mkdir -p $HOME/.kymsu && echo "${KYMSU_PATH}" > $HOME/.kymsu/path

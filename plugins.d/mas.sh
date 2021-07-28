@@ -25,8 +25,11 @@ echo -e "${bold}🍏  Mac App Store updates come fast as lightning ${reset}"
 echo ""
 echo -e "mas : https://github.com/mas-cli/mas"
 
+command -v mas >/dev/null 2>&1 || { echo -e "\n${bold}mas${reset} is not installed.\n\nRun ${italic}'brew install mas'${reset} for install." && exit 1; }
+
 latest_v=$(curl -s https://api.github.com/repos/mas-cli/mas/releases/latest | jq -j '.tag_name')
 current_v=$(mas version)
+
 
 echo -e "Current version: $current_v"
 echo -e "Latest version: $latest_v"
