@@ -7,7 +7,7 @@
 # Settings:
 
 # npm local install
-local_path=/Users/bruno/Sites/node_modules/
+local_path=$HOME/Sites/node_modules/
 # folder contains Brewfile and Installer.md
 #chemin=$(pwd)
 chemin=$HOME/Documents/kymsu

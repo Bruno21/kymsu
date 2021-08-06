@@ -49,6 +49,31 @@ echo -e "${bold}❗️ plugin en test (beta) ${reset}"
 echo ""
 
 
+# Airbook
+#❯ echo $(brew --prefix)
+#/opt/homebrew
+
+#❯ which -a php
+#/opt/homebrew/bin/php
+#/usr/bin/php
+
+#/opt/homebrew/opt/php
+
+#❯ php --info | grep 'PHP Version'
+#PHP Version => 7.3.24-(to be removed in future macOS)
+#PHP Version => 7.3.24-(to be removed in future macOS)
+
+# Silberbook
+#❯ echo $(brew --prefix)
+#/usr/local
+
+#❯ which -a php
+#/usr/local/bin/php
+#/usr/bin/php
+
+#/usr/local/opt/php
+
+
 version=$(php --info | grep 'PHP Version' | sed -n '1p' | awk -F" " '{print $NF}')
 v=${version:0:3}
 echo -e "Current PHP version: ${bold}$version${reset}\n"
@@ -146,7 +171,9 @@ echo "php_info: $php_info"
 # si modif des extensions, les .ini dans conf.d/ ne sont pas modifiés, juste le php.ini
 
 # php.ini a été modifié il y a moins de 5mn
-v_php=$(php --info | grep -E 'usr.*ini')
+#v_php=$(php --info | grep -E 'usr.*ini')
+v_php=$(php --ini)
+
 conf_php=$(echo "$v_php" | grep 'Loaded Configuration File' | awk '{print $NF}')
 dir=$(dirname "$conf_php")
 name=$(basename "$conf_php")

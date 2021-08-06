@@ -146,8 +146,10 @@ echo ""
 # Local packages #
 ##################
 
-if [ -d "$local_path" ]; then
-	cd "$local_path" || return
+# Local folder exist and not empty (modules installed)
+#if [ -d "$local_path/node_modules" ] && [ -n "$(ls -A "$local_path/node_modules")" ]; then
+if find "$local_path/node_modules" -mindepth 1 -maxdepth 1 | read; then
+	
 	echo -e "${underline}🌿  Local installed scripts:${reset}"
 	
 	if [ "$display_info" = true ]; then
@@ -347,6 +349,10 @@ if [ "$doctor" = true ]; then
 		fi
 	fi
 
+	echo ""
+	
+	echo "Troubleshooting:"
+	echo "https://github.com/nvm-sh/nvm#macos-troubleshooting"
 	echo ""
 	
     echo -e "🔍   Verifying npm cache\n"

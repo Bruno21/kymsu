@@ -461,14 +461,14 @@ echo "$test"
 # Fichier php.ini courant
 # php -i | grep 'Loaded Configuration File' | awk '{print $NF}'
 
-php_versions=$(ls /usr/local/etc/php/ 2>/dev/null)
+php_versions=$(ls $(brew --prefix)/etc/php/ 2>/dev/null)
 for php in $php_versions
 do 	
 	if [ -n "$upd_pkg" ]; then
 
 		# file modified since it was last read	
-		php_modified=$(find /usr/local/etc/php/$php/ -name php.ini -newer /tmp/checkpoint)
-		php_ini=/usr/local/etc/php/$php/php.ini
+		php_modified=$(find $(brew --prefix)/etc/php/$php/ -name php.ini -newer /tmp/checkpoint)
+		php_ini=$(brew --prefix)/etc/php/$php/php.ini
 		notif2="$php_ini has been modified"
 	
 		echo "$php_modified"
