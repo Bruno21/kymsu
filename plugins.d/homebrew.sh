@@ -449,7 +449,7 @@ dir=$(dirname $conf_apa)
 name=$(basename $conf_apa)
 notif1="$dir has been modified in the last 5 minutes"
 
-test=$(find $dir -name "$name" -mmin -5 -maxdepth 1)
+test=$(find $dir -maxdepth 1 -name "$name" -mmin -5)
 
 echo "$test"
 

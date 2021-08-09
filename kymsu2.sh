@@ -31,7 +31,7 @@ cd "$SCRIPTS_DIR"
 # On boucle sur tous les fichiers du répertoire 
 # (seuls les fichiers commençant par '_' ou '0' sont pris en compte)
 #for script in $(find . -name '[_0]*' -maxdepth 1 | sort); do
-for script in $(find . ! -name _\*.sh -maxdepth 1 | sort); do
+for script in $(find . -maxdepth 1 ! -name _\*.sh | sort); do
     # si le fichier est exécutable et n'est pas un dossier
     if [ -x "$SCRIPTS_DIR/$script" ] && [ -f "$SCRIPTS_DIR/$script" ]; then
          # on l’exécute ; le $@ permet de passer à chaque

@@ -189,7 +189,7 @@ if [ "$display_info" = true ]; then
 	[ "$php_info" = true ] && echo -e "Opening PHP info in Safari..." && open "https://$host.local/info.php"
 fi
 
-test=$(find "$dir" -name "$name" -mmin -5 -maxdepth 1)
+test=$(find "$dir" -maxdepth 1 -name "$name" -mmin -5)
 
 if [ -n "$test" ]; then
 	echo -e "${red}❗️ ️$notif2${reset}"
