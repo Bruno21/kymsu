@@ -1,7 +1,16 @@
 #!/usr/bin/env bash
 
-# Perl plugin for KYMSU
+# Venv plugin for KYMSU
 # https://github.com/welcoMattic/kymsu
+
+italic="\033[3m"
+underline="\033[4m"
+ita_under="\033[3;4m"
+bgd="\033[1;4;31m"
+red="\033[1;31m"
+bold="\033[1m"
+box="\033[1;41m"
+reset="\033[0m"
 
 ###############################################################################################
 #
@@ -33,15 +42,6 @@ elif [[ "$OSTYPE" == "linux_gnueabihf" ]]; then
 fi
 #
 ###############################################################################################
-
-italic="\033[3m"
-underline="\033[4m"
-ita_under="\033[3;4m"
-bgd="\033[1;4;31m"
-red="\033[1;31m"
-bold="\033[1m"
-box="\033[1;41m"
-reset="\033[0m"
 
 for app in ${apps[*]}
 do

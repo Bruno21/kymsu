@@ -146,31 +146,42 @@ echo ""
 # Local packages #
 ##################
 
+# 1. Create package.json file with 'npm init'
+#	 or copy packagejson in $local_path
+# 2. Install node modules with 'npm install' in $local_path\node_modules
+
 # Local folder exist and not empty (modules installed)
 #if [ -d "$local_path/node_modules" ] && [ -n "$(ls -A "$local_path/node_modules")" ]; then
 if find "$local_path/node_modules" -mindepth 1 -maxdepth 1 | read; then
 	
 	echo -e "${underline}🌿  Local installed scripts:${reset}"
 	
+	cd "$local_path" || return
+	
 	if [ "$display_info" = true ]; then
 		ll=$(npm ls --long  | grep -v 'git$')
-
+		x=
+		
 		while IFS= read -r line
 		do 
 			if [[ "${line}" =~ "──" ]] || [[ "${line}" =~ "─┬" ]]; then 
 				local_pkg=$(echo "${line}" | awk '{print $2}' | awk -F"@" '{print $1}')
-				echo -e "${bold}${line}${reset}"
+				#echo -e "${bold}${line}${reset}"
 				info_pkg=$(npm view "$local_pkg" | sed -n '3,4p')
 				q=$(echo "$info_pkg" | sed "s/^/|     /")
-				echo -e "$q"
+				#echo -e "$q"
+				x+="${bold}${line}${reset}\n"
+				x+="$q\n"
 			else
-				echo -e "${line}"
+				#echo -e "${line}"
+				x+="${line}\n"
 			fi
 		done <<< "$ll"
 	else
 		npm ls
 	fi
 	
+	echo -e "$x"
 
 	echo -e "\n${underline}🌿 Search for local packages update...${reset}\n"	
 	outdated=$(npm outdated --long | sed '1d')
@@ -226,19 +237,31 @@ echo -e "${underline}🌿  Global installed scripts:${reset}"
 
 if [ "$display_info" = true ]; then
 	lg=$(npm list -g --depth=0 --long | grep -v 'git$')
+	x=""
+	q=""
 
 	while IFS= read -r line
 	do 
 		if [[ "${line}" =~ "──" ]]; then 
-			echo -e "${bold}${line}${reset}"
-		else
-			echo -e "${line}"
+			#echo -e "${bold}${line}${reset}"
+			global_pkg=$(echo "${line}" | awk '{print $2}' | awk -F"@" '{print $1}')
+			#echo -e "${bold}${line}${reset}"
+			info_pkg=$(npm view "$global_pkg" | sed -n '4p')
+			q=$(echo "$info_pkg" | sed "s/^/|   /")
+			#echo "$q"
+			x+="${bold}${line}${reset}\n"
+
+		elif [[ ${#line} > 2 ]]; then 
+			#echo -e "${line}"
+			x+="${line}\n"
+			x+="$q\n"
 		fi
 	done <<< "$lg"
 else
 	npm list -g --depth=0
 fi
 
+echo -e "$x"
 
 #Packages update	
 echo -e "\n${underline}🌿 Search for global packages update...${reset}\n"
@@ -295,7 +318,8 @@ echo ""
 if [ "$doctor" = true ]; then
 	echo -e "${underline}🌿  The Doc is checking that everything is ok.${reset}\n"
 	#npm doctor
-	doc=$(npm doctor)
+	#doc=$(npm doctor)
+	doc=$(cd "$local_path" && npm doctor)
 
 	while IFS= read -r line
 	do 

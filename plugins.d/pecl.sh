@@ -24,6 +24,7 @@ underline="\033[4m"
 ita_under="\033[3;4m"
 bgd="\033[1;4;31m"
 red="\033[1;31m"
+blue="\033[34m"
 bold="\033[1m"
 box="\033[1;41m"
 reset="\033[0m"
@@ -76,21 +77,27 @@ echo ""
 
 version=$(php --info | grep 'PHP Version' | sed -n '1p' | awk -F" " '{print $NF}')
 v=${version:0:3}
-echo -e "Current PHP version: ${bold}$version${reset}\n"
+echo -e "${ita_under}${blue}Current PHP version:${reset} ${bold}$version${reset}\n"
 
-if [ "$v" = "7.3" ]; then
-	php_path=$(brew --prefix)/opt/php@7.3/bin
-elif [ "$v" = "7.2" ]; then	
-	php_path=$(brew --prefix)/opt/php@7.2/bin
-elif [ "$v" = "7.4" ]; then	
-	php_path=$(brew --prefix)/opt/php@7.4/bin
-elif [ "$v" = "8.0" ]; then	
+latest="8.0"
+versions=("7.2" "7.3" "7.4" "8.1" "$latest")
+php_installed=$(ls -1 $(brew --prefix)/opt/ | grep php@)
+echo -e "${ita_under}${blue}Installed PHP versions:${reset}"
+echo -e "$php_installed\n"
+
+if [ "$v" == "$latest" ] ; then
 	php_path=$(brew --prefix)/opt/php/bin
-fi
+else
+	php_path=$(brew --prefix)/opt/php@$v/bin
+fi	
+#echo "$php_path"
+pecl version
+
+
 
 # Note that all public channels can be synced using "update-channels"
-echo -e "${underline}Updating all channels...${reset}"
-$php_path/pecl update-channels
+echo -e "\n${ita_under}${blue}Updating all channels...${reset}"
+pecl update-channels
 
 #pecl channel-update pecl.php.net
 #pecl channel-update pear.php.net
@@ -99,7 +106,7 @@ $php_path/pecl update-channels
 # List Installed Packages In The Default Channel
 #pecl_list=$($php_path/pecl list)
 # List installed packages from all channels
-pecl_list=$($php_path/pecl list -a)
+pecl_list=$(pecl list -a)
 echo -e "\n$pecl_list\n"
 
 # Installation imagick:
@@ -111,12 +118,12 @@ echo -e "\n$pecl_list\n"
 #make install
 
 
-pecl_upgrade=$($php_path/pecl list-upgrades)
+pecl_upgrade=$(pecl list-upgrades)
 
 
 if [ -n "$pecl_upgrade" ]; then
 	
-	echo -e "${underline}Extensions update:${reset}"
+	echo -e "${ita_under}${blue}Extensions update:${reset}"
 	
 	echo ""
 	echo "$pecl_upgrade"
@@ -135,7 +142,7 @@ if [ -n "$pecl_upgrade" ]; then
 			#echo "a: $a"
 			if [ -n "$a" ]; then
 				#pecl channel-update pear.php.net
-				$php_path/pecl channel-update pear.php.net
+				pecl channel-update pear.php.net
 			fi
 			
 			# Channel pecl.php.net
@@ -143,20 +150,20 @@ if [ -n "$pecl_upgrade" ]; then
 			#echo "b: $b"
 			if [ -n "$b" ]; then
 				#pecl channel-update pecl.php.net
-				$php_path/pecl channel-update pecl.php.net
+				pecl channel-update pecl.php.net
 				
 				#(pecl or doc) update available
 				b=$(echo "$ligne" | awk '{print $2}')
 				#pecl info "$b"
-				$php_path/pecl info "$b"
+				pecl info "$b"
 				echo ""
 				if [ "$no_distract" = false ]; then
 					#echo "$b" | xargs -p -n 1 pecl upgrade
-					echo "$b" | xargs -p -n 1 $php_path/pecl upgrade
+					echo "$b" | xargs -p -n 1 pecl upgrade
 					php_info=true
 				else
 					#echo "$b" | xargs -n 1 pecl upgrade
-					echo "$b" | xargs -n 1 $php_path/pecl upgrade
+					echo "$b" | xargs -n 1 pecl upgrade
 					php_info=true
 				fi
 			fi
@@ -166,7 +173,6 @@ if [ -n "$pecl_upgrade" ]; then
 	fi
 fi
 
-echo "php_info: $php_info"
 
 # si modif des extensions, les .ini dans conf.d/ ne sont pas modifiés, juste le php.ini
 
@@ -180,13 +186,19 @@ name=$(basename "$conf_php")
 notif2="$conf_php was modified in the last 5 minutes"
 
 if [ "$display_info" = true ]; then
+	echo -e "${ita_under}${blue}PHP ini files:${reset}"
 	echo -e "php.ini path: ${bold}$conf_php${reset}"
 	echo -e "Additionnals ini files:\n$(ls $dir/conf.d/*.ini)"
-	echo -e "\nTo change php version: ${italic}$ sphp 7.4${reset}"
-	echo -e "${italic}https://gist.github.com/rhukster/f4c04f1bf59e0b74e335ee5d186a98e2${reset}\n"
+	echo -e "\n${ita_under}${blue}To change php version:${reset} ${italic}$ sphp 7.4${reset}"
+	echo -e "  ${italic}•mod-php: https://gist.github.com/rhukster/f4c04f1bf59e0b74e335ee5d186a98e2${reset}"
+	echo -e "  ${italic}•php-fpm: https://gist.github.com/rozsival/10289d1e2006c68009ace0478306ecd2${reset}\n"
 	
-	host=$(hostname)
-	[ "$php_info" = true ] && echo -e "Opening PHP info in Safari..." && open "https://$host.local/info.php"
+	#[ "$php_info" = true ] && echo -e "Opening PHP info in Safari..." && open "https://$host.local/info.php"
+	if [ "$php_info" = true ]; then
+		#host=$(hostname)
+		echo -e "Some extensions have been updated. Let's opening PHP info in Safari..."
+		open "https://$(hostname).local/info.php"
+	fi
 fi
 
 test=$(find "$dir" -maxdepth 1 -name "$name" -mmin -5)

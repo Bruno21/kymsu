@@ -89,7 +89,7 @@ if [ -n "$upd" ]; then
 
 	nb=$(echo "$upd" | wc -w | xargs)
 
-	echo -e "${redbox} $nb ${reset} ${underline}availables updates:${reset}"
+	echo -e "${redbox} $nb ${reset} availables updates:"
 	echo -e "\n$pip_outdated"
 	echo ""
 	
@@ -180,7 +180,7 @@ if [ -n "$upd" ]; then
 	done
 	
 else
-	echo -e "${underline}No availables updates.${reset}"
+	echo -e "No availables updates."
 fi
 
 
