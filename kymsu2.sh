@@ -12,7 +12,8 @@ if [[ "$1" == "-h" || "$1" == "--help" ]]; then
   echo "   -h, --help     display this help"
   echo "   --nodistract   no distract mode (no user interaction)"
   echo "   --cleanup      removing any older versions of installed formulae and clearing old downloads from the Homebrew download-cache"
-  echo "   --npm_cleanup    cleaning npm cache"
+  echo "   --npm_cleanup  cleaning npm cache"
+  echo "   --all          run all scripts (by default, all except those start by _)"
   echo
   echo "Tips:"
   echo " -prefix the plugin with _ to ignore it"
@@ -24,18 +25,19 @@ fi
 echo "Please, grab a ☕️, KYMSU keep your working environment up to date!"
 
 SCRIPTS_DIR=$HOME/.kymsu/plugins.d
-#SCRIPTS_DIR=$(cat ~/.kymsu/path)/plugins.d
+
+[[ $@ =~ "--all" ]] && all_plugins=true || all_plugins=false
+if [ "$all_plugins" = false ]; then
+	# Tous sauf commençant par _ (les fichiers commençant par '_' ne sont pas pris en compte) "_*.sh"
+	list_plugins=$(find $SCRIPTS_DIR -maxdepth 1 -type f ! -name "_*" -a -name "*.sh" -a -perm +111 | sort)
+else
+	# Tous (-a = ET; -perm +111 = exec)
+	list_plugins=$(find $SCRIPTS_DIR -maxdepth 1 -type f -name "*.sh" -a -perm +111 | sort)
+fi
 
 cd "$SCRIPTS_DIR"
 
-# On boucle sur tous les fichiers du répertoire 
-# (seuls les fichiers commençant par '_' ou '0' sont pris en compte)
-#for script in $(find . -name '[_0]*' -maxdepth 1 | sort); do
-for script in $(find . -maxdepth 1 ! -name _\*.sh | sort); do
-    # si le fichier est exécutable et n'est pas un dossier
-    if [ -x "$SCRIPTS_DIR/$script" ] && [ -f "$SCRIPTS_DIR/$script" ]; then
-         # on l’exécute ; le $@ permet de passer à chaque
-         # script les arguments passés à *ce* script
-         $SCRIPTS_DIR/$script $@
-    fi
+for script in $list_plugins; do
+         # le $@ permet de passer à chaque script les arguments passés à *ce* script
+         $script $@
 done
