@@ -24,6 +24,18 @@ reset="\033[0m"
 
 echo -e "${bold}🛠  pipx (Python 3) ${reset}"
 
+if ! command -v pipx &> /dev/null
+then
+    echo -e "${bold}pipx${reset} could not be found !\n"
+    echo -e "You should install ${bold}pipx${reset}:\n"
+    echo -e "  - brew install pipx"
+    echo -e "  - pipx ensurepath"
+    echo -e "or"
+    echo -e "  - python3 -m pip install --user pipx"
+    echo -e "  - python3 -m pipx ensurepath"
+    exit
+fi
+
 list=$(pipx list --include-injected)
 echo -e "\n${underline}List installed packages:${reset}"
 echo "$list"
