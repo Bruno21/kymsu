@@ -18,7 +18,7 @@
 display_info=true
 
 # No distract mode (no user interaction)
-[[ $@ =~ "--nodistract" ]] && no_distract=true || no_distract=false
+[[ $@ =~ "-nodistract" || $@ =~ "-n" ]] && no_distract=true || no_distract=false
 
 # Display dependancies on updated pakages / casks
 #[[ $@ =~ "--depend" ]] && display_depend=false || display_depend=true

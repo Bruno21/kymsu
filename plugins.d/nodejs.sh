@@ -13,7 +13,7 @@ display_info=true
 
 # No distract mode (no user interaction)
 
-[[ $@ =~ "--nodistract" ]] && no_distract=true || no_distract=false
+[[ $@ =~ "-nodistract" || $@ =~ "-n" ]] && no_distract=true || no_distract=false
 
 # Set ls_color to '' for output nvm list in default colors, else '--no-colors'
 # ls_color='--no-colors'

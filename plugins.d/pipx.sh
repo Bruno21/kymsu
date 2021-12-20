@@ -4,7 +4,7 @@
 # https://github.com/welcoMattic/kymsu
 
 # No distract mode (no user interaction)
-[[ $@ =~ "--nodistract" ]] && no_distract=true || no_distract=false
+[[ $@ =~ "-nodistract" || $@ =~ "-n" ]] && no_distract=true || no_distract=false
 
 # Upgrade --include-injected
 injected=true
@@ -53,7 +53,7 @@ pipx-outdated() {
 	done < <( pipx list | grep -o 'package.*,' | tr -d ',' | cut -d ' ' -f 2- )
 }
 
-
+# https://github.com/avantrec/soco-cli/blob/master/CHANGELOG.txt
 
 pipx-outdated
 

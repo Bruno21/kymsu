@@ -11,7 +11,7 @@
 display_info=true
 
 # No distract mode (no user interaction)
-[[ $@ =~ "--nodistract" ]] && no_distract=true || no_distract=false
+[[ $@ =~ "-nodistract" || $@ =~ "-n" ]] && no_distract=true || no_distract=false
 
 # Also add module for prevent to update it.
 declare -a do_not_update=('')

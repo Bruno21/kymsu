@@ -16,7 +16,7 @@ display_info=true
 declare -a do_not_update=('')
 
 # No distract mode (no user interaction)
-[[ $@ =~ "--nodistract" ]] && no_distract=true || no_distract=false
+[[ $@ =~ "-nodistract" || $@ =~ "-n" ]] && no_distract=true || no_distract=false
 
 #
 ###############################################################################################

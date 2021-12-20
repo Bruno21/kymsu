@@ -4,7 +4,7 @@
 # https://github.com/welcoMattic/kymsu
 
 # No distract mode (no user interaction)
-[[ $@ =~ "--nodistract" ]] && no_distract=true || no_distract=false
+[[ $@ =~ "-nodistract" || $@ =~ "-n" ]] && no_distract=true || no_distract=false
 
 testing=1
 

@@ -5,7 +5,7 @@
 # https://guides.rubygems.org/what-is-a-gem/
 
 # No distract mode
-[[ $@ =~ "--nodistract" ]] && no_distract=true || no_distract=false
+[[ $@ =~ "-nodistract" || $@ =~ "-n" ]] && no_distract=true || no_distract=false
 
 italic="\033[3m"
 underline="\033[4m"

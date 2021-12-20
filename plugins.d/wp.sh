@@ -34,6 +34,8 @@ admin=false
 #add module to do_not_update array
 declare -a do_not_update=()
 
+#[[ $@ =~ "-nodistract" || $@ =~ "-n" ]] && no_distract=true || no_distract=false
+
 if [[ $1 == "--nodistract" ]] || [[ $no_distract == true ]]; then
 	no_distract=true
 	prompt=

@@ -15,7 +15,8 @@ display_info=true
 declare -a cask_to_not_update=()
 
 # No distract mode (no user interaction)(Casks with 'latest' version number won't be updated)
-[[ $@ =~ "--nodistract" ]] && no_distract=true || no_distract=false
+#[[ $@ =~ "--nodistract" ]] && no_distract=true || no_distract=false
+[[ $@ =~ "-nodistract" || $@ =~ "-n" ]] && no_distract=true || no_distract=false
 
 # Some Casks have auto_updates true or version :latest. Homebrew Cask cannot track versions of those apps.
 # 'latest=true' force Homebrew to update those apps.
