@@ -10,15 +10,19 @@ homebrew and pecl plugins notifie you if apache/php configuration files have bee
 
 ## Plug-ins:
 
-- **atom** (plug-ins)
-- **antibody** (zsh plug-ins)
-- **homebrew**  (brew and cask)
+- **atom** ([plug-ins](https://atom.io/packages/list))
+- **antibody** ([zsh plug-ins](https://getantibody.github.io))
+- **gem** ([Ruby](https://rubygems.org))
+- **homebrew**  ([brew and cask](https://formulae.brew.sh))
 - **installed** (create a list of all your brew, pip, npm... stuffs and a Brewfile). 
-- **npm** (javascript package) (local or global packages) (can update nvm script)
+- **nodejs** ([npm package](https://www.npmjs.com)) (local or global packages) (can update [nvm](https://github.com/nvm-sh/nvm) script)
 - **mas** (Mac Appstore)
-- **pip** (Python Package index) (pip or pip3)
-- **PECL** (PHP modules)
-- **Wordpress** (wp-cli) <u>(for testing only)</u>
+- **pecl** ([PHP modules](https://pecl.php.net)) (<u>for testing only</u>)
+- **perl** (Perl modules ([cpan](https://metacpan.org)))
+- **pip** ([Python Package index](https://pypi.org)) (pip or pip3)
+- **pipx** ([Python Apps in Isolated Environments](https://pypa.github.io/pipx/))
+- **venv** ([Environnement virtuel Python](https://docs.python.org/3/library/venv.html))
+- **wp** (WordPress [wp-cli](https://wp-cli.org/fr/)) <u>(for testing only)</u>
 
  
 
@@ -49,9 +53,13 @@ Plug-ins are placed in `~/.kymsu/`
 
 Only update all the things:  `$ kymsu2` 
 
+Run only 1 script: `$ kymsu2 -s homebrew` (option -s and name of script without extension)
+
 With cleanup after updates: `$ kymsu2 --cleanup`
 
-No distract mode  (no user interaction):`$ kymsu2 --nodistract`
+No distract mode (no user interaction):`$ kymsu2 --nodistract` `$ kymsu2 -n` (update without confirmation)
+
+Help: `$ kymsu2 --help` `$ kymsu2 -h`
 
 Prefix plugin with a _ to ignore it:
 

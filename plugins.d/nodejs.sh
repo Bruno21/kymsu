@@ -79,7 +79,7 @@ echo -e "     - install path: ${italic}$npm_ins${reset}"
 # nvm_installed=$(brew info nvm | grep Cellar)
 
 # version actuelle de nvm sur GitHub
-version_nvm=$(git ls-remote --tags --refs --sort="v:refname" git://github.com/nvm-sh/nvm.git | tail -n1 | sed 's/.*\///' | sed 's/v//')
+version_nvm=$(git ls-remote --tags --refs --sort="v:refname" https://github.com/nvm-sh/nvm.git | tail -n1 | sed 's/.*\///' | sed 's/v//')
 
 # nvm from github
 if [ -f "$NVM_DIR/nvm.sh" ]; then
