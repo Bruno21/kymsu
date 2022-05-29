@@ -236,7 +236,7 @@ echo ""
 echo -e "${underline}🌿  Global installed scripts:${reset}"
 
 if [ "$display_info" = true ]; then
-	lg=$(npm list -g --depth=0 --long | grep -v 'git$')
+	lg=$(npm list --location=global --depth=0 --long | grep -v 'git$')
 	x=""
 	q=""
 
@@ -266,7 +266,7 @@ echo -e "$x"
 #Packages update	
 echo -e "\n${underline}🌿 Search for global packages update...${reset}\n"
 
-glong_outdated=$(npm outdated -g --long | sed '1d')
+glong_outdated=$(npm outdated --location=global --long | sed '1d')
 
 if [ -n "$glong_outdated" ]; then
 	nb_update_global=$(echo "$glong_outdated" | wc -l | xargs)
