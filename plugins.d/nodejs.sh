@@ -258,7 +258,7 @@ if [ "$display_info" = true ]; then
 		fi
 	done <<< "$lg"
 else
-	npm list -g --depth=0
+	npm list --location=global --depth=0
 fi
 
 echo -e "$x"
@@ -296,10 +296,10 @@ if [ -n "$glong_outdated" ]; then
 		# /test
 		
 		if [ "$no_distract" = false ]; then
-			echo "$outdated" | xargs -p -n 1 npm -g install
+			echo "$outdated" | xargs -p -n 1 npm --location=global install
 			echo ""
 		else
-			echo "$outdated" | xargs -n 1 npm -g install
+			echo "$outdated" | xargs -n 1 npm --location=global install
 			echo ""
 		fi
 
@@ -353,7 +353,7 @@ if [ "$doctor" = true ]; then
 				echo -e "\n${bold}Updating node to v$new_node...${reset}"
 				nvm install $new_node
 				echo -e "\n${bold}Updating npm...${reset}"
-				npm -g install npm
+				npm --location=global install npm
 				#
 				nvm use $new_node
 				echo -e "\n${bold}Reinstall packages from $old_node...${reset}"
@@ -369,7 +369,7 @@ if [ "$doctor" = true ]; then
 
 		if [ "$new_npm" != "$old_npm" ]; then
 			echo -e "${underline}Udpate available for npm.${reset} You should run:"
-			echo -e "  - ${bold}nnpm -g install npm${reset}"
+			echo -e "  - ${bold}npm --location=global install npm${reset}"
 		fi
 	fi
 
