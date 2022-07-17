@@ -33,7 +33,7 @@ user=""
 # Add module to the do_not_update array for prevent to update.
 #declare -a do_not_update=()
 #declare -a do_not_update=("parso" "asgiref")
-declare -a do_not_update=("charset-normalizer")
+declare -a do_not_update=("geomet")
 #
 #########################################
 

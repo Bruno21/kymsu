@@ -67,17 +67,21 @@ SCRIPTS_DIR=$HOME/.kymsu/plugins.d
 # -n : non vide
 if [ -n "$one_script" ]; then
 	# Un seul script
-	list_plugins=$(find $SCRIPTS_DIR -maxdepth 1 -type f -name "*$one_script.sh" -a -perm +111)
+	#list_plugins=$(find $SCRIPTS_DIR -maxdepth 1 -type f -name "*$one_script" -a -perm +111)
+	list_plugins=$(find $SCRIPTS_DIR -maxdepth 1 -type f -name "$one_script" -o -name "_$one_script" -a -perm +111)
 	[ -z "$list_plugins" ] && echo -e "❗️ No named plugin ${italic}$one_script${reset}" && exit -1
 	
 # [[ $@ =~ "--all" ]] && all_plugins=true || all_plugins=false
 elif [ "$all_plugins" = false ]; then
 	# Tous sauf commençant par _ (les fichiers commençant par '_' ne sont pas pris en compte) "_*.sh"
 	list_plugins=$(find $SCRIPTS_DIR -maxdepth 1 -type f ! -name "_*" -a -name "*.sh" -a -perm +111 | sort)
+	[ -z "$list_plugins" ] && echo -e "❗️ No plugin in ${italic}$SCRIPTS_DIR${reset}" && exit -1
 else
 	# Tous (-a = ET; -perm +111 = exec)
 	list_plugins=$(find $SCRIPTS_DIR -maxdepth 1 -type f -name "*.sh" -a -perm +111 | sort)
+	[ -z "$list_plugins" ] && echo -e "❗️ No plugin in ${italic}$SCRIPTS_DIR${reset}" && exit -1
 fi
+
 
 cd "$SCRIPTS_DIR"
 
@@ -96,7 +100,8 @@ echo ""
 
 for script in $list_plugins; do
          # le $@ permet de passer à chaque script les arguments passés à *ce* script
-         $script $@
+         #$script $@
+         echo "$script"
 done
 
 shift "$((OPTIND-1))"
