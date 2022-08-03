@@ -36,6 +36,7 @@ function showHelp() {
 all_plugins=false
 no_distract=false
 brew_cleanup=false
+SCRIPTS_DIR=$HOME/.kymsu/plugins.d
 
 while getopts "hncs: a-:" opt
 do
@@ -62,7 +63,6 @@ done
 		
 #shift "$((OPTIND-1))"
 
-SCRIPTS_DIR=$HOME/.kymsu/plugins.d
 
 # -n : non vide
 if [ -n "$one_script" ]; then
@@ -100,8 +100,8 @@ echo ""
 
 for script in $list_plugins; do
          # le $@ permet de passer à chaque script les arguments passés à *ce* script
-         #$script $@
-         echo "$script"
+         $script $@
+         #echo "$script"
 done
 
 shift "$((OPTIND-1))"
