@@ -240,6 +240,11 @@ if [ -n "$upd_pkg_notpinned" ]; then
 		if [ "$choice" == "y" ] || [ "$choice" == "Y" ] || [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
 			for i in $upd_pkg_notpinned;
 			do
+				if [ "$i" == "bash" ]; then
+					echo -e "\nBash update available !"
+					echo -e "You should run ${bold}brew upgrade bash${reset} in another terminal !\n"
+					continue
+				fi
 				if [ "$choice" == "y" ] || [ "$choice" == "Y" ]; then
 					echo "$i" | xargs -p -n 1 brew upgrade 
 				elif [ "$choice" == "a" ] || [ "$choice" == "A" ]; then
