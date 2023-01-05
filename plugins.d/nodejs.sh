@@ -30,6 +30,11 @@ update_node=false
 # run 'npm init' in local_path to create package.json
 local_path=$HOME/Sites/
 
+# Add module to the do_not_update array for prevent to update.
+#declare -a do_not_update=()
+#declare -a do_not_update=("parso" "asgiref")
+declare -a do_not_update=("@squoosh/cli")
+
 #########################################
 
 : <<'END_COMMENT'
@@ -44,6 +49,8 @@ red="\033[1;31m"
 bold="\033[1m"
 bold_ita="\033[1;3m"
 box="\033[1;41m"
+redbold="\033[1;31m"
+redbox="\033[1;41m"
 reset="\033[0m"
 
 upd_nvm() {(
@@ -142,6 +149,19 @@ echo -e "You need to run \"nvm install 10.18.0\" to install it before using it.$
 
 echo ""
 
+
+# Do not update packages
+if (( ${#do_not_update[@]} )); then
+
+	nbp=${#do_not_update[*]}
+	
+	echo -e "${underline}🌿  List of${reset} ${redbox} $nbp ${reset} ${underline}'do not update' packages:${reset}"
+	echo -e "${redbold}${do_not_update[*]}${reset}"
+	echo -e "To remove package from this list, you need to edit the ${italic}do_not_update${reset} array."
+	echo ""
+
+fi
+
 ##################
 # Local packages #
 ##################
@@ -203,21 +223,27 @@ if find "$local_path/node_modules" -mindepth 1 -maxdepth 1 | read; then
 		 j=$(echo "$current" | awk -F "." '{print $1}')
 		 k=$(echo "$latest" | awk -F "." '{print $1}')
 		 
-		 # Update major version 1.x.y to 2.x.y
-		 if [ $current = $wanted ] && [ "$j" -lt "$k" ]; then
-		 	if [ "$no_distract" = false ]; then
-		 		echo "$package@latest" | xargs -p npm install
+		 if [[ ! " ${do_not_update[@]} " =~ " ${package} " ]]; then
+		 
+		 	# Update major version 1.x.y to 2.x.y
+			 if [ $current = $wanted ] && [ "$j" -lt "$k" ]; then
+		 		if [ "$no_distract" = false ]; then
+		 			echo "$package@latest" | xargs -p npm install
+		 		else
+		 			echo "$package@latest" | xargs npm install
+		 			#npm install "$package@latest"
+		 		fi
+		 	# Update minor or patch version
 		 	else
-		 		echo "$package@latest" | xargs npm install
-		 		#npm install "$package@latest"
+		 		if [ "$no_distract" = false ]; then
+		 			echo "$package" | xargs -p npm update
+		 		else
+		 			echo "$package" | xargs npm update
+		 		fi
 		 	fi
-		 # Update minor or patch version
-		 else
-		 	if [ "$no_distract" = false ]; then
-		 		echo "$package" | xargs -p npm update
-		 	else
-		 		echo "$package" | xargs npm update
-		 	fi
+		 
+		else
+			echo -e "${redbold}$package is pinned to version $current !${reset} Don't update !"
 		 fi
 		 
 		done <<< "$outdated"
@@ -287,20 +313,28 @@ if [ -n "$glong_outdated" ]; then
 	while IFS= read -r line
 	do 
 		pkg=$(echo "$line" | awk '{print $1}')
+		curr=$(echo "$line" | awk '{print $2}')
 		vers=$(echo "$line" | awk '{print $4}')
 		outdated="$pkg@$vers"
-
-		# TEST
-		#version=$(echo "$line" | awk '{print $1 "@" $4}')
-		#echo "$version"
-		# /test
 		
-		if [ "$no_distract" = false ]; then
-			echo "$outdated" | xargs -p -n 1 npm --location=global install
-			echo ""
+		if [[ ! " ${do_not_update[@]} " =~ " ${pkg} " ]]; then
+
+			# TEST
+			#version=$(echo "$line" | awk '{print $1 "@" $4}')
+			#echo "$version"
+			# /test
+		
+			if [ "$no_distract" = false ]; then
+				echo "$outdated" | xargs -p -n 1 npm --location=global install
+				echo ""
+			else
+				echo "$outdated" | xargs -n 1 npm --location=global install
+				echo ""
+			fi
+			
 		else
-			echo "$outdated" | xargs -n 1 npm --location=global install
-			echo ""
+			echo -e "${redbold}$pkg is pinned to version $curr !${reset} Don't update !"
+			
 		fi
 
 	done <<< "$glong_outdated"

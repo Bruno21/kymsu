@@ -21,6 +21,7 @@ homebrew and pecl plugins notifie you if apache/php configuration files have bee
 - **perl** (Perl modules ([cpan](https://metacpan.org)))
 - **pip** ([Python Package index](https://pypi.org)) (pip or pip3)
 - **pipx** ([Python Apps in Isolated Environments](https://pypa.github.io/pipx/))
+- **rust** ([Rust](https://www.rust-lang.org))
 - **venv** ([Environnement virtuel Python](https://docs.python.org/3/library/venv.html))
 - **wp** (WordPress [wp-cli](https://wp-cli.org/fr/)) <u>(for testing only)</u>
 
@@ -77,7 +78,7 @@ Prefix plugin with a _ to ignore it:
 
  There is a <u>settings section</u> on top of each plug-in:
 
-- *[homebrew-pip]* don't update a module, package...: add it to the `do_not_update` array on the top.
+- *[homebrew-pip-nodejs]* don't update a module, package...: add it to the `do_not_update` array on the top.
 
 ```bash
 $ nano homebrew.sh
@@ -85,9 +86,9 @@ declare -a do_not_update=('virtualbox,virtualbox-extension-pack')
 ```
 
 - *[homebrew]* display info on updated pakages: `display_info=true`
-- *[homebrew-npm-pecl-pip]* no distract mode  (no user interaction): `no_distract=false`
+- *[homebrew-nodejs-pecl-pip]* no distract mode  (no user interaction): `no_distract=false`
   *If running Homebrew plug-in in no_distract mode, Casks with 'latest' version number won't be updated.*
-- *[npm]* run npm maintenance tools: `doctor=true`
+- *[nodejs]* run npm maintenance tools: `doctor=true`
 - *[pip]* `version=pip or pip3`  `user="" or "--user"`
 
 
