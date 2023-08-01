@@ -74,7 +74,7 @@ get_info_cask() {
 	#auto_updates=$(echo "$info" | jq -r '.[] | select(.token == "'${app}'") | (.auto_updates)')
 	#caveats=$(echo "$info" | jq -r '.[] | select(.token == "'${app}'") | (.caveats)')
 
-	installed_versions=$(echo "$upd_cask" | jq -r '.[] | select(.name == "'${app}'") | (.installed_versions)')
+	installed_versions=$(echo "$upd_cask" | jq -r '.[] | select(.name == "'${app}'") | (.installed_versions)' | jq -r '.[]')
 	current_version=$(echo "$upd_cask" | jq -r '.[] | select(.name == "'${app}'") | (.current_version)')
 	
 	[[ "$desc" = "null" ]] && desc="${italic}No description${reset}"
@@ -117,6 +117,7 @@ get_info_pkg() {
 	#echo -e "installed: $installed\n"
 	
 	installed_versions=$(echo "$upd_package" | jq -r '.[] | select(.name == "'${pkg2}'") | (.installed_versions)' | jq -r '.[]')
+	
 	current_version=$(echo "$upd_package" | jq -r '.[] | select(.name == "'${pkg2}'") | (.current_version)')
 	#echo -e "installed_versions: $installed_versions\n"
 	#echo "stable: $current_version"
@@ -277,11 +278,12 @@ upd_cask=$(echo "$brew_outdated" | jq '{casks} | .[]')
 # parse error: Unfinished string at EOF at line 2, column 0
 # parse error: Invalid numeric literal at line 1, column 7
 
+#echo "$upd_cask"
 
 for row in $(jq -c '.[]' <<< "$upd_cask");
 do
 	name=$(echo "$row" | jq -j '.name')
-	installed_versions=$(echo "$row" | jq -j '.installed_versions')
+	installed_versions=$(echo "$row" | jq -j '.installed_versions | .[]')
 	current_version=$(echo "$row" | jq -j '.current_version')
 	
 	if [ "$current_version" != "latest" ]; then
