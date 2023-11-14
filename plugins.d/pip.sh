@@ -126,10 +126,12 @@ if [ -n "$upd" ]; then
 		dependencies=$(echo "$x" | xargs pipdeptree -r -p | grep -E $y)
 		echo -e ""
 		
+		
 		while IFS= read -r line; do
 			z=$(echo "${line}" | grep -i ^[a-z])
-				k=$(echo "${line}" | awk -F'==' '{print $1}')
-				l=$(echo "${line}" | awk -F':' '{print $2}')
+			k=$(echo "${line}" | awk -F'==' '{print $1}')
+			l=$(echo "${line}" | awk -F':' '{print $2}')
+			
 			
 			# Si la ligne commence par une lettre (aka. paquet à mettre à jour)
 			if [ -n "$z" ] ; then
