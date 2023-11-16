@@ -40,6 +40,13 @@ list=$(pipx list --include-injected)
 echo -e "\n${underline}List installed packages:${reset}"
 echo "$list"
 
+curl -Is http://www.google.com | head -1 | grep 200 1>/dev/null
+if [[ $? -eq 1 ]]; then
+	echo -e "\n${red}No Internet connection !${reset}"
+	echo -e "Exit !"
+	exit 1
+fi
+
 pipx-outdated() {
 	echo -e "\n${underline}Outdated Packages:${reset}"
 	while read -sr pyPkgName pyPkyVersion; do

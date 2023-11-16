@@ -11,6 +11,13 @@ reset="\033[0m"
 
 echo -e "\n${bold}🦀 Rust${reset}\n"
 
+curl -Is http://www.google.com | head -1 | grep 200 1>/dev/null
+if [[ $? -eq 1 ]]; then
+	echo -e "\n${red}No Internet connection !${reset}"
+	echo -e "Exit !"
+	exit 1
+fi
+
 if hash rustup 2>/dev/null; then
 
 	echo -e "🦀 ${underline}rustup check${reset}\n"

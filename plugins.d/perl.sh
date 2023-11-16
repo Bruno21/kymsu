@@ -16,6 +16,20 @@ display_info=true
 # Also add module for prevent to update it.
 declare -a do_not_update=('')
 
+italic="\033[3m"
+underline="\033[4m"
+ita_under="\033[3;4m"
+bgd="\033[1;4;31m"
+red="\033[1;31m"
+bold="\033[1m"
+bold_ita="\033[1;3m"
+box="\033[1;41m"
+redbold="\033[1;31m"
+redbox="\033[1;41m"
+reset="\033[0m"
+
+echo -e "${bold}🐪 Perl ${reset}"
+echo
 
 perl_app=$(which perl)
 perl_v=$(perl -v | sed -n '2p')
@@ -42,10 +56,17 @@ else
 	install_ok=true
 fi
 
+
+curl -Is http://www.google.com | head -1 | grep 200 1>/dev/null
+if [[ $? -eq 1 ]]; then
+	echo -e "\n${red}No Internet connection !${reset}"
+	echo -e "Exit !"
+	exit 1
+fi
+
 if [ "$install_ok" == "true" ]; then
-	echo "$module installed"
 	
-	       # install with cpan
+	    # install with cpan
        # % cpan-outdated | xargs cpan -i
 
         # install with cpanm

@@ -82,6 +82,14 @@ echo -e "\n${underline}🌿  npm:${reset}"
 echo -e "     - current version: ${italic}$npm_v${reset}"
 echo -e "     - install path: ${italic}$npm_ins${reset}"
 
+
+curl -Is http://www.google.com | head -1 | grep 200 1>/dev/null
+if [[ $? -eq 1 ]]; then
+	echo -e "\n${red}No Internet connection !${reset}"
+	echo -e "Exit !"
+	exit 1
+fi
+
 # version installée de nvm par Homebrew
 # nvm_installed=$(brew info nvm | grep Cellar)
 

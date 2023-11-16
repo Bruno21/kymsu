@@ -152,6 +152,13 @@ get_info_pkg() {
 
 echo -e "${bold}🍺  Homebrew ${reset}"
 
+curl -Is http://www.google.com | head -1 | grep 200 1>/dev/null
+if [[ $? -eq 1 ]]; then
+	echo -e "\n${red}No Internet connection !${reset}"
+	echo -e "Exit !"
+	exit 1
+fi
+
 echo -e "\n🍺 ${underline}Updating brew...${reset}\n"
 brew update
 

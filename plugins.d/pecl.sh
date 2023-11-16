@@ -79,8 +79,8 @@ version=$(php --info | grep 'PHP Version' | sed -n '1p' | awk -F" " '{print $NF}
 v=${version:0:3}
 echo -e "${ita_under}${blue}Current PHP version:${reset} ${bold}$version${reset}\n"
 
-latest="8.0"
-versions=("7.2" "7.3" "7.4" "8.1" "$latest")
+latest="8.2"
+versions=("7.4" "8.0" "8.1" "8.3" "$latest")
 php_installed=$(ls -1 $(brew --prefix)/opt/ | grep php@)
 echo -e "${ita_under}${blue}Installed PHP versions:${reset}"
 echo -e "$php_installed\n"
@@ -94,6 +94,12 @@ fi
 pecl version
 
 
+curl -Is http://www.google.com | head -1 | grep 200
+if [[ $? -eq 1 ]]; then
+	echo -e "\n${red}No Internet connection !${reset}"
+	echo -e "Exit !"
+	exit 1
+fi
 
 # Note that all public channels can be synced using "update-channels"
 echo -e "\n${ita_under}${blue}Updating all channels...${reset}"

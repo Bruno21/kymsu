@@ -78,6 +78,13 @@ if (( ${#do_not_update[@]} )); then
 fi
 
 
+curl -Is http://www.google.com | head -1 | grep 200 1>/dev/null
+if [[ $? -eq 1 ]]; then
+	echo -e "\n${red}No Internet connection !${reset}"
+	echo -e "Exit !"
+	exit 1
+fi
+
 #Packages update	
 echo -e "🐍 ${underline}Search for packages update...${reset}\n"
 
