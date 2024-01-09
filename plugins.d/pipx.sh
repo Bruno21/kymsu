@@ -36,7 +36,7 @@ then
     exit
 fi
 
-list=$(pipx list --include-injected)
+list=$(pipx list --include-injected)		# pipx list --quiet
 echo -e "\n${underline}List installed packages:${reset}"
 echo "$list"
 
