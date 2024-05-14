@@ -24,7 +24,7 @@ display_info=true
 doctor=true
 
 # Set update_node to true to update node.
-update_node=false
+update_node=true
 
 # Local install:
 # run 'npm init' in local_path to create package.json
@@ -46,6 +46,7 @@ underline="\033[4m"
 ita_under="\033[3;4m"
 bgd="\033[1;4;31m"
 red="\033[1;31m"
+green="\033[1;32m"
 bold="\033[1m"
 bold_ita="\033[1;3m"
 box="\033[1;41m"
@@ -78,12 +79,13 @@ echo -e "     - install path: ${italic}$node_ins${reset}"
 # version courante de npm
 npm_v=$(npm -v)
 npm_ins=$(which npm)
+old_npm="$npm_v"
 echo -e "\n${underline}🌿  npm:${reset}"
 echo -e "     - current version: ${italic}$npm_v${reset}"
 echo -e "     - install path: ${italic}$npm_ins${reset}"
 
 
-curl -Is http://www.google.com | head -1 | grep 200 1>/dev/null
+curl -Is https://www.apple.com | head -1 | grep 200 1>/dev/null
 if [[ $? -eq 1 ]]; then
 	echo -e "\n${red}No Internet connection !${reset}"
 	echo -e "Exit !"
@@ -360,58 +362,65 @@ echo ""
 if [ "$doctor" = true ]; then
 	echo -e "${underline}🌿  The Doc is checking that everything is ok.${reset}\n"
 	#npm doctor
-	#doc=$(npm doctor)
 	doc=$(cd "$local_path" && npm doctor)
+
 
 	while IFS= read -r line
 	do 
-		if [[ "${line}" =~ "not ok" ]]; then 
+		if [[ "${line}" =~ "Not ok" ]]; then 
 			echo -e "${red}${line}${reset}"
+		elif [[ "${line}" =~ "Ok" ]]; then 
+			echo -e "${green}${line}${reset}"
 		else
 			echo -e "${line}"
 		fi
 	done <<< "$doc"
 
+
 	#echo -e "$doc\n"
 	
 	# search not ok => red
 
-	npm_v=$(echo "$doc" | grep 'npm -v')
-	node_v=$(echo "$doc" | grep 'node -v')
-
-	if [[ " $node_v " =~ " not ok " ]]; then
-		no=$(grep -o -E "v([0-9]{1,2}\.){2}[0-9]{1,2}" <<< "$node_v")
-		new_node=$(echo "${no:1}" | sed -n '1p')
-		old_node=$(echo "${no:1}" | sed -n '$p')
+	#npm_v=$(echo "$doc" | grep 'npm -v')
+	#node_v=$(echo "$doc" | grep 'node -v')
+	npm_v=$(echo "$doc" | grep -A2 'Checking npm version')
+	node_v=$(echo "$doc" | grep -A2 'Checking node version')
 	
-		#if [ "$new_node" != "$old_node" ]; then
+	if [[ " $node_v " =~ "Not ok" ]]; then
+		
+		no=$(echo "$node_v" | sed -n '$p')
+		new_node=$(echo "$no" | awk '{print $3}' | sed 's/^.//')
+		old_node=$(echo "$no" | awk '{print $5}' | sed 's/.//;s/.$//')
+			
 		if [ "$new_node" != "$old_node" ] && [ "$update_node" = true ]; then
-		#if [ "$update_node" = true ]; then
 
-			b=$(echo -e "\nCurrent node: $old_node. Update ${bold}node${reset} to ${bold}$new_node${reset} [y/n] ? ")
+			b=$(echo -e "\nCurrent node: v$old_node. Update ${bold}node${reset} to ${bold}v$new_node${reset} [y/n] ? ")
 			read -e -p "$b" rep2
 			if [ "$rep2" == "y" ] || [ "$rep2" == "Y" ]; then
 				. $HOME/.nvm/nvm.sh
 				echo -e "\n${bold}Updating node to v$new_node...${reset}"
-				nvm install $new_node
+				nvm install "$new_node"
 				echo -e "\n${bold}Updating npm...${reset}"
 				npm --location=global install npm
 				#
 				nvm use $new_node
-				echo -e "\n${bold}Reinstall packages from $old_node...${reset}"
-				nvm reinstall-packages $old_node
+				echo -e "\n${bold}Reinstall packages from v$old_node...${reset}"
+				nvm reinstall-packages "$old_node"
 			fi
 		fi
 	fi
 
-	if [[ " $npm_v " =~ " not ok " ]]; then
+	if [[ " $npm_v " =~ "Not ok" ]]; then
+		
 		np=$(grep -o -E "v([0-9]{1,2}\.){2}[0-9]{1,2}" <<< "$npm_v")
-		new_npm=$(echo "${np:1}" | sed -n '1p')
-		old_npm=$(echo "${np:1}" | sed -n '$p')
+		new_npm=$(echo "${np:1}")	# 10.7.0
 
 		if [ "$new_npm" != "$old_npm" ]; then
-			echo -e "${underline}Udpate available for npm.${reset} You should run:"
-			echo -e "  - ${bold}npm --location=global install npm${reset}"
+			echo -e "${underline}\nUdpate available for npm.${reset}"
+			echo -e " - Current: ${red}v$old_npm${reset}"
+			echo -e " - Update: ${green}v$new_npm${reset}"
+			echo -e "You should run:"
+			echo -e " - ${bold}npm --location=global install npm${reset}"
 		fi
 	fi
 
