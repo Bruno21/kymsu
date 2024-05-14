@@ -57,7 +57,7 @@ else
 fi
 
 
-curl -Is http://www.google.com | head -1 | grep 200 1>/dev/null
+curl -Is https://www.apple.com | head -1 | grep 200 1>/dev/null
 if [[ $? -eq 1 ]]; then
 	echo -e "\n${red}No Internet connection !${reset}"
 	echo -e "Exit !"

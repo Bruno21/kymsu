@@ -33,7 +33,7 @@ user=""
 # Add module to the do_not_update array for prevent to update.
 #declare -a do_not_update=()
 #declare -a do_not_update=("parso" "asgiref")
-declare -a do_not_update=("geomet")
+declare -a do_not_update=("pyee")
 #
 #########################################
 
@@ -78,7 +78,7 @@ if (( ${#do_not_update[@]} )); then
 fi
 
 
-curl -Is http://www.google.com | head -1 | grep 200 1>/dev/null
+curl -Is https://www.apple.com | head -1 | grep 200 1>/dev/null
 if [[ $? -eq 1 ]]; then
 	echo -e "\n${red}No Internet connection !${reset}"
 	echo -e "Exit !"
@@ -130,7 +130,7 @@ if [ -n "$upd" ]; then
 		# on filtre les lignes (y = asgiref|setuptools|lunr)
 		y=$(echo "$z" | sed 's/.$//' | sed 's/ /|/g')
 
-		dependencies=$(echo "$x" | xargs pipdeptree -r -p | grep -E $y)
+		dependencies=$(echo "$x" | xargs pipdeptree -r --python /opt/homebrew/opt/python@3.11/bin/python3.11 -p | grep -E $y)
 		echo -e ""
 		
 		

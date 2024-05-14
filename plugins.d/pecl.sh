@@ -94,7 +94,7 @@ fi
 pecl version
 
 
-curl -Is http://www.google.com | head -1 | grep 200
+curl -Is https://www.apple.com | head -1 | grep 200
 if [[ $? -eq 1 ]]; then
 	echo -e "\n${red}No Internet connection !${reset}"
 	echo -e "Exit !"

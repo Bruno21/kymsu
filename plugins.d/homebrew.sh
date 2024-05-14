@@ -152,7 +152,7 @@ get_info_pkg() {
 
 echo -e "${bold}🍺  Homebrew ${reset}"
 
-curl -Is http://www.google.com | head -1 | grep 200 1>/dev/null
+curl -Is https://www.apple.com | head -1 | grep 200 1>/dev/null
 if [[ $? -eq 1 ]]; then
 	echo -e "\n${red}No Internet connection !${reset}"
 	echo -e "Exit !"
@@ -503,6 +503,11 @@ echo ""
 echo -e "\n🍺 ${underline}The Doc is checking that everything is ok...${reset}\n"
 
 brew doctor
+
+echo "python-cryptography required by certbot"
+echo "python-certifi required by certbot and yt-dlp"
+echo "numpy required ffmpeg and openvin"
+# suprimer: python-packaging python-argcomplete
 
 brew missing
 status=$?
