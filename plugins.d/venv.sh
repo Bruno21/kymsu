@@ -18,7 +18,7 @@ reset="\033[0m"
 
 # Liste des apps:
 # 	- le venv doit avoir le même nom que l'app
-declare -a apps=("soco-cli" "mkdocs")
+declare -a apps=("mkdocs")
 
 # Liste des extensions pour Mkdocs
 mkdocs_ext=("mkdocs-material" "mkdocs-material-extensions" "mkdocs-git-revision-date-localized-plugin" "mkdocs-minify-plugin" "fontawesome_markdown" "mkdocs-pdf-export-plugin")
