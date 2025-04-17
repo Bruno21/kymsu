@@ -14,12 +14,14 @@ chemin=$HOME/Documents/kymsu
 #version: pip ou pip3
 pip_version=pip3
 #
+# https://github.com/atom/apm/tags
+apm=false
 #########################################
 
 #if [ ! -d chemin ]; then mkdir $chemin; fi
 mkdir -p $chemin
 
-now=$(date +"%d-%m-%Y_%T")
+now=$(date +"%d-%m-%Y_%T" | sed 's/://g')
 mac=$(hostname -s)
 file=$mac"@"$now
 filename="Installed_$file"
@@ -152,24 +154,25 @@ echo ''
 
 # atom
 
-echo -e "⚛️   Get \033[3m\033[93mAtom editor packages\033[0m installed list"
-atom=$(apm list | grep 'Community Packages' -A 100 | sed '1,1d')
-{
-echo '## ⚛️ Atom packages'
-echo ''
-echo "\`\`\`bash"
+if [ "$apm" = "true" ]; then
+	echo -e "⚛️   Get \033[3m\033[93mAtom editor packages\033[0m installed list"
+	atom=$(apm list | grep 'Community Packages' -A 100 | sed '1,1d')
+	{
+	echo '## ⚛️ Atom packages'
+	echo ''
+	echo "\`\`\`bash"
 
-while read -r line; do
-	a=$(echo "$line" | awk -F "@" '{print $1}' | awk '{print $2}' )
-	#atom_pkg=${a:4}
-	echo "$a"	
-done <<< "$atom"
+	while read -r line; do
+		a=$(echo "$line" | awk -F "@" '{print $1}' | awk '{print $2}' )
+		#atom_pkg=${a:4}
+		echo "$a"	
+	done <<< "$atom"
 
-echo "\`\`\`"
-echo ""
-echo ''
-} >> $chemin/Installed.md
-
+	echo "\`\`\`"
+	echo ""
+	echo ''
+	} >> $chemin/Installed.md
+fi
 # Node.js packages (npm)
 
 echo -e "🌿  Get npm \033[3m\033[93m node global packages\033[0m installed scripts"
@@ -235,11 +238,16 @@ echo ''
 echo -e "🍺  Create a \033[3m\033[93mBrewfile\033[0m:"
 echo "list all  of the installed brew packages, cask applications, and Mac App Store applications currently on the machine..."
 brew bundle dump
-echo ''
-echo -e "To restore everything listed in that file, run \033[3m\033[93m'$ brew bundle'\033[0m in folder that contains the Brewfile."
+echo -e "To restore everything listed in that file, run \033[3m\033[93m'brew bundle'\033[0m in folder that contains the Brewfile."
 echo ''
 
-mv Brewfile "$chemin/Brewfile"
+mv $chemin/Brewfile "$chemin/Brewfile_$file".md
+y=$(find . -type f -name 'Brewfile*' -mtime +10 -maxdepth 1)
+if [ -n "$y" ]; then
+	nb=$(echo "$y" | wc -l)
+	echo "$y" | xargs rm
+	[ $? ] && echo -e "\033[93m$nb Brewfile_*\033[0m files removed !"
+fi
 
 #iconv -f macroman -t utf-8  Installed.md > Installed-utf8.md
 #mv Installed-utf8.md "$filename".md
