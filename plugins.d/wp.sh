@@ -25,11 +25,24 @@ emptytrash=true
 # Sauvegarde de la base
 backup=true
 # Maintenance de la base (optimize & repair)
-database=false
+database=true
 # Effacer les transients expirés
 transient=true
 # Ouvrir la page d'aministration
 admin=false
+
+: <<'END_COMMENT'
+blabla
+END_COMMENT
+
+italic="\033[3m"
+underline="\033[4m"
+ita_under="\033[3;4m"
+bgd="\033[1;4;31m"
+redbold="\033[1;31m"
+bold="\033[1m"
+box="\033[1;41m"
+reset="\033[0m"
 
 #add module to do_not_update array
 declare -a do_not_update=()
@@ -49,20 +62,23 @@ if ! [ -x "$(command -v wp)" ]; then
 	exit 1
 fi
 
-echo -e "\033[1mWP wp-cli \033[0m"
+echo -e "${redbold}Updates${reset}"
 
 echo ""
 
-cd $rep_wordpress
+cd $rep_wordpress || exit
 
 #echo $(pwd)
 
 
 # *** plugins ***
 
-if [ "$test" = true ]; then
+#if [ "$test" = true ]; then
+
+#: <<'END_COMMENT2'
+
 	# *** core update ***
-	echo "Search for core update..."
+	echo -e "${bold}Search for core update...${reset}"
 	core_cu=$(wp core check-update)
 	if ! [[ $core_cu = *"latest version"* ]]; then
   		echo "New version available!"
@@ -80,10 +96,11 @@ if [ "$test" = true ]; then
 	echo ""
 	
 	# *** plugins ***
-	echo "Search for all plugins update..."
-	plugin_cu_all=$(wp plugin update --all --dry-run)
-
-	plugins_outdated=$(echo "$plugin_cu_all" | sed '1,2d' | awk '{print $1}')
+	echo -e "${bold}Search for all plugins update...${reset}"
+	wp plugin list --format=table # --update=available
+	plugin_update=$(wp plugin list --format=table --update=available) 
+	echo
+	plugins_outdated=$(echo "$plugin_update" | sed '/^+/d' | sed '1d' | awk '{print $1}')
 	if [ -z "$plugins_outdated" ]; then
 		echo "No plugins update available !"
 	else
@@ -95,10 +112,11 @@ if [ "$test" = true ]; then
 	echo ""
 	
 	# *** themes ***
-	echo "Search for all themes update..."
-	theme_cu_all=$(wp theme update --all --dry-run)
-
-	themes_outdated=$(echo "$theme_cu_all" | sed '1,2d' | awk '{print $1}')
+	echo -e "${bold}Search for all themes update...${reset}"
+	wp theme list --format=table #--update=available
+	theme_update=$(wp theme list --format=table --update=available)
+	echo
+	themes_outdated=$(echo "$theme_update" | sed '/^+/d' | sed '1d' | awk '{print $1}')
 	if [ -z "$themes_outdated" ]; then
 		echo "No themes update available !"
 	else
@@ -110,10 +128,11 @@ if [ "$test" = true ]; then
 	echo ""
 	
 	# *** languages core ***
-	echo "Search for languages core update..."
-	list_lang_core_upd=$(wp language core list --update=available --all --format=csv)
+	echo -e "${bold}Search for languages core update...${reset}"
+	wp language core list --update=available --all --format=table
+	list_lang_core_upd=$(wp language core list --update=available --all --format=table)
 	
-	lang_core_outdated=$(echo "$list_lang_core_upd" | sed '1d' | awk '{print $1}')
+	lang_core_outdated=$(echo "$list_lang_core_upd" | sed '/^+/d' | sed '1d' | awk '{print $1}')
 	if [ -z "$lang_core_outdated" ]; then
 		echo "No languages core update available !"
 	else
@@ -123,12 +142,13 @@ if [ "$test" = true ]; then
 		done
 	fi
 	echo ""
-	
+
+
 	# *** languages plugin ***
-	echo "Search for languages plugins update..."
-	list_lang_plugin_upd=$(wp language plugin list --update=available --all --format=csv)
-	
-	lang_plugin_outdated=$(echo "$list_lang_plugin_upd" | sed '1d' | awk '{print $1}')
+	echo -e "${bold}Search for languages plugins update...${reset}"
+	wp language plugin list --update=available --all --format=table
+	list_lang_plugin_upd=$(wp language plugin list --update=available --all --format=table)
+	lang_plugin_outdated=$(echo "$list_lang_plugin_upd" | sed '/^+/d' | sed '1d' | awk '{print $1}')
 	if [ -z "$lang_plugin_outdated" ]; then
 		echo "No languages plugins update available !"
 	else
@@ -140,10 +160,11 @@ if [ "$test" = true ]; then
 	echo ""
 	
 	# *** languages theme ***
-	echo "Search for languages themes update..."
-	list_lang_theme_upd=$(wp language theme list --update=available --all --format=csv)
+	echo -e "${bold}Search for languages themes update...${reset}"
+	wp language theme list --update=available --all --format=table
+	list_lang_theme_upd=$(wp language theme list --update=available --all --format=table)
 	
-	lang_theme_outdated=$(echo "$list_lang_theme_upd" | sed '1d' | awk '{print $1}')
+	lang_theme_outdated=$(echo "$list_lang_theme_upd" | sed '/^+/d' | sed '1d' | awk '{print $1}')
 	if [ -z "$lang_theme_outdated" ]; then
 		echo "No languages themes update available !"
 	else
@@ -153,9 +174,10 @@ if [ "$test" = true ]; then
 		done
 	fi
 
-fi	
+#fi	
 echo ""
 
+#END_COMMENT2
 
 # *** Maintenance ***
 
@@ -164,19 +186,20 @@ if [ "$maint" = true ]; then
     echo -e "\n\033[1;31mMaintenance...\033[0m"
 
     #On récupère la liste des packages installés
+    echo -e "\n\033[1mInstalled package list...\033[0m"
     packages_list=$(wp package list | sed -n '1!p' | awk '{print $1'})
-echo "$packages_list"
+	echo "$packages_list"
 
     if [ "$transient" = true ]; then
         echo -e "\n\033[1mRemove expired transients...\033[0m"
 
-        wp transient delete --expired --path=$path
+        wp transient delete --expired --path=$rep_wordpress
     fi
 
     if [ "$database" = true ]; then
         echo -e "\n\033[1mDatabase maintenance...\033[0m"
 
-        wp db optimize --quiet --path=$path
+        wp db optimize --quiet --path=$rep_wordpress
         
         #wp db repair --quiet --path=$path
     fi
@@ -187,19 +210,19 @@ echo "$packages_list"
         DATE=`date +%Y-%m-%d_%H:%M:%S`
         file="wp-$blogname-$DATE.sql"
 
-        wp db export "$file" --add-drop-table --path=$path
+        wp db export "$file" --add-drop-table --path=$rep_wordpress
         mv "$file" "../$file"
     fi
 
     if [ "$removespam" = true ]; then
         echo -e "\n\033[1mRemove spam comments...\033[0m"
 
-        #spam=$($wp_exec comment list --status=spam --format=ids --path=$path)
+        spam=$(wp comment list --status=spam --format=ids --path=$rep_wordpress)
         echo "$spam"
         if [ -n "$spam" ]; then
         	echo "$spam"
             #wp comment delete "$spam" --path=$path
-            wp comment delete $($wp_exec comment list --status=spam --format=ids --path=$path) --path=$path --dry-run
+            wp comment delete $(wp comment list --status=spam --format=ids --path=$rep_wordpress) --path=$rep_wordpress --dry-run
         else
             echo "No SPAM"
         fi
@@ -208,9 +231,9 @@ echo "$packages_list"
     if [ "$emptytrash" = true ]; then
        echo -e "\n\033[1mRemove comments in trash and comment from deleted posts...\033[0m"
 
-        trashed=$(wp comment list --status=trash,post-trashed --format=ids --path=$path) 
+        trashed=$(wp comment list --status=trash,post-trashed --format=ids --path=$rep_wordpress) 
         if [ -n "$trashed" ]; then
-            wp comment delete "$trashed" --path=$path
+            wp comment delete "$trashed" --path=$rep_wordpress
             echo $?
             
         else
@@ -221,7 +244,7 @@ echo "$packages_list"
     #if [[ "$($wp_exec cli has-command 'revisions' --path=$path && echo $?)" -eq 0 ]] && [[ "$rev" = true ]]; then
     if [[ -n "$(echo "$packages_list" | awk '$1 ~ /trepmal\/wp-revisions-cli/')" ]] && [[ "$rev" = true ]]; then
         echo -e "\n\033[1mKeep only $revisions revisions...\033[0m"
-        wp revisions clean $revisions --path=$path --dry-run
+        wp revisions clean $revisions --path=$rep_wordpress --dry-run
 
     elif [ "$rev" = true ]; then
     	printf "Voulez-vous installer wp-revisions-cli ? (y/n)"
@@ -239,18 +262,18 @@ echo "$packages_list"
     if [ "$back" = true ]; then
         echo -e "\n\033[1mTrackback list...\033[0m"
 
-        trackback=$(wp comment list --type=trackback --format=ids --path=$path)
+        trackback=$(wp comment list --type=trackback --format=ids --path=$rep_wordpress)
         if [ -n "$trackback" ]; then
-            wp comment delete "$trackback" --path=$path --dry-run
+            wp comment delete "$trackback" --path=$rep_wordpress --dry-run
         else
             echo "No trackback post"
         fi
 
         echo -e "\n\033[1mPingback list...\033[0m"
 
-        pingback=$(wp comment list --type=pingback --format=ids --path=$path)
+        pingback=$(wp comment list --type=pingback --format=ids --path=$rep_wordpress)
         if [ -n "$pingback" ]; then
-            wp comment delete "$pingback" --path=$path --dry-run
+            wp comment delete "$pingback" --path=$rep_wordpress --dry-run
         else
             echo "No pingback post"
         fi
@@ -262,12 +285,12 @@ echo "$packages_list"
 
     if [[ -n "$(echo "$packages_list" | awk '$1 ~ /wp-cli\/admin-command/')" ]] && [[ "$admin" = true ]]; then
         echo -e "\n\033[1mOpen wp-admin/ page in browser...\033[0m"
-        wp admin --path=$path
+        wp admin --path=$rep_wordpress
     elif [ "$admin" = true ]; then
         wp package install wp-cli/admin-command
         echo ""
         echo -e "\n\033[1mOpen wp-admin/ page in browser...\033[0m"
-        wp admin --path=$path
+        wp admin --path=$rep_wordpress
     fi
 
 

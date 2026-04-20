@@ -28,7 +28,7 @@ update_node=true
 
 # Local install:
 # run 'npm init' in local_path to create package.json
-local_path=$HOME/Sites/
+local_path=$HOME/Sites
 
 # Add module to the do_not_update array for prevent to update.
 #declare -a do_not_update=()
@@ -53,6 +53,7 @@ box="\033[1;41m"
 redbold="\033[1;31m"
 redbox="\033[1;41m"
 reset="\033[0m"
+
 
 upd_nvm() {(
   cd "$NVM_DIR"
@@ -226,9 +227,9 @@ if find "$local_path/node_modules" -mindepth 1 -maxdepth 1 | read; then
 		while IFS= read -r i
 		do
 		 package=$(echo "$i" | awk '{print $1}')
-		 current=$(echo "$i" | awk '{print $2}')
-		 wanted=$(echo "$i" | awk '{print $3}')
-		 latest=$(echo "$i" | awk '{print $4}')
+		 current=$(echo "$i" | awk '{print $2}')	# 2.8.3
+		 wanted=$(echo "$i" | awk '{print $3}')		# 2.8.3
+		 latest=$(echo "$i" | awk '{print $4}')		# 2.9.0-beta.1
 		 
 		 j=$(echo "$current" | awk -F "." '{print $1}')
 		 k=$(echo "$latest" | awk -F "." '{print $1}')
@@ -393,6 +394,8 @@ if [ "$doctor" = true ]; then
 		old_node=$(echo "$no" | awk '{print $5}' | sed 's/.//;s/.$//')
 			
 		if [ "$new_node" != "$old_node" ] && [ "$update_node" = true ]; then
+		
+: <<'END_COMMENT'
 
 			b=$(echo -e "\nCurrent node: v$old_node. Update ${bold}node${reset} to ${bold}v$new_node${reset} [y/n] ? ")
 			read -e -p "$b" rep2
@@ -407,6 +410,30 @@ if [ "$doctor" = true ]; then
 				echo -e "\n${bold}Reinstall packages from v$old_node...${reset}"
 				nvm reinstall-packages "$old_node"
 			fi
+			
+END_COMMENT
+		
+			echo -e "\nCurrent node: v$old_node. Press \"u\" to update ${bold}node${reset} to ${bold}v$new_node${reset}"
+			
+			#read -sn1 c && printf "You Pressed: %s\n" "$c"
+			
+	
+			read -sn1 c
+			if [ "$c" == "u" ] || [ "$c" == "U" ]; then
+				sleep 3
+
+				. $HOME/.nvm/nvm.sh
+				echo -e "\n${bold}Updating node to v$new_node...${reset}"
+				nvm install "$new_node"
+				echo -e "\n${bold}Updating npm...${reset}"
+				npm --location=global install npm
+				#
+				nvm use $new_node
+				echo -e "\n${bold}Reinstall packages from v$old_node...${reset}"
+				nvm reinstall-packages "$old_node"
+			fi
+
+			
 		fi
 	fi
 

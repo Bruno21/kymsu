@@ -246,7 +246,7 @@ y=$(find . -type f -name 'Brewfile*' -mtime +10 -maxdepth 1)
 if [ -n "$y" ]; then
 	nb=$(echo "$y" | wc -l)
 	echo "$y" | xargs rm
-	[ $? ] && echo -e "\033[93m$nb Brewfile_*\033[0m files removed !"
+	[ $? ] && echo -e "\033[93m$nb Brewfile_*\033[0m files removed !\n\n"
 fi
 
 #iconv -f macroman -t utf-8  Installed.md > Installed-utf8.md

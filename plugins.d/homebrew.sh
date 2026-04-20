@@ -12,7 +12,7 @@ display_info=true
 
 # Casks don't have pinned cask. So add Cask to the do_not_update array for prevent to update.
 # declare -a do_not_update=("xnconvert" "yate")
-declare -a cask_to_not_update=()
+declare -a cask_to_not_update=(ff-works)
 
 # No distract mode (no user interaction)(Casks with 'latest' version number won't be updated)
 #[[ $@ =~ "--nodistract" ]] && no_distract=true || no_distract=false
