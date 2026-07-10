@@ -276,6 +276,7 @@ if [ "$display_info" = true ]; then
 	lg=$(npm list --location=global --depth=0 --long | grep -v 'git$')
 	x=""
 	q=""
+	all_global_pkgs=""
 
 	while IFS= read -r line
 	do 
@@ -287,6 +288,8 @@ if [ "$display_info" = true ]; then
 			q=$(echo "$info_pkg" | sed "s/^/|   /")
 			#echo "$q"
 			x+="${bold}${line}${reset}\n"
+			
+			all_global_pkgs="$all_global_pkgs $global_pkg"
 
 		elif [[ ${#line} > 2 ]]; then 
 			#echo -e "${line}"
@@ -299,6 +302,7 @@ else
 fi
 
 echo -e "$x"
+#echo "$all_global_pkgs"
 
 #Packages update	
 echo -e "\n${underline}🌿 Search for global packages update...${reset}\n"
@@ -430,7 +434,9 @@ END_COMMENT
 				#
 				nvm use $new_node
 				echo -e "\n${bold}Reinstall packages from v$old_node...${reset}"
-				nvm reinstall-packages "$old_node"
+				# nvm reinstall-packages bloque sur thumbsup (better-sql)
+				#nvm reinstall-packages "$old_node"
+				npm install -g "$all_global_pkgs"
 			fi
 
 			
