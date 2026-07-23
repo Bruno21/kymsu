@@ -3,6 +3,7 @@
 italic="\033[3m"
 underline="\033[4m"
 bold="\033[1m"
+yellow="\033[0;33m"
 reset="\033[0m"
 
 KYMSU_PATH=`pwd`
@@ -27,6 +28,16 @@ rm -rf  $pluginpath
 # Install new plugins
 echo -e "Copying plugins in ${bold}$pluginpath${reset} ..."
 cp -R "${KYMSU_PATH}/plugins.d" $HOME/.kymsu
+
+for F in $HOME/.kymsu/plugins.d/*.sh
+do
+	q=$(xattr -l "$F" | grep "com.apple.quarantine") 
+		
+	if [ "$q" != "" ]; then
+		echo -e "${yellow}Clear quarantine flag...${reset}"
+		xattr -d com.apple.quarantine "$F"
+	fi
+done
 
 if [ -n "$disabled" ]; then
 
