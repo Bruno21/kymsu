@@ -27,7 +27,12 @@ if hash rustup 2>/dev/null; then
 	#check=$(echo "$check" | sed 's/Up\ to\ date/${bold}Up\ to\ dateee${reset}/g')
 	#echo ${check/Up to date/\{greenbold\}Up to dateee\{reset\}\}
 	#Update available
-	echo -e "$check"
+	echo -e "$check\n"
+	
+	if [[ "$check" =~ "update\ available" ]]; then 
+		echo -e "🦀 ${underline}rustup update${reset}\n"
+		rustup update
+	fi
 	
 	#if [[ ! $(which rustup-init) =~ "homebrew" ]]; then 
     #	echo -e "\n🦀 ${underline}Upgrading rustup itself !${reset}\n"
