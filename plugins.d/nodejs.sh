@@ -434,9 +434,15 @@ END_COMMENT
 				#
 				nvm use $new_node
 				echo -e "\n${bold}Reinstall packages from v$old_node...${reset}"
+				echo "$all_global_pkgs"
 				# nvm reinstall-packages bloque sur thumbsup (better-sql)
 				#nvm reinstall-packages "$old_node"
-				npm install -g "$all_global_pkgs"
+				
+				for i in "$all_global_pkgs"
+				do
+					echo "--$i--"
+				done
+				#npm install -g "$all_global_pkgs"
 			fi
 
 			

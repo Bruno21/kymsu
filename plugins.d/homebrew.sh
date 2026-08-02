@@ -3,6 +3,8 @@
 # Homebrew plugin for KYMSU
 # https://github.com/welcoMattic/kymsu
 
+source config.shlib; # load the config library functions
+
 ###############################################################################################
 #
 # Settings:
@@ -12,7 +14,10 @@ display_info=true
 
 # Casks don't have pinned cask. So add Cask to the do_not_update array for prevent to update.
 # declare -a do_not_update=("xnconvert" "yate")
-declare -a cask_to_not_update=(ff-works)
+#declare -a cask_to_not_update=(ff-works)
+
+pinned_cask="$(config_get pinned_cask)"
+declare -a cask_to_not_update=($pinned_cask)
 
 # No distract mode (no user interaction)(Casks with 'latest' version number won't be updated)
 #[[ $@ =~ "--nodistract" ]] && no_distract=true || no_distract=false
@@ -34,7 +39,6 @@ latest=false
 
 : <<'END_COMMENT'
 blabla
-END_COMMENT
 
 italic="\033[3m"
 underline="\033[4m"
@@ -44,6 +48,17 @@ red="\033[1;31m"
 bold="\033[1m"
 box="\033[1;41m"
 reset="\033[0m"
+END_COMMENT
+
+italic="$(config_get italic)"
+underline="$(config_get underline)"
+ita_under="$(config_get ita_under)"
+bgd="$(config_get bgd)"
+red="$(config_get red)"
+bold="$(config_get bold)"
+box="$(config_get box)"
+reset="$(config_get reset)"
+
 
 command -v terminal-notifier >/dev/null 2>&1 || { echo -e "You shoud intall ${bold}terminal-notifier${reset} for notification ${italic}(brew install terminal-notifier)${reset}.\n"; }
 command -v jq >/dev/null 2>&1 || { echo -e "${bold}kymsu2${reset} require ${bold}jq${reset} but it's not installed.\nRun ${italic}(brew install jq)${reset}\nAborting..." >&2; exit 1; }
@@ -311,7 +326,7 @@ if (( ${#cask_to_not_update[@]} )); then
 	
 	echo -e "${underline}List of${reset} ${box} $nbp ${reset} ${underline}'do not update' casks:${reset}"
 	echo -e "${red}${cask_to_not_update[*]}${reset}"
-	echo -e "To remove an app from this list, you need to edit the ${italic}do_not_update${reset} array."
+	echo -e "To add/remove an app from this list, you need to edit the ${italic}pinned_cask${reset} variable in kymsu.cfg file."
 	echo ""
 
 	casks_not_pinned=""

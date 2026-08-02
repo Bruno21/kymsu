@@ -37,9 +37,18 @@ else
 fi
 
 current_timestamp=$(date +"%s")
-temps=$(( current_timestamp-last_update))
+temps=$(( current_timestamp-last_update ))
 
-if [ $(( temps-w)) -gt 0 ]; then
+echo "$w"
+# date +'%d-%m-%Y %H:%M:%S' -d @1658067929
+echo "$last_update"
+date +'%d-%m-%Y %H:%M:%S' -d @$last_update
+echo "$current_timestamp"
+date +'%d-%m-%Y %H:%M:%S' -d @$current_timestamp
+echo "$temps"
+
+
+if [ $(( temps-w )) -gt 0 ]; then
 	echo "🦄  KYMSU self update"
 	pushd "$(cat ~/.kymsu/path)" > /dev/null
 	#git pull
