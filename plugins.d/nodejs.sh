@@ -4,6 +4,8 @@
 # https://github.com/welcoMattic/kymsu
 #
 
+source config.shlib; # load the config library functions
+
 #########################################
 #
 # Settings:
@@ -29,17 +31,21 @@ update_node=true
 # Local install:
 # run 'npm init' in local_path to create package.json
 local_path=$HOME/Sites
+#local_path=$(config_get npm_local_path) # $HOME not evaluated
 
 # Add module to the do_not_update array for prevent to update.
 #declare -a do_not_update=()
 #declare -a do_not_update=("parso" "asgiref")
-declare -a do_not_update=("@squoosh/cli")
+#declare -a do_not_update=("@squoosh/cli")
+
+pinned_npm="$(config_get pinned_npm)"
+declare -a npm_do_not_update=($pinned_npm)
 
 #########################################
 
 : <<'END_COMMENT'
 blabla
-END_COMMENT
+
 
 italic="\033[3m"
 underline="\033[4m"
@@ -53,7 +59,20 @@ box="\033[1;41m"
 redbold="\033[1;31m"
 redbox="\033[1;41m"
 reset="\033[0m"
+END_COMMENT
 
+italic="$(config_get italic)"
+underline="$(config_get underline)"
+ita_under="$(config_get ita_under)"
+bgd="$(config_get bgd)"
+red="$(config_get red)"
+bold="$(config_get bold)"
+box="$(config_get box)"
+green="$(config_get green)"
+bold_ita="$(config_get bold_ita)"
+redbold="$(config_get redbold)"
+redbox="$(config_get redbox)"
+reset="$(config_get reset)"
 
 upd_nvm() {(
   cd "$NVM_DIR"
@@ -162,15 +181,15 @@ echo ""
 
 
 # Do not update packages
-if (( ${#do_not_update[@]} )); then
 
-	nbp=${#do_not_update[*]}
+if [ ${#npm_do_not_update[@]} -gt 0 ]; then
+
+	nbp="${#npm_do_not_update[@]}"
 	
 	echo -e "${underline}🌿  List of${reset} ${redbox} $nbp ${reset} ${underline}'do not update' packages:${reset}"
-	echo -e "${redbold}${do_not_update[*]}${reset}"
-	echo -e "To remove package from this list, you need to edit the ${italic}do_not_update${reset} array."
+	echo -e "${redbold}${npm_do_not_update[@]}${reset}"
+	echo -e "To remove package from this list, you need to edit the ${italic}pinned_npm${reset} variable in ${italic}kymsu.cfg${reset} file."
 	echo ""
-
 fi
 
 ##################
@@ -183,6 +202,8 @@ fi
 
 # Local folder exist and not empty (modules installed)
 #if [ -d "$local_path/node_modules" ] && [ -n "$(ls -A "$local_path/node_modules")" ]; then
+
+
 if find "$local_path/node_modules" -mindepth 1 -maxdepth 1 | read; then
 	
 	echo -e "${underline}🌿  Local installed scripts:${reset}"
@@ -234,7 +255,7 @@ if find "$local_path/node_modules" -mindepth 1 -maxdepth 1 | read; then
 		 j=$(echo "$current" | awk -F "." '{print $1}')
 		 k=$(echo "$latest" | awk -F "." '{print $1}')
 		 
-		 if [[ ! " ${do_not_update[@]} " =~ " ${package} " ]]; then
+		 if [[ ! " ${npm_do_not_update[@]} " =~ " ${package} " ]]; then
 		 
 		 	# Update major version 1.x.y to 2.x.y
 			 if [ $current = $wanted ] && [ "$j" -lt "$k" ]; then
@@ -262,6 +283,8 @@ if find "$local_path/node_modules" -mindepth 1 -maxdepth 1 | read; then
 	else
 		echo -e "${italic}No local packages updates.${reset}"
 	fi
+else
+	echo -e "${italic}No local folder !${reset}"
 fi
 	
 echo ""
@@ -332,7 +355,7 @@ if [ -n "$glong_outdated" ]; then
 		vers=$(echo "$line" | awk '{print $4}')
 		outdated="$pkg@$vers"
 		
-		if [[ ! " ${do_not_update[@]} " =~ " ${pkg} " ]]; then
+		if [[ ! " ${npm_do_not_update[@]} " =~ " ${pkg} " ]]; then
 
 			# TEST
 			#version=$(echo "$line" | awk '{print $1 "@" $4}')
@@ -367,8 +390,8 @@ echo ""
 if [ "$doctor" = true ]; then
 	echo -e "${underline}🌿  The Doc is checking that everything is ok.${reset}\n"
 	#npm doctor
+	
 	doc=$(cd "$local_path" && npm doctor)
-
 
 	while IFS= read -r line
 	do 
