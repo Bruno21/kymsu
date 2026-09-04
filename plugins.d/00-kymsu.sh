@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-#PREF_FILE="$SCRIPT_DIR/kymsu.pref"
-#TEMP_FILE="$SCRIPT_DIR/kymsu.pref.tmp"
-PREF_FILE="$HOME/.kymsu/plugins.d/kymsu.pref"
-TEMP_FILE="$HOME/.kymsu/plugins.d/kymsu.pref.tmp"
+PREF_FILE="$HOME/.kymsu/plugins.d/kymsu.cfg"
+TEMP_FILE="$HOME/.kymsu/plugins.d/kymsu.cfg.tmp"
 
 # 5m	5 minutes
 # 2h 	2 hours
@@ -39,16 +37,18 @@ fi
 current_timestamp=$(date +"%s")
 temps=$(( current_timestamp-last_update ))
 
-echo "$w"
-# date +'%d-%m-%Y %H:%M:%S' -d @1658067929
-echo "$last_update"
-date +'%d-%m-%Y %H:%M:%S' -d @$last_update
-echo "$current_timestamp"
-date +'%d-%m-%Y %H:%M:%S' -d @$current_timestamp
-echo "$temps"
+last_upd=$(date +'%d-%m-%Y %H:%M:%S' -d @$last_update)
+echo "Last update: $last_upd"
+
+current=$(date +'%d-%m-%Y %H:%M:%S' -d @$current_timestamp)
+echo "Current: $current"
+
+next_update=$(( last_update+w ))
+next_upd=$(date +'%d-%m-%Y %H:%M:%S' -d @$next_update)
+echo -e "Next update: $next_upd\n"
 
 
-if [ $(( temps-w )) -gt 0 ]; then
+if [ $(( temps-w )) -gt 0 ]; then	# more than $update_interval
 	echo "🦄  KYMSU self update"
 	pushd "$(cat ~/.kymsu/path)" > /dev/null
 	#git pull
