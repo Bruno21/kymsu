@@ -6,6 +6,10 @@ bold="\033[1m"
 yellow="\033[0;33m"
 reset="\033[0m"
 
+source plugins.d/config.shlib; # load the config library functions
+PREF_FILE="$HOME/.kymsu/plugins.d/kymsu.cfg"
+TEMP_FILE="$HOME/.kymsu/plugins.d/kymsu.cfg.tmp"
+
 KYMSU_PATH=`pwd`
 
 # Make Kymsu accessible in PATH
@@ -38,6 +42,10 @@ do
 		xattr -d com.apple.quarantine "$F"
 	fi
 done
+
+current_timestamp=$(date +"%s")
+awk -F'=' -v OFS='=' -v newval="$current_timestamp" '/^last.update/{$2=newval;print;next}1' $PREF_FILE > $TEMP_FILE
+mv $TEMP_FILE $PREF_FILE
 
 if [ -n "$disabled" ]; then
 

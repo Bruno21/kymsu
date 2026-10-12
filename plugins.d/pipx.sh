@@ -2,6 +2,9 @@
 
 # pipx plugin for KYMSU
 # https://github.com/welcoMattic/kymsu
+#
+
+source config.shlib; # load the config library functions
 
 # No distract mode (no user interaction)
 [[ $@ =~ "-nodistract" || $@ =~ "-n" ]] && no_distract=true || no_distract=false
@@ -12,14 +15,18 @@ injected=true
 # Add module to the do_not_update array for prevent to update.
 #declare -a do_not_update=()
 
-italic="\033[3m"
-underline="\033[4m"
-ita_under="\033[3;4m"
-bgd="\033[1;4;31m"
-red="\033[1;31m"
-bold="\033[1m"
-box="\033[1;41m"
-reset="\033[0m"
+italic="$(config_get italic)"
+underline="$(config_get underline)"
+ita_under="$(config_get ita_under)"
+bgd="$(config_get bgd)"
+red="$(config_get red)"
+bold="$(config_get bold)"
+box="$(config_get box)"
+green="$(config_get green)"
+bold_ita="$(config_get bold_ita)"
+redbold="$(config_get redbold)"
+redbox="$(config_get redbox)"
+reset="$(config_get reset)"
 
 
 echo -e "${bold}🛠  pipx (Python 3) ${reset}"
@@ -57,7 +64,9 @@ while IFS= read -r line; do
 		infoPkg=$(curl -s https://pypi.org/pypi/${pyPkgName}/json | jq -r '.info')
 		summaryPkg=$(echo "$infoPkg"  | jq -r '.summary')
 		srcUrl=$(echo "$infoPkg"  | jq -r '.project_urls' | jq -r '.Homepage')
-		
+		if [ "$srcUrl" == "null" ]; then
+			srcUrl=$(echo "$infoPkg"  | jq -r '.project_urls' | jq -r '.Source')
+		fi
 		inf="$summaryPkg\n""   ${italic}$srcUrl${reset}"	
 		echo -e "\n${bold}${line}${reset}\n   ${inf}"	
 	else

@@ -1,8 +1,19 @@
 #!/usr/bin/env bash
 
+source config.shlib; # load the config library functions
+
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 PREF_FILE="$HOME/.kymsu/plugins.d/kymsu.cfg"
 TEMP_FILE="$HOME/.kymsu/plugins.d/kymsu.cfg.tmp"
+
+secondes_en_duree() {
+    local total=$1
+    local jours=$((total / 86400))
+    local heures=$(( (total % 86400) / 3600 ))
+    local minutes=$(( (total % 3600) / 60 ))
+    local secs=$((total % 60))
+    printf "%dj %dh %dm %ds\n" "$jours" "$heures" "$minutes" "$secs"
+}
 
 # 5m	5 minutes
 # 2h 	2 hours
@@ -28,24 +39,33 @@ y=$(( ${#update_interval}-1 ))
 nb=${update_interval:0:$y}
 w=$(( unite*nb ))
 
-if [ -f $PREF_FILE ]; then
-	last_update=$(cat $PREF_FILE | grep "last.update" | awk -F"=" '{print $2}' )
-else
-	last_update=0
-fi
-
 current_timestamp=$(date +"%s")
+
+lu="$(config_get last.update)"
+#echo ${#lu} # 0 ou 10
+
+if [ -n "$lu" ]; then
+	last_update="$lu"
+else
+	last_update=$current_timestamp
+	awk -F'=' -v OFS='=' -v newval="$current_timestamp" '/^last.update/{$2=newval;print;next}1' $PREF_FILE > $TEMP_FILE
+	mv $TEMP_FILE $PREF_FILE
+fi 
+
 temps=$(( current_timestamp-last_update ))
 
 last_upd=$(date +'%d-%m-%Y %H:%M:%S' -d @$last_update)
 echo "Last update: $last_upd"
 
 current=$(date +'%d-%m-%Y %H:%M:%S' -d @$current_timestamp)
-echo "Current: $current"
+#echo "Current: $current"
 
 next_update=$(( last_update+w ))
 next_upd=$(date +'%d-%m-%Y %H:%M:%S' -d @$next_update)
-echo -e "Next update: $next_upd\n"
+
+duree=$(( next_update-current_timestamp ))
+q=$(secondes_en_duree $duree)
+echo -e "Next update: $next_upd (in $q)\n"
 
 
 if [ $(( temps-w )) -gt 0 ]; then	# more than $update_interval

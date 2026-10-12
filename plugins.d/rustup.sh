@@ -29,7 +29,7 @@ if hash rustup 2>/dev/null; then
 	#Update available
 	echo -e "$check\n"
 	
-	if [[ "$check" =~ "update\ available" ]]; then 
+	if [[ "$check" =~ "update available" ]]; then 
 		echo -e "🦀 ${underline}rustup update${reset}\n"
 		rustup update
 	fi
