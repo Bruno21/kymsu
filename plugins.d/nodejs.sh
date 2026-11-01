@@ -29,7 +29,7 @@ pinned_npm="$(config_get pinned_npm)"
 read -r -a npm_do_not_update <<< "$pinned_npm"
 
 # No distract mode (no user interaction)
-# kymsu2 -s nodejs.sh -n => no_distract=true (false sans l'option)
+# kymsu2 -s nodejs.sh -n => no_distract=true (false without the option)
 
 # Set ls_color to '' for output nvm list in default colors, else '--no-colors'
 # ls_color='--no-colors'
@@ -65,8 +65,8 @@ while getopts "phncs:a-:" opt; do
 			nodistract) no_distract=true;;
 			*) ;;
 		esac;;
-		c|p|h|s|a) ;;	# gérées par kymsu2, ignorées ici
-		*) ;;			# option inconnue : ignorée
+		c|p|h|s|a) ;;	# handled by kymsu2, ignored here
+		*) ;;			# unknown option: ignored
 	esac
 done
 
@@ -175,14 +175,14 @@ fi
 echo -e "${bold}🌿  npm ${reset}"
 echo ""
 
-# version courante de node.js
+# current node.js version
 node_v=$(node -v)
 node_ins=$(command -v node)
 echo -e "${underline}🌿  node.js:${reset}"
 echo -e "     - current version: ${italic}$node_v${reset}"
 echo -e "     - install path: ${italic}$node_ins${reset}"
 
-# version courante de npm
+# current npm version
 npm_v=$(npm -v)
 npm_ins=$(command -v npm)
 old_npm="$npm_v"
@@ -199,20 +199,20 @@ if ! curl -fsI --max-time 5 -o /dev/null https://www.apple.com; then
 fi
 
 
-# version installée de nvm par Homebrew
+# nvm version installed by Homebrew
 # nvm_installed=$(brew info nvm | grep Cellar)
 
 # nvm from github
 if [ -f "$NVM_DIR/nvm.sh" ]; then
 	#source "$NVM_DIR/nvm.sh"
 
-	# version courante de nvm
+	# current nvm version
 	nvm_v=$(nvm --version)
 
 	echo -e "\n${underline}🌿  nvm install is:${reset} $NVM_DIR/nvm.sh"
 	echo "     - nvm $nvm_v is installed from https://github.com/nvm-sh/nvm"
 
-	# version actuelle de nvm sur GitHub
+	# latest nvm version on GitHub
 	version_nvm=$(latest_nvm_version)
 
 	if [ -n "$version_nvm" ]; then
@@ -238,13 +238,13 @@ elif brew_nvm="$(brew --prefix nvm 2>/dev/null)/nvm.sh"; [ -f "$brew_nvm" ]; the
 	# shellcheck source=/dev/null
 	source "$brew_nvm"
 
-	# version courante de nvm
+	# current nvm version
 	nvm_v=$(nvm --version)
 
 	echo -e "\n${underline}🌿  nvm install is:${reset} $brew_nvm"
 	echo "nvm $nvm_v is installed from homebrew"
 
-	# version actuelle de nvm sur GitHub
+	# latest nvm version on GitHub
 	version_nvm=$(latest_nvm_version)
 
 	if [ -n "$version_nvm" ] && [ "$nvm_v" != "$version_nvm" ]; then
@@ -562,8 +562,8 @@ if [ "$doctor" = true ]; then
 					nvm use "$new_node"
 					echo -e "\n${bold}Reinstall packages from v$old_node...${reset}"
 					echo "$all_global_pkgs"
-					# nvm reinstall-packages bloque sur thumbsup/thumbsup (better-sql)
-					# thumbsup est un fork installé depuis GitHub : voir pinned_npm
+					# nvm reinstall-packages hangs on thumbsup/thumbsup (better-sql)
+					# thumbsup is a fork installed from GitHub: see pinned_npm
 					#nvm reinstall-packages "$old_node"
 
 					for i in $all_global_pkgs
