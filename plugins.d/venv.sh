@@ -3,99 +3,111 @@
 # Venv plugin for KYMSU
 # https://github.com/welcoMattic/kymsu
 
-italic="\033[3m"
-underline="\033[4m"
-ita_under="\033[3;4m"
-bgd="\033[1;4;31m"
-red="\033[1;31m"
-bold="\033[1m"
-box="\033[1;41m"
-reset="\033[0m"
 
-###############################################################################################
+#########################################
 #
 # Settings:
+#  - use kymsu.cfg for configuring options
+
+#SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPTS_DIR="${SCRIPTS_DIR:-$HOME/.kymsu/plugins.d}"
+
+if [ ! -r "$SCRIPTS_DIR/config.shlib" ]; then
+	echo "config.shlib not found in $SCRIPTS_DIR (set SCRIPTS_DIR or check the KYMSU installation)." >&2
+	exit 1
+fi
+# shellcheck source=/dev/null
+source "$SCRIPTS_DIR/config.shlib"	# load the config library functions
+
+
+bold="$(config_get bold)"
+underline="$(config_get underline)"
+red="$(config_get red)"
+reset="$(config_get reset)"
 
 # Liste des apps:
 # 	- le venv doit avoir le même nom que l'app
-declare -a apps=("mkdocs")
+apps=("mkdocs")
 
 # Liste des extensions pour Mkdocs
 mkdocs_ext=("mkdocs-material" "mkdocs-material-extensions" "mkdocs-git-revision-date-localized-plugin" "mkdocs-minify-plugin" "fontawesome_markdown" "mkdocs-pdf-export-plugin")
 
+declare -A before
+
+#########################################
+
+
 echo -e "${bold}🐍  Update apps in Python virtuals environments ${reset}\n"
 
-# Où sont stockés les environnements virtuels:
-# macos: silverbook / airbook
-if [[ "$OSTYPE" == "darwin"* ]]; then
-	v=$HOME/Documents/venv
+# Emplacement des venv selon l'OS
+case "$OSTYPE" in
+	darwin*)          v="$HOME/Documents/venv" ;;   # macOS
+	linux-gnueabihf*) v="$HOME/venv" ;;             # Raspberry Pi
+	linux-gnu*)       v="$HOME/Applications" ;;     # Solus, etc.
+	*)
+		echo -e "${red}Unsupported OS: $OSTYPE${reset}"
+		exit 1
+		;;
+esac
 
-# rpi4: linux_gnueabihf
-# rpi3:
-# solus: linux-gnu
-
-elif [[ "$OSTYPE" == "linux_gnu" ]]; then
-	v=$HOME/Applications
-
-elif [[ "$OSTYPE" == "linux_gnueabihf" ]]; then
-	v=$HOME/venv
-fi
-
-curl -Is https://www.google.com | head -1 | grep 200 1>/dev/null
-if [[ $? -eq 1 ]]; then
-	echo -e "\n${red}No Internet connection !${reset}"
-	echo -e "Exit !"
-	exit 1
+# Internet connection test
+if ! curl -fsI --max-time 5 -o /dev/null https://www.apple.com; then
+  echo -e "\n${red}No Internet connection !${reset}"
+  echo -e "Exit !"
+  exit 1
 fi
 
 echo -e "Venv directory: $v\n"
-################################################################################################
 
-for app in ${apps[*]}
+for app in "${apps[@]}"
 do
-	echo -e "${bold}Update $app${reset}";
-	cd "$v/$app"
+	echo -e "${bold}Update $app${reset}"
 
+	if [[ ! -f "$v/$app/bin/activate" ]]; then
+		echo -e "${red}Venv not found: $v/$app${reset}\n"
+		continue
+	fi
+
+	pushd "$v/$app" >/dev/null || continue
+	# shellcheck source=/dev/null
 	source bin/activate
-	python3 -V
-	pip3 install -U pip setuptools
-	
-	pip3 install -U "$app"
-	ret=$?
-	
-	# pas d'update: ret=0
-	#[ $ret -eq 0 ] && echo -e "${underline}\nNo update available !\n${reset}"
 
-	if [ $ret -eq 0 ]; then
-		echo -e "${underline}\nNo update available !\n${reset}"
-	fi
-	
-	info=$(pip3 show "$app")
-	l1=$(echo "$info" | sed -n '1p')
-	l1="\\\033[4m$l1\\\033[0m"
-	info=$(echo "$info" | sed "1s/.*/$l1/")
-	echo -e "$info"
-	
-<<COMMENT
-	# Update all modules:
-	pip_outdated=$(pip3 list --outdated --format columns)
-	upd=$(echo "$pip_outdated" | sed '1,2d' | awk '{print $1}')
-	outdated=""
-	for i in $upd
-	do
-		outdated+="$i "
+	python -V
+	python -m pip install -U pip setuptools
+
+	pkgs=("$app")
+	[[ "$app" == "mkdocs" ]] && pkgs+=("${mkdocs_ext[@]}")
+
+	before=()
+	# Versions avant
+	for p in "${pkgs[@]}"; do
+		before[$p]=$(python -m pip show "$p" 2>/dev/null | awk '/^Version:/ {print $2}')
 	done
-	outdated=$(echo "$outdated" | sed 's/.$//')
-COMMENT
-	
-	# Update mkdocs plugins & themes:
-	if [ $app == "mkdocs" ]; then
-		for i in ${mkdocs_ext[*]}
-		do
-			echo -e "\n${bold}Update $i:${reset}" && pip3 install -U $i
+
+	if python -m pip install -U "${pkgs[@]}"; then
+		echo ""
+		for p in "${pkgs[@]}"; do
+			after=$(python -m pip show "$p" 2>/dev/null | awk '/^Version:/ {print $2}')
+			if [[ -z "${before[$p]}" ]]; then
+				echo -e "${bold}$p${reset}: installed ($after)"
+			elif [[ "${before[$p]}" != "$after" ]]; then
+				echo -e "${bold}$p${reset}: ${before[$p]} → $after"
+			else
+				echo -e "${underline}$p${reset}: up to date ($after)"
+			fi
 		done
+		echo ""
+	else
+		echo -e "${red}Update failed for $app${reset}"
 	fi
-	deactivate
 	
+	# Résumé : première ligne soulignée
+	info=$(python -m pip show "$app")
+	echo -e "${underline}$(sed -n '1p' <<<"$info")${reset}"
+	sed '1d' <<<"$info"
+
+	deactivate
+	popd >/dev/null || true
 	echo ""
+
 done
