@@ -93,7 +93,9 @@ cd "$SCRIPTS_DIR" || exit 1
 echo "Please, grab a ☕️, KYMSU keep your working environment up to date!"
 echo ""
 
-while IFS= read -r script; do
+# The list of plugins is read on fd 3, not on stdin: the plugins keep the terminal as stdin
+# (otherwise their "read" would read the list of plugins instead of the keyboard)
+while IFS= read -r -u 3 script; do
     # le $@ permet de passer à chaque script les arguments passés à *ce* script
   	"$script" "$@"
-done <<< "$list_plugins"
+done 3<<< "$list_plugins"

@@ -53,6 +53,7 @@ red="$(config_get red)"
 redbox="$(config_get redbox)"
 reset="$(config_get reset)"
 
+
 ###############################################################################################
 #
 # Require software (brew install):
@@ -248,6 +249,8 @@ if [ -n "$upd_pkg_notpinned" ]; then
 	echo -e "\n🍺 ${underline}Updating packages...${reset}\n"
 
 	[ -n "$upd_pkg_pinned" ] && echo -e "${red}Pinned: $upd_pkg_pinned . It won't be updated!${reset}\n"
+
+echo "$no_distract"
 
 	if [ "$no_distract" = false ]; then
 		a=$(echo -e "Do you wanna run ${bold}brew upgrade $upd_pkg_notpinned${reset} ? (y/n/a) ")
