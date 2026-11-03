@@ -19,7 +19,7 @@ function showHelp() {
   echo "   -h, --help         display this help"
   echo "   -n, --nodistract   no distract mode (no user interaction)"
   echo "   -c, --cleanup      removing any older versions of installed formulae and clearing old downloads from the Homebrew download-cache"
-  #echo "   --npm_cleanup  cleaning npm cache"
+  echo "   -m, --modules      activate / deactivate plugins"
   echo "   -p, --pref         open configuration file kymsu.cfg in your editor"
   echo "   -s <script>        run only the script given in argument"
   echo "   -a, --all          run all scripts (by default, all except those start by _)"
@@ -31,17 +31,45 @@ function showHelp() {
 #  exit 0
 }
 
+activate_plugins() {
+	local f i rep
+
+	echo -e "\n${bold}Activate / Deactivate plugins${reset}\n"
+
+	for f in "$SCRIPTS_DIR"/*.sh; do
+		i="${f##*/}"
+		[[ "$i" == 00* || "$i" == _* ]] && continue
+
+		read -r -p "$(echo -e "Do you want to deactivate ${bold}$i${reset} ? [y/n] ")" rep
+		if [[ "${rep,,}" == "y" ]]; then
+			mv "$f" "$SCRIPTS_DIR/_$i" && echo -e "${bold}$i${reset} deactivated !"
+		fi
+	done
+
+	echo -e "\n${bold}Disabled plugins:${reset}"
+	for f in "$SCRIPTS_DIR"/_*.sh; do
+		[[ -e "$f" ]] || continue
+		i="${f##*/}"
+
+		read -r -p "$(echo -e "Do you want to re-enable ${bold}${i#_}${reset} ? [y/n] ")" rep
+		if [[ "${rep,,}" == "y" ]]; then
+			mv "$f" "$SCRIPTS_DIR/${i#_}" && echo -e "${bold}${i#_}${reset} enabled !"
+		fi
+	done
+}
+
 function preferences() {
 	"${EDITOR:-vi}" "$SCRIPTS_DIR/kymsu.cfg"
 }
 
 
-while getopts "phncs:a-:" opt
+while getopts "pmhncs:a-:" opt
 do
 	case $opt in
 		-) case "${OPTARG}" in
 			help) showHelp; exit;;
 			pref) preferences; exit;;
+			modules) activate_plugins; exit;;
 			nodistract) : ;;			# transmis aux plugins via "$@" => no_distract=true
 			cleanup) : ;;				# transmis aux plugins via "$@" => cleanup=true
 			all) all_plugins=true;;
@@ -50,6 +78,7 @@ do
 				exit 1;;
 			esac;;
 		p) preferences; exit;;
+		m) activate_plugins; exit;;
 		h) showHelp; exit;;
 		n) : ;;							# transmis aux plugins via "$@" => no_distract=true
 		c) : ;;							# transmis aux plugins via "$@" => cleanup=true

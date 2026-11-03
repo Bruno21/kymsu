@@ -56,23 +56,6 @@ npm_view_range='3,4p'
 # Number of parallel "npm view" requests when npm_display_info is true
 npm_view_jobs=8
 
-no_distract=false
-OPTIND=1
-while getopts "phncs:a-:" opt; do
-	case $opt in
-		n) no_distract=true;;
-		-) case "$OPTARG" in
-			nodistract) no_distract=true;;
-			*) ;;
-		esac;;
-		c|p|h|s|a) ;;	# handled by kymsu2, ignored here
-		*) ;;			# unknown option: ignored
-	esac
-done
-
-#########################################
-
-
 italic="$(config_get italic)"
 underline="$(config_get underline)"
 red="$(config_get red)"
@@ -85,6 +68,23 @@ reset="$(config_get reset)"
 cyan="$(config_get cyan)"
 [ -n "$bold_ita" ] || bold_ita='\033[1;3m'
 [ -n "$cyan" ] || cyan='\033[36m'	# fallback if kymsu.cfg / config.shlib has no "cyan"
+
+no_distract=false
+OPTIND=1
+while getopts "pmhncs:a-:" opt; do
+	case $opt in
+		n) no_distract=true;;
+		-) case "$OPTARG" in
+			nodistract) no_distract=true;;
+			*) ;;
+		esac;;
+		m|c|p|h|s|a) ;;	# handled by kymsu2, ignored here
+		*) ;;			# unknown option: ignored
+	esac
+done
+
+#########################################
+
 
 # npm outdated reports "git" / "linked" (or nothing) for packages that do not
 # come from the registry: they cannot be updated with "npm install pkg@version"

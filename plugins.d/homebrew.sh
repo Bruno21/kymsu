@@ -32,7 +32,7 @@ latest=false
 no_distract=false
 cleanup=false
 OPTIND=1
-while getopts "phncs:a-:" opt; do
+while getopts "pmhncs:a-:" opt; do
   case $opt in
     n) no_distract=true;;
     c) cleanup=true;;
@@ -41,7 +41,7 @@ while getopts "phncs:a-:" opt; do
          cleanup)    cleanup=true;;
          *) ;;
        esac;;
-    p|h|s|a) ;;   # gérées par kymsu2, ignorées ici
+    p|m|h|s|a) ;;   # gérées par kymsu2, ignorées ici
     *) ;;         # option inconnue : ignorée
   esac
 done
