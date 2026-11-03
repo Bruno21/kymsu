@@ -21,7 +21,8 @@ source "$SCRIPTS_DIR/config.shlib"	# load the config library functions
 dry_run="$(config_get gem_dry_run)"
 
 # Gems à ne pas mettre à jour (noms exacts, ex: 'bundler')
-do_not_update=(rdoc)
+gem_pinned="$(config_get gem_pinned)"
+read -r -a do_not_update <<< "$gem_pinned"
 
 # Couleurs
 bold="$(config_get bold)"

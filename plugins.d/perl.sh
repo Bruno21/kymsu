@@ -17,7 +17,8 @@ source "$SCRIPTS_DIR/config.shlib"	# load the config library functions
 dry_run="$(config_get perl_dry_run)"
 
 # Modules à ne pas mettre à jour (noms exacts, ex: 'Foo::Bar')
-do_not_update=('DBD::CSV' 'Alien::cmake3' 'App::Cpan' 'DBD::CSV' 'DBD::SQLite')
+perl_pinned="$(config_get perl_pinned)"
+read -r -a do_not_update <<< "$perl_pinned"
 
 # Couleurs
 bold="$(config_get bold)"
