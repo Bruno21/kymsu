@@ -1,89 +1,134 @@
 #!/usr/bin/env bash
 
-italic="\033[3m"
-underline="\033[4m"
-bold="\033[1m"
-yellow="\033[0;33m"
-reset="\033[0m"
+# install script for KYMSU
+# https://github.com/welcoMattic/kymsu
 
-source plugins.d/config.shlib; # load the config library functions
-PREF_FILE="$HOME/.kymsu/plugins.d/kymsu.cfg"
-TEMP_FILE="$HOME/.kymsu/plugins.d/kymsu.cfg.tmp"
 
-KYMSU_PATH=`pwd`
+# Pour tester l'installation
+#HOME=/tmp/kymsu-test ./install.sh
 
-# Make Kymsu accessible in PATH
-echo -e "\nInstalling ${bold}kymsu2${reset} in ${bold}/usr/local/bin${reset} ..."
-sudo ln -fs "${KYMSU_PATH}"/kymsu2.sh /usr/local/bin/kymsu2
+# --- Chemins (définis une seule fois, sans "/" final) ---
+KYMSU_DIR=/usr/local/bin
+KYMSU_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"   # le dépôt
+KYMSU_HOME="$HOME/.kymsu"
+SCRIPTS_DIR="$KYMSU_HOME/plugins.d"                          # destination
+PREF_FILE="$SCRIPTS_DIR/kymsu.cfg"
+TEMP_FILE="$SCRIPTS_DIR/kymsu.cfg.tmp"
 
-# Store Kymsu stuff in home directory
-mkdir -p $HOME/.kymsu && echo "${KYMSU_PATH}" > $HOME/.kymsu/path
+# --- Premier install ? (avant toute suppression) ---
+new_install=false
+[[ -d "$SCRIPTS_DIR" ]] || new_install=true
 
-pluginpath=$HOME/.kymsu/plugins.d/
+bold='\033[1m'
+italic='\033[3m'
+underline='\033[4m'
+yellow='\033[33m'
+reset='\033[0m'
 
-if [ ! -d $pluginpath ]; then new_install=true; fi
+# --- Commande kymsu2 dans le PATH ---
+echo -e "\nInstalling ${bold}kymsu2${reset} in ${bold}$KYMSU_DIR${reset} ..."
+sudo mkdir -p "$KYMSU_DIR" && sudo ln -fs "$KYMSU_PATH/kymsu2.sh" "$KYMSU_DIR/kymsu2"
 
-# Backup disabled plugins
-disabled=$(ls $pluginpath | grep ^_  | sed 's/^_//')
+# --- Mémoriser l'emplacement du dépôt ---
+mkdir -p "$KYMSU_HOME" && echo "$KYMSU_PATH" > "$KYMSU_HOME/path"
 
-# Delete plugins folder
-rm -rf  $pluginpath
-
-# Install new plugins
-echo -e "Copying plugins in ${bold}$pluginpath${reset} ..."
-cp -R "${KYMSU_PATH}/plugins.d" $HOME/.kymsu
-
-for F in $HOME/.kymsu/plugins.d/*.sh
-do
-	q=$(xattr -l "$F" | grep "com.apple.quarantine") 
-		
-	if [ "$q" != "" ]; then
-		echo -e "${yellow}Clear quarantine flag...${reset}"
-		xattr -d com.apple.quarantine "$F"
-	fi
+# --- Sauvegarder la liste des plugins désactivés (noms sans "_") ---
+disabled=()
+for f in "$SCRIPTS_DIR"/_*; do
+	[[ -e "$f" ]] || continue
+	n="${f##*/}"
+	disabled+=("${n#_}")
 done
 
-current_timestamp=$(date +"%s")
-awk -F'=' -v OFS='=' -v newval="$current_timestamp" '/^last.update/{$2=newval;print;next}1' $PREF_FILE > $TEMP_FILE
-mv $TEMP_FILE $PREF_FILE
+# --- Sauvegarder la config personnelle (si elle existe) ---
+saved_cfg=""
+if [[ -f "$PREF_FILE" ]]; then
+	saved_cfg="$(mktemp)" || exit 1
+	cp -p "$PREF_FILE" "$saved_cfg" || { echo "Cannot back up $PREF_FILE" >&2; exit 1; }
+fi
 
-if [ -n "$disabled" ]; then
+# --- Remplacer les plugins ---
+rm -rf "${SCRIPTS_DIR:?}"
 
-	echo -e "Disabling previous disabled plugins ..."
-	# Disable previous disabled plugins
-	for i in $(ls $pluginpath)
-	do 
-		[[ $disabled =~ $i ]] && mv "$pluginpath$i" "$pluginpath"_"$i"
+echo -e "Copying plugins in ${bold}$SCRIPTS_DIR${reset} ..."
+#cp -R "$KYMSU_PATH/plugins.d" "$KYMSU_HOME/"
+mkdir -p "$SCRIPTS_DIR"
+for f in "$KYMSU_PATH/plugins.d"/*; do
+	[[ -f "$f" ]] || continue
+	case "$f" in
+		*.sh|*.png|*.shlib|*.cfg) cp -p "$f" "$SCRIPTS_DIR/" ;;
+	esac
+done
+: '
+echo -e "Copying plugins in ${bold}$SCRIPTS_DIR${reset} ..."
+rsync -a \
+	--include='*/' \
+	--include='*.sh' --include='*.png' --include='*.shlib' --include='*.cfg' \
+	--exclude='*' \
+	--prune-empty-dirs \
+	"$KYMSU_PATH/plugins.d" "$KYMSU_HOME/"
+'
+# --- Restaurer la config personnelle + ajouter les nouvelles clés ---
+if [[ -n "$saved_cfg" ]]; then
+	added=()
+	while IFS= read -r line; do
+		[[ "$line" =~ ^[[:space:]]*([A-Za-z0-9_.-]+)= ]] || continue
+		key="${BASH_REMATCH[1]}"
+		if ! grep -qE "^[[:space:]]*${key//./[.]}=" "$saved_cfg"; then
+			echo "$line" >> "$saved_cfg"
+			added+=("$key")
+		fi
+	done < "$SCRIPTS_DIR/kymsu.cfg"
+
+	mv "$saved_cfg" "$PREF_FILE"
+	echo -e "Preserved ${bold}kymsu.cfg${reset}"
+	(( ${#added[@]} > 0 )) && echo -e "New settings added: ${bold}${added[*]}${reset}"
+fi
+
+# --- Quarantaine (macOS uniquement) ---
+if [[ "$OSTYPE" == darwin* ]]; then
+	for f in "$SCRIPTS_DIR"/*.sh; do
+		if xattr -l "$f" 2>/dev/null | grep -q "com.apple.quarantine"; then
+			echo -e "${yellow}Clear quarantine flag: ${f##*/}${reset}"
+			xattr -d com.apple.quarantine "$f"
+		fi
 	done
-	
+fi
+
+# --- Timestamp de mise à jour ---
+if awk -F'=' -v OFS='=' -v newval="$(date +%s)" \
+	'/^last.update/{$2=newval;print;next}1' "$PREF_FILE" > "$TEMP_FILE"; then
+	mv "$TEMP_FILE" "$PREF_FILE"
+else
+	rm -f "$TEMP_FILE"
+fi
+
+# --- Re-désactiver les plugins qui l'étaient (nom exact) ---
+if (( ${#disabled[@]} > 0 )); then
+	echo -e "Disabling previous disabled plugins ..."
+	for name in "${disabled[@]}"; do
+		[[ -e "$SCRIPTS_DIR/$name" ]] && mv "$SCRIPTS_DIR/$name" "$SCRIPTS_DIR/_$name"
+	done
 fi
 
 echo -e "\n${bold}altKYMSU${reset} has been installed. Run ${bold}kymsu2${reset} command!"
 echo -e "It's a fork from ${italic}https://github.com/welcoMattic/kymsu${reset}"
 echo -e "All credits to ${underline}welcoMattic${reset}\n"
 
-# If NEW install, we choose to desactivate some plugins
-if [ "$new_install" = true ]; then
-	read -p "Do you want to activate / deactivate some plugins ? [y/n]" deactivate
+# --- Premier install : choisir les plugins à désactiver ---
+if [[ "$new_install" == true ]]; then
+	read -r -p "Do you want to activate / deactivate some plugins ? [y/n] " answer
 	echo ""
-	
-	if [[ "$deactivate" == "y" || "$deactivate" == "Y" ]]; then
 
-		for i in $(ls $pluginpath)
-		do 
-			
-			if [[ ${i: -3} == ".sh" ]] && [[ ! ${i:0:2} == "00" ]] && [[ ! ${i:0:1} == "_" ]]; then
-			
-				a=$(echo -e "Do you want to deactivate ${bold}$i${reset} plugins ? [y/n]")
-				read -p "$a" rep
-			
-				if [[ "$rep" == "y" || "$rep" == "Y" ]]; then
-					mv "$pluginpath$i" "$pluginpath"_"$i" && echo -e "${bold}$i${reset} deactivated !"
-				fi
-			
+	if [[ "${answer,,}" == "y" ]]; then
+		for f in "$SCRIPTS_DIR"/*.sh; do
+			i="${f##*/}"
+			[[ "$i" == 00* || "$i" == _* ]] && continue
+
+			read -r -p "$(echo -e "Do you want to deactivate ${bold}$i${reset} plugin ? [y/n] ")" rep
+			if [[ "${rep,,}" == "y" ]]; then
+				mv "$f" "$SCRIPTS_DIR/_$i" && echo -e "${bold}$i${reset} deactivated !"
 			fi
-			
 		done
-		
 	fi
 fi
