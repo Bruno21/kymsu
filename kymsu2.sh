@@ -11,6 +11,7 @@
 #  - use kymsu.cfg for configuring options
 
 all_plugins=false
+KYMSU_HOME="$HOME/.kymsu"
 SCRIPTS_DIR=$HOME/.kymsu/plugins.d
 export SCRIPTS_DIR
 
@@ -43,11 +44,13 @@ showHelp() {
 	echo "   -m, --modules      activate / deactivate plugins"
 	echo "   -p, --pref         open kymsu.cfg in \$EDITOR"
 	echo "   -s <script>        run only the given script"
+	echo "   -u, --uninstall    uninstall altKYMSU"
 	echo "   -a, --all          run all scripts including disabled ones (prefixed by _)"
 	echo
 	echo "Tips:"
 	echo "  - prefix a plugin with _ to disable it"
 	echo "  - see Settings section on top of each plugin"
+	echo "  - edit preferences with kymsu -p/--pref. The kymsu.cfg file is commented."
 	echo
 }
 
@@ -88,18 +91,31 @@ activate_plugins() {
 	echo ""
 }
 
+run_uninstall() {
+	local uninstall_script
+	uninstall_script="$(cat "$KYMSU_HOME/path")/uninstall.sh"
+
+	if [[ ! -x "$uninstall_script" ]]; then
+		echo -e "${red}uninstall.sh not found or not executable:${reset} $uninstall_script" >&2
+		exit 1
+	fi
+
+	bash "$uninstall_script"
+}
+
 preferences() {
 	"${EDITOR:-vi}" "$SCRIPTS_DIR/kymsu.cfg"
 }
 
-while getopts "pmhncs:a-:" opt; do
+while getopts "pumhncs:a-:" opt; do
 	case $opt in
 		-) case "${OPTARG}" in
 			help)       showHelp; exit 0 ;;
 			pref)       preferences; exit 0 ;;
 			modules)    activate_plugins; exit 0 ;;
-			nodistract) : ;;	# transmis aux plugins via "$@"
-			cleanup)    : ;;	# transmis aux plugins via "$@"
+			uninstall)  run_uninstall; exit 0 ;;
+			nodistract) : ;;
+			cleanup)    : ;;
 			all)        all_plugins=true ;;
 			*)
 				echo "Unknown option '--${OPTARG}'" >&2
@@ -107,6 +123,7 @@ while getopts "pmhncs:a-:" opt; do
 		esac ;;
 		p) preferences; exit 0 ;;
 		m) activate_plugins; exit 0 ;;
+		u) run_uninstall; exit 0 ;;
 		h) showHelp; exit 0 ;;
 		n) : ;;					# transmis aux plugins via "$@"
 		c) : ;;					# transmis aux plugins via "$@"
