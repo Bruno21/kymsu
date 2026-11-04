@@ -2,7 +2,8 @@
 
 # pipx plugin for KYMSU
 # https://github.com/welcoMattic/kymsu
-#
+# fork https://github.com/Bruno21/kymsu
+# Verified by Claude
 
 #########################################
 #
@@ -24,7 +25,6 @@ source "$SCRIPTS_DIR/config.shlib"	# load the config library functions
 # In this mode, all the outdated packages are upgraded without any question.
 
 # Upgrade --include-injected
-#injected=true
 injected="$(config_get pipx_injected)"
 
 # Number of parallel requests to PyPI
@@ -50,9 +50,16 @@ while getopts "phncs:a-:" opt; do
 		*) ;;		# unknown option: ignored
 	esac
 done
-
+#
 #########################################
 
+###############################################################################################
+#
+# Require software:
+#   -jq (Lightweight and flexible command-line JSON processor) (https://jqlang.github.io/jq/)
+#   -pipx (Execute binaries from Python packages in isolated environments) (https://pipx.pypa.io)
+#
+###############################################################################################
 
 # Fetch the PyPI info of several packages in parallel.
 # usage: fetch_pypi_info <dir> <package>...  ->  <dir>/<package>.json (no file if PyPI does not know the package)
@@ -168,7 +175,7 @@ then
 fi
 
 # Internet connection test
-if ! curl -fsI --max-time 5 -o /dev/null https://www.apple.com; then
+if ! check_internet; then
 	echo -e "\n${red}No Internet connection !${reset}"
 	echo -e "Exit !"
 	exit 1

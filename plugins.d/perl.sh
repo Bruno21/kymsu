@@ -2,6 +2,13 @@
 
 # Perl plugin for KYMSU
 # https://github.com/welcoMattic/kymsu
+# fork https://github.com/Bruno21/kymsu
+# Verified by Claude
+
+#########################################
+#
+# Settings:
+#  - use kymsu.cfg for configuring options
 
 SCRIPTS_DIR="${SCRIPTS_DIR:-$HOME/.kymsu/plugins.d}"
 
@@ -25,6 +32,17 @@ bold="$(config_get bold)"
 underline="$(config_get underline)"
 red="$(config_get red)"
 reset="$(config_get reset)"
+#
+#########################################
+
+###############################################################################################
+#
+# Require software:
+#   -perl (Highly capable, feature-rich programming language) (https://www.perl.org/)
+#   -module App::cpanoutdated (installed by the script)
+#	-fzf (Command-line fuzzy finder written in Go) (https://junegunn.github.io/fzf/)
+#
+###############################################################################################
 
 is_excluded() {
 	local m

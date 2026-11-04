@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 
-# install script for KYMSU
+# Install script for KYMSU
 # https://github.com/welcoMattic/kymsu
+# fork https://github.com/Bruno21/kymsu
+# Verified by Claude
 
+#########################################
+#
+# Settings:
+#  - use kymsu.cfg for configuring options
 
 # Pour tester l'installation
 #HOME=/tmp/kymsu-test ./install.sh
@@ -24,6 +30,9 @@ italic='\033[3m'
 underline='\033[4m'
 yellow='\033[33m'
 reset='\033[0m'
+#
+#########################################
+
 
 # --- Commande kymsu2 dans le PATH ---
 echo -e "\nInstalling ${bold}kymsu2${reset} in ${bold}$KYMSU_DIR${reset} ..."
@@ -51,7 +60,6 @@ fi
 rm -rf "${SCRIPTS_DIR:?}"
 
 echo -e "Copying plugins in ${bold}$SCRIPTS_DIR${reset} ..."
-#cp -R "$KYMSU_PATH/plugins.d" "$KYMSU_HOME/"
 mkdir -p "$SCRIPTS_DIR"
 for f in "$KYMSU_PATH/plugins.d"/*; do
 	[[ -f "$f" ]] || continue
@@ -59,15 +67,7 @@ for f in "$KYMSU_PATH/plugins.d"/*; do
 		*.sh|*.png|*.shlib|*.cfg) cp -p "$f" "$SCRIPTS_DIR/" ;;
 	esac
 done
-: '
-echo -e "Copying plugins in ${bold}$SCRIPTS_DIR${reset} ..."
-rsync -a \
-	--include='*/' \
-	--include='*.sh' --include='*.png' --include='*.shlib' --include='*.cfg' \
-	--exclude='*' \
-	--prune-empty-dirs \
-	"$KYMSU_PATH/plugins.d" "$KYMSU_HOME/"
-'
+
 # --- Restaurer la config personnelle + ajouter les nouvelles clés ---
 if [[ -n "$saved_cfg" ]]; then
 	added=()

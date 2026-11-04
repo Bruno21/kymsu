@@ -2,9 +2,10 @@
 
 # pecl plugin for KYMSU
 # https://github.com/welcoMattic/kymsu
+# fork https://github.com/Bruno21/kymsu
+# Verified by Claude
 
 # https://pecl.php.net
-# Verified by Claude
 # The format of the `pecl list-upgrades` command when an update is available has not yet been confirmed: 
 # if the output looks incorrect to you at that point, please send me the output.
 
@@ -23,9 +24,6 @@ if [ ! -r "$SCRIPTS_DIR/config.shlib" ]; then
 fi
 # shellcheck source=/dev/null
 source "$SCRIPTS_DIR/config.shlib"	# load the config library functions
-
-# No distract mode (no user interaction)
-#[[ $@ =~ "--nodistract" ]] && no_distract=true || no_distract=false
 
 # Display PHP informations
 display_info=true
@@ -55,9 +53,16 @@ while getopts "phncs:a-:" opt; do
 		*) ;;			# unknown option: ignored
 	esac
 done
-
+#
 #########################################
 
+###############################################################################################
+#
+# Require software:
+#   -pecl (part of PHP)
+#   -terminal-notifier (Send macOS User Notifications from the command-line) (https://github.com/julienXX/terminal-notifier)
+#
+###############################################################################################
 
 notification() {
 	local sound="Basso"
@@ -123,7 +128,7 @@ pecl version
 
 
 # Internet connection test
-if ! curl -fsI --max-time 5 -o /dev/null https://www.apple.com; then
+if ! check_internet; then
 	echo -e "\n${red}No Internet connection !${reset}"
 	echo -e "Exit !"
 	exit 1

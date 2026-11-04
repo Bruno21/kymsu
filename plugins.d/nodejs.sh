@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-# npm plugin for KYMSU (install local package)
+# npm plugin for KYMSU (local and global packages)
 # https://github.com/welcoMattic/kymsu
+# fork https://github.com/Bruno21/kymsu
 # Polished by Claude
 
 #########################################
@@ -82,9 +83,15 @@ while getopts "pmhncs:a-:" opt; do
 		*) ;;			# unknown option: ignored
 	esac
 done
-
+#
 #########################################
 
+###############################################################################################
+#
+# Require software (brew install):
+#	-jq (Lightweight and flexible command-line JSON processor)
+#
+###############################################################################################
 
 # npm outdated reports "git" / "linked" (or nothing) for packages that do not
 # come from the registry: they cannot be updated with "npm install pkg@version"
@@ -192,7 +199,7 @@ echo -e "     - install path: ${italic}$npm_ins${reset}"
 
 
 # Internet connection test
-if ! curl -fsI --max-time 5 -o /dev/null https://www.apple.com; then
+if ! check_internet; then
 	echo -e "\n${red}No Internet connection !${reset}"
 	echo -e "Exit !"
 	exit 1

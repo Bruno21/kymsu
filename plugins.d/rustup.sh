@@ -2,7 +2,8 @@
 
 # Rust plugin for KYMSU
 # https://github.com/welcoMattic/kymsu
-
+# fork https://github.com/Bruno21/kymsu
+# Verified by Claude
 
 #########################################
 #
@@ -26,9 +27,16 @@ underline="$(config_get underline)"
 greenbold="$(config_get greenbold)"
 red="$(config_get red)"
 reset="$(config_get reset)"
-
+#
 #########################################
 
+###############################################################################################
+#
+# Require software:
+#   -rustup (Rust toolchain installer) (https://rust-lang.github.io/rustup/)
+#   -cargo (part of Rust)
+#
+###############################################################################################
 
 echo -e "\n${bold}🦀 Rust${reset}\n"
 
@@ -39,7 +47,7 @@ if ! hash rustup 2>/dev/null && ! hash cargo 2>/dev/null; then
 fi
 
 # Internet connection test
-if ! curl -fsI --max-time 5 -o /dev/null https://www.apple.com; then
+if ! check_internet; then
 	echo -e "\n${red}No Internet connection !${reset}"
 	echo -e "Exit !"
 	exit 1

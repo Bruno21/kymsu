@@ -2,10 +2,17 @@
 
 # gem plugin for KYMSU (install local package)
 # https://github.com/welcoMattic/kymsu
-# https://guides.rubygems.org/what-is-a-gem/
+# fork https://github.com/Bruno21/kymsu
+# Verified by Claude
 
+# https://guides.rubygems.org/what-is-a-gem/
 # Ne pas générer la doc de façon permanente pour tous tes gem install et gem update :
 # echo 'gem: --no-document' >> ~/.gemrc
+
+#########################################
+#
+# Settings:
+#  - use kymsu.cfg for configuring options
 
 SCRIPTS_DIR="${SCRIPTS_DIR:-$HOME/.kymsu/plugins.d}"
 
@@ -34,7 +41,16 @@ reset="$(config_get reset)"
 # Option kymsu.cfg : gem_no_document (true par défaut si absente)
 gem_flags=()
 [[ "$(config_get gem_no_document)" != "false" ]] && gem_flags+=(--no-document)
+#
+#########################################
 
+###############################################################################################
+#
+# Require software (brew install):
+#	-fzf (Command-line fuzzy finder written in Go) (https://junegunn.github.io/fzf/)
+#   -gem (part of Ruby)
+#
+###############################################################################################
 
 is_excluded() {
 	local m
@@ -140,7 +156,6 @@ for m in "${selected[@]}"; do
 		echo -e "\n${bold}update $m (dry-run)${reset}"
 	else
 		echo -e "\n${bold}Update $m${reset}"
-		#gem update "$m"
 		# no-document
 		gem update "${gem_flags[@]}" "$m"
 	fi

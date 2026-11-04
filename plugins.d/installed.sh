@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
 # List of brew, cask, mas, python, npm, pecl installed...
+# https://github.com/welcoMattic/kymsu
+# fork https://github.com/Bruno21/kymsu
+# Verified by Claude
 
 #########################################
 #
@@ -16,7 +19,23 @@ pip_version=pip3
 #
 # https://github.com/atom/apm/tags
 apm=false
+#
 #########################################
+
+###############################################################################################
+#
+# Require software:
+#	-brew
+#   -mas (Mac App Store command-line interface) (https://github.com/mas-cli/mas)
+#   -pecl (part of PHP)
+#   -pip (part of Python)
+#   -pipx (Execute binaries from Python packages in isolated environments) (https://pipx.pypa.io)
+#   -cargo (part of Rust)
+#   -apm
+#   -npm (part of node)
+#   -gem (part of Ruby)
+#
+###############################################################################################
 
 #if [ ! -d chemin ]; then mkdir $chemin; fi
 mkdir -p "$chemin"

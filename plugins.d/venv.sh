@@ -2,7 +2,8 @@
 
 # Venv plugin for KYMSU
 # https://github.com/welcoMattic/kymsu
-
+# fork https://github.com/Bruno21/kymsu
+# Verified by Claude
 
 #########################################
 #
@@ -33,8 +34,16 @@ apps=("mkdocs")
 mkdocs_ext=("mkdocs-material" "mkdocs-material-extensions" "mkdocs-git-revision-date-localized-plugin" "mkdocs-minify-plugin" "fontawesome_markdown" "mkdocs-pdf-export-plugin")
 
 declare -A before
-
+#
 #########################################
+
+###############################################################################################
+#
+# Require software:
+#   -python (Interpreted, interactive, object-oriented programming language) (https://www.python.org/)
+#   -pip (part of Python)
+#
+###############################################################################################
 
 
 echo -e "${bold}🐍  Update apps in Python virtuals environments ${reset}\n"
@@ -51,10 +60,10 @@ case "$OSTYPE" in
 esac
 
 # Internet connection test
-if ! curl -fsI --max-time 5 -o /dev/null https://www.apple.com; then
-  echo -e "\n${red}No Internet connection !${reset}"
-  echo -e "Exit !"
-  exit 1
+if ! check_internet; then
+	echo -e "\n${red}No Internet connection !${reset}"
+	echo -e "Exit !"
+	exit 1
 fi
 
 echo -e "Venv directory: $v\n"

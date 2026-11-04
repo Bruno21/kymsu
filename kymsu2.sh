@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 
-# Configuration
+# altKYMSU
+# https://github.com/welcoMattic/kymsu
+# fork https://github.com/Bruno21/kymsu
+# Verified by Claude
+
+#########################################
+#
+# Settings:
+#  - use kymsu.cfg for configuring options
+
 all_plugins=false
 SCRIPTS_DIR=$HOME/.kymsu/plugins.d
 export SCRIPTS_DIR
@@ -16,6 +25,8 @@ source "$SCRIPTS_DIR/config.shlib"	# load the config library functions
 italic="$(config_get italic)"
 bold="$(config_get bold)"
 reset="$(config_get reset)"
+#
+#########################################
 
 showHelp() {
 	echo -e "\033[93m\033[1maltKymsu\033[0m"
@@ -40,6 +51,7 @@ showHelp() {
 	echo
 }
 
+# activer / désactiver les plugins
 activate_plugins() {
 	local f i rep
 
@@ -106,16 +118,19 @@ while getopts "pmhncs:a-:" opt; do
 	esac
 done
 
-# -n : non vide
+# un script
 if [ -n "$one_script" ]; then
 	list_plugins=$(find "$SCRIPTS_DIR" -maxdepth 1 -type f \
 		\( -name "$one_script" -o -name "_$one_script" \) -a -perm -u+x)
 	[[ -z "$list_plugins" ]] && echo -e "❗️ No named plugin ${italic}$one_script${reset}" && exit 1
 
+# tous les scripts
 elif [[ "$all_plugins" == false ]]; then
 	list_plugins=$(find "$SCRIPTS_DIR" -maxdepth 1 -type f \
 		! -name "_*" -a -name "*.sh" -a -perm -u+x | sort)
 	[[ -z "$list_plugins" ]] && echo -e "❗️ No plugin in ${italic}$SCRIPTS_DIR${reset}" && exit 1
+
+# scripts sélectionnés (voir option -m)
 else
 	list_plugins=$(find "$SCRIPTS_DIR" -maxdepth 1 -type f \
 		-name "*.sh" -a -perm -u+x | sort)

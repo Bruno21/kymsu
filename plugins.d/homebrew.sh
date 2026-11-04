@@ -2,7 +2,8 @@
 
 # Homebrew plugin for KYMSU
 # https://github.com/welcoMattic/kymsu
-
+# fork https://github.com/Bruno21/kymsu
+# Verified by Claude
 
 #########################################
 #
@@ -42,7 +43,7 @@ while getopts "pmhncs:a-:" opt; do
          *) ;;
        esac;;
     p|m|h|s|a) ;;   # gérées par kymsu2, ignorées ici
-    *) ;;         # option inconnue : ignorée
+    *) ;;         	# option inconnue : ignorée
   esac
 done
 
@@ -68,10 +69,10 @@ command -v terminal-notifier >/dev/null 2>&1 || { echo -e "You should install ${
 command -v jq >/dev/null 2>&1 || { echo -e "${bold}kymsu2${reset} requires ${bold}jq${reset} but it's not installed.\nRun ${italic}(brew install jq)${reset}\nAborting..." >&2; exit 1; }
 
 # Internet connection test
-if ! curl -fsI --max-time 5 -o /dev/null https://www.apple.com; then
-  echo -e "\n${red}No Internet connection !${reset}"
-  echo -e "Exit !"
-  exit 1
+if ! check_internet; then
+	echo -e "\n${red}No Internet connection !${reset}"
+	echo -e "Exit !"
+	exit 1
 fi
 
 notification() {
@@ -249,8 +250,6 @@ if [ -n "$upd_pkg_notpinned" ]; then
 	echo -e "\n🍺 ${underline}Updating packages...${reset}\n"
 
 	[ -n "$upd_pkg_pinned" ] && echo -e "${red}Pinned: $upd_pkg_pinned . It won't be updated!${reset}\n"
-
-echo "$no_distract"
 
 	if [ "$no_distract" = false ]; then
 		a=$(echo -e "Do you wanna run ${bold}brew upgrade $upd_pkg_notpinned${reset} ? (y/n/a) ")
