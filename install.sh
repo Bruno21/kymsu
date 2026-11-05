@@ -28,6 +28,7 @@ new_install=false
 bold='\033[1m'
 italic='\033[3m'
 underline='\033[4m'
+red='\033[31m'
 yellow='\033[33m'
 reset='\033[0m'
 #
@@ -67,6 +68,24 @@ for f in "$KYMSU_PATH/plugins.d"/*; do
 		*.sh|*.png|*.shlib|*.cfg) cp -p "$f" "$SCRIPTS_DIR/" ;;
 	esac
 done
+
+# --- Vérifier que config.shlib pointe vers $HOME/.kymsu ---
+config_shlib="$SCRIPTS_DIR/config.shlib"
+
+if grep -qE 'FOR TESTING ONLY' "$config_shlib"; then
+	if ! grep -qE '^[[:space:]]*#.*FOR TESTING ONLY' "$config_shlib"; then
+		# La ligne de test est active : la commenter et décommenter la ligne .kymsu
+		echo -e "${yellow}Warning: config.shlib en mode test. Fixing...${reset}"
+
+		# Commenter la ligne FOR TESTING ONLY
+		sed -i.bak 's/^\([[:space:]]*\)val=\(.*FOR TESTING ONLY.*\)$/\1#val=\2/' "$config_shlib"
+		# Décommenter la ligne .kymsu
+		sed -i.bak 's/^\([[:space:]]*\)#val=\(.*\.kymsu\/plugins\.d\/kymsu\.cfg.*\)$/\1val=\2/' "$config_shlib"
+
+		rm -f "$config_shlib.bak"
+		echo -e "${yellow}config.shlib fixed.${reset}"
+	fi
+fi
 
 # --- Restaurer la config personnelle + ajouter les nouvelles clés ---
 if [[ -n "$saved_cfg" ]]; then

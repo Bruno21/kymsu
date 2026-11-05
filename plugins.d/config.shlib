@@ -6,9 +6,10 @@ config_read_file() {
 
 config_get() {
     #val="$(config_read_file "$HOME"/.kymsu/plugins.d/kymsu.cfg "${1}")";
-    val="$(config_read_file "$HOME"/Documents/Scripts/kymsu2/plugins.d/kymsu.cfg "${1}")";
+    val="$(config_read_file "$HOME"/Documents/Scripts/kymsu2/plugins.d/kymsu.cfg "${1}")";  # FOR TESTING ONLY
     if [ "${val}" = "__UNDEFINED__" ]; then
-        val="$(config_read_file config.cfg.defaults "${1}")";
+        #val="$(config_read_file config.cfg.defaults "${1}")";
+        val="$(config_read_file "$HOME/.kymsu/plugins.d/kymsu.cfg.defaults" "${1}")";
     fi
     printf -- "%s" "${val}";
 }
