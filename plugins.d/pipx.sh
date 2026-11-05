@@ -47,7 +47,7 @@ while getopts "phncs:a-:" opt; do
 			*) ;;
 		esac;;
 		c|p|h|s|a) ;;	# handled by kymsu2, ignored here
-		*) ;;		# unknown option: ignored
+		*) ;;			# unknown option: ignored
 	esac
 done
 #
