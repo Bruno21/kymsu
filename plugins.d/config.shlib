@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+#https://unix.stackexchange.com/questions/175648/use-config-file-for-my-shell-script
+
 config_read_file() {
     (grep -E "^${2}=" -m 1 "${1}" 2>/dev/null || echo "VAR=__UNDEFINED__") | head -n 1 | cut -d '=' -f 2-;
 }
@@ -13,6 +15,8 @@ config_get() {
     fi
     printf -- "%s" "${val}";
 }
+
+# Other shared functions
 
 check_internet() {
 	curl -fsS -o /dev/null --connect-timeout 5 --max-time 10 \
