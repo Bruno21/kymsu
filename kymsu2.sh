@@ -9,6 +9,9 @@
 #
 # Settings:
 #  - use kymsu.cfg for configuring options
+# Test:
+#  - rm -rf /tmp/kymsu-test && HOME=/tmp/kymsu-test ./install.sh
+#
 
 all_plugins=false
 KYMSU_HOME="$HOME/.kymsu"
@@ -64,7 +67,7 @@ activate_plugins() {
 	for f in "$SCRIPTS_DIR"/*.sh; do
 		[[ -e "$f" ]] || continue
 		i="${f##*/}"
-		[[ "$i" == 00* ]] && continue
+		[[ "$i" == 00* || "$i" == _* ]] && continue   # ← ajouter || "$i" == _*
 
 		has_active=true
 		read -r -p "$(echo -e "Deactivate ${bold}$i${reset} ? [y/n] ")" rep
