@@ -5,6 +5,17 @@
 # fork https://github.com/Bruno21/kymsu
 # Verified by Claude
 
+###############################################################################################
+#
+# Require software:
+#   -brew (Homebrew) (https://brew.sh/)
+#   -jq (Lightweight and flexible command-line JSON processor)(brew install jq)
+#
+# Recommended software :
+#   -terminal-notifier (Send macOS User Notifications from the command-line)(brew install terminal-notifier)
+#
+###############################################################################################
+
 #########################################
 #
 # Settings:
@@ -53,17 +64,9 @@ underline="$(config_get underline)"
 red="$(config_get red)"
 redbox="$(config_get redbox)"
 reset="$(config_get reset)"
-
-
-###############################################################################################
-#
-# Require software (brew install):
-#	-jq (Lightweight and flexible command-line JSON processor)
-#
-# Recommended software (brew install):
-#	-terminal-notifier (Send macOS User Notifications from the command-line)
 #
 ###############################################################################################
+
 
 command -v terminal-notifier >/dev/null 2>&1 || { echo -e "You should install ${bold}terminal-notifier${reset} for notification ${italic}(brew install terminal-notifier)${reset}.\n"; }
 command -v jq >/dev/null 2>&1 || { echo -e "${bold}kymsu2${reset} requires ${bold}jq${reset} but it's not installed.\nRun ${italic}(brew install jq)${reset}\nAborting..." >&2; exit 1; }

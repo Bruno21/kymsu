@@ -160,3 +160,6 @@ for m in "${selected[@]}"; do
 		gem update "${gem_flags[@]}" "$m"
 	fi
 done
+
+echo ""
+echo ""
