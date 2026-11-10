@@ -27,10 +27,16 @@ locked="${locked:-true}"
 # true : affiche ce qui serait mis à jour sans rien installer
 dry_run="$(config_get rust_dry_run)"
 
+# Paquets cargo à ne pas mettre à jour
+pinned_rust="$(config_get rust_pinned)"
+read -r -a cargo_do_not_update <<< "$pinned_rust"
+
 bold="$(config_get bold)"
 underline="$(config_get underline)"
 greenbold="$(config_get greenbold)"
 red="$(config_get red)"
+redbold="$(config_get redbold)"
+redbox="$(config_get redbox)"
 reset="$(config_get reset)"
 #
 #########################################
@@ -138,16 +144,31 @@ if hash cargo 2>/dev/null; then
 		all_verbose+="$name $installed $available"$'\n'
 	done < <(echo "$cargo_before" | sed 's/:$//')
 
-	# Ne garder que les paquets avec une mise à jour disponible
-	mapfile -t pkgs < <(awk '$2 != $3 && $3 != "?" {print $1}' <<< "$all_verbose")
+	# Ne garder que les paquets avec une mise à jour disponible, en excluant les épinglés
+	mapfile -t pkgs < <(
+		awk '$2 != $3 && $3 != "?" {print $1}' <<< "$all_verbose" | while IFS= read -r p; do
+			[[ " ${cargo_do_not_update[*]} " == *" $p "* ]] || echo "$p"
+		done
+	)
 	nb=${#pkgs[@]}
 	echo
+
+	# Display pinned packages if any
+	if [ ${#cargo_do_not_update[@]} -gt 0 ]; then
+		nb_pinned="${#cargo_do_not_update[*]}"
+		echo -e "${underline}🦀  List of${reset} ${redbox} $nb_pinned ${reset} ${underline}'do not update' packages:${reset}"
+		echo -e "${redbold}${cargo_do_not_update[*]}${reset}"
+		echo ""
+	fi
 
 	if (( nb == 0 )); then
 		echo -e "${greenbold}All cargo packages are up to date.${reset}"
 	else
-		# Afficher uniquement les paquets obsolètes
-		outdated_verbose=$(awk '$2 != $3 && $3 != "?" {print}' <<< "$all_verbose")
+		# Afficher uniquement les paquets obsolètes (hors épinglés)
+		outdated_verbose=$(awk '$2 != $3 && $3 != "?" {print}' <<< "$all_verbose" | while IFS= read -r l; do
+			p=$(awk '{print $1}' <<< "$l")
+			[[ " ${cargo_do_not_update[*]} " == *" $p "* ]] || echo "$l"
+		done)
 
 		col_name=$(awk '{print length($1)}' <<< "$outdated_verbose" | sort -n | tail -1)
 		col_name=$(( col_name > 7 ? col_name : 7 ))
