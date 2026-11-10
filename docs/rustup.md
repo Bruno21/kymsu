@@ -29,16 +29,18 @@ Ajouter les clés suivantes dans `kymsu.cfg` :
 ```
 rust_dry_run=false
 rust_locked=true
+rust_pinned=
 ```
 
 ## Configuration (`kymsu.cfg`)
 
-`rustup.sh` ajoute deux clés dans `kymsu.cfg` en plus des variables de couleur communes :
+`rustup.sh` ajoute trois clés dans `kymsu.cfg` en plus des variables de couleur communes :
 
 | Clé | Valeur par défaut | Description |
 | --- | --- | --- |
 | `rust_dry_run` | `false` | `true` : affiche les mises à jour sans rien installer |
 | `rust_locked` | `true` | `true` : réessaie avec `--locked` si `cargo install` échoue |
+| `rust_pinned` | _(vide)_ | Liste de paquets à ne jamais mettre à jour (noms séparés par des espaces, ex : `rust_pinned=cargo-update fnm`) |
 
 ## Utilisation
 
@@ -79,7 +81,7 @@ Si au moins une ligne signale une mise à jour, `rustup update` est lancé pour 
 
 Seuls les paquets installés depuis **crates.io** sont pris en compte. Les paquets installés depuis git ou un chemin local (signalés par des parenthèses dans la sortie de `cargo install --list`) sont ignorés.
 
-Avant la mise à jour, `cargo search` est appelé pour chaque paquet afin de récupérer la version disponible sur crates.io. Seuls les paquets dont la version installée diffère de la version disponible sont proposés. Chaque paquet sélectionné est installé individuellement avec `cargo install <nom>`. Cette approche permet :
+Avant la mise à jour, `cargo search` est appelé pour chaque paquet afin de récupérer la version disponible sur crates.io. Tous les paquets obsolètes sont affichés dans un tableau ; ceux listés dans `rust_pinned` y apparaissent avec la mention `(pinned)` et sont exclus de la sélection. Seuls les paquets non-épinglés dont la version installée diffère de la version disponible sont proposés. Chaque paquet sélectionné est installé individuellement avec `cargo install <nom>`. Cette approche permet :
 
 - De continuer en cas d'échec sur un paquet (les autres sont toujours traités).
 - De réessayer automatiquement avec `cargo install --locked <nom>` si `rust_locked=true` dans `kymsu.cfg`. Cette option utilise les versions de dépendances testées par l'auteur et peut débloquer certains échecs de compilation.
@@ -96,6 +98,5 @@ La liste des paquets cargo est lue sur le descripteur de fichier 3 (`3<<< "$inst
 
 - **Vérification des versions lente** : `cargo search` fait un appel réseau par paquet. Avec 10 paquets installés, la phase de vérification peut prendre 10 à 20 secondes avant que la sélection s'affiche.
 - **`cargo search` peut rater un paquet** : si le nom n'est pas trouvé exactement sur crates.io (paquet retiré, renommé ou privé), la version disponible affichée sera `?` et le paquet sera ignoré dans la sélection.
-- **Pas de liste d'exclusion** : tous les paquets obsolètes sont proposés. L'ajout d'un `do_not_update` (sur le modèle de `gem.sh`) pourrait être envisagé si le besoin se présente.
 - **Echec de compilation persistant** : si `cargo install --locked` échoue aussi, le paquet apparaît dans la liste `Still failed` en fin de script. Il peut nécessiter une intervention manuelle (mise à jour de la toolchain, installation d'une dépendance système comme OpenSSL ou cmake).
 - **`rustup update` met à jour toutes les toolchains** : si plusieurs toolchains sont installées (`stable`, `beta`, `nightly`), elles sont toutes mises à jour en une seule passe.
