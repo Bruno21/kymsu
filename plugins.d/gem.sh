@@ -111,7 +111,7 @@ if [[ -n "$pinned" ]]; then
 fi
 
 if (( nb == 0 )); then
-	echo -e "${underline}No gem updates.${reset}"
+	echo -e "${underline}No gem updates.${reset}\n\n"
 	exit 0
 fi
 
