@@ -92,21 +92,6 @@ if ! perl "-M$module" -e 1 2>/dev/null; then
 	fi
 fi
 
-# Un seul appel : module, version installée, version disponible, distribution
-: '
-verbose=$(cpan-outdated --verbose | sort -u)
-mapfile -t outdated < <(awk '{print $1}' <<<"$verbose")
-nb=${#outdated[@]}
-
-if (( nb == 0 )); then
-	echo -e "${underline}All Perl modules are up to date.${reset}"
-	exit 0
-fi
-
-printf '%s\n' "${outdated[@]}" | column -c "$(tput cols)"
-
-read -r -p "$(echo -e "\nDo you wanna update ${bold}${nb} outdated${reset} modules ? (y=choose/a=all/n) ")" choice
-'
 
 # Un seul appel : module, version installée, version disponible, distribution
 all=$(cpan-outdated --verbose | sort -u)
@@ -172,8 +157,8 @@ case "${choice,,}" in
 		;;
 esac
 
-# Une chose à vérifier : cpan -i en mode a peut poser des questions interactives (dépendances, tests 
-# qui échouent). Si tu veux éviter ça, lance-le avec PERL_MM_USE_DEFAULT=1 cpan -i "$m", 
+# Une chose à vérifier : cpan -i en mode a peut poser des questions interactives (dépendances, tests
+# qui échouent). Si tu veux éviter ça, lance-le avec PERL_MM_USE_DEFAULT=1 cpan -i "$m",
 # qui accepte les réponses par défaut.
 
 # --- Installation ---

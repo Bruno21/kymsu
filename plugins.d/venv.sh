@@ -109,7 +109,7 @@ do
 	else
 		echo -e "${red}Update failed for $app${reset}"
 	fi
-	
+
 	# Résumé : première ligne soulignée
 	info=$(python -m pip show "$app")
 	echo -e "${underline}$(sed -n '1p' <<<"$info")${reset}"

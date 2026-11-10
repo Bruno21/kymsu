@@ -27,7 +27,7 @@ Ou laisser `install.sh` le copier automatiquement depuis le dépôt.
 
 Ajouter les clés suivantes dans `kymsu.cfg` :
 
-```
+```ini
 npm_display_info=false
 npm_doctor=false
 npm_update_node=false
@@ -47,7 +47,7 @@ pinned_npm=
 
 Exemple :
 
-```
+```ini
 npm_display_info=false
 npm_doctor=false
 npm_update_node=false

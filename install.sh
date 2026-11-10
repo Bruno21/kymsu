@@ -28,7 +28,6 @@ new_install=false
 bold='\033[1m'
 italic='\033[3m'
 underline='\033[4m'
-red='\033[31m'
 yellow='\033[33m'
 reset='\033[0m'
 #

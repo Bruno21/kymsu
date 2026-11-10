@@ -27,7 +27,7 @@ Ou laisser `install.sh` le copier automatiquement depuis le dépôt.
 
 Ajouter les clés suivantes dans `kymsu.cfg` :
 
-```
+```ini
 mas_dry_run=false
 mas_store_country=fr
 pinned_mas=
@@ -43,7 +43,7 @@ pinned_mas=
 
 Exemple :
 
-```
+```ini
 mas_dry_run=false
 mas_store_country=fr
 pinned_mas=497799835 408981434
@@ -84,7 +84,7 @@ Au lancement, le script :
 
 La liste des apps obsolètes est affichée avec des colonnes alignées dynamiquement (largeur calculée sur les données réelles) :
 
-```
+```csv
 ID            App                             Installed  Available
 6749351423    Menu Bar Controller for Sonos   7.3.0      7.3.1
 1006087419    SnippetsLab                     2.7        2.7.1

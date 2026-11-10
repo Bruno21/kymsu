@@ -21,7 +21,7 @@ Son nom `00-kymsu.sh` garantit qu'il est exécuté en premier par kymsu, avant t
 
 Ajouter les clés suivantes dans `kymsu.cfg` :
 
-```
+```ini
 update_interval=1w
 last.update=
 ```
@@ -58,7 +58,7 @@ kymsu2
 
 Il affiche toujours :
 
-```
+```log
 Last update: 31-10-2026 10:00:00
 Next update: 07-11-2026 10:00:00 (in 6j 19h 50m 21s)
 ```

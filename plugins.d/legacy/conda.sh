@@ -6,7 +6,7 @@
 # If you'd prefer that conda's base environment not be activated on startup, set the auto_activate_base parameter to false:
 #   conda config --set auto_activate_base false
 
-# In order to initialize after the installation process is done, 
+# In order to initialize after the installation process is done,
 #   first run source <path to conda>/bin/activate and then run conda init.
 
 

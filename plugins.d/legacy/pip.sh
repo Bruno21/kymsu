@@ -69,7 +69,7 @@ echo ""
 if (( ${#do_not_update[@]} )); then
 
 	nbp=${#do_not_update[*]}
-	
+
 	echo -e "${underline}List of${reset} ${redbox} $nbp ${reset} ${underline}'do not update' packages:${reset}"
 	echo -e "${redbold}${do_not_update[*]}${reset}"
 	echo -e "To remove package from this list, you need to edit the ${italic}do_not_update${reset} array."
@@ -85,7 +85,7 @@ if [[ $? -eq 1 ]]; then
 	exit 1
 fi
 
-#Packages update	
+#Packages update
 echo -e "🐍 ${underline}Search for packages update...${reset}\n"
 
 pip_outdated=$($pip_version list --outdated --format columns)
@@ -99,13 +99,13 @@ if [ -n "$upd" ]; then
 	echo -e "${redbox} $nb ${reset} availables updates:"
 	echo -e "\n$pip_outdated"
 	echo ""
-	
+
 	for i in $upd
 	do
 		info=$($pip_version show "$i")
-		
+
 		l=$(echo "$info" | sed -n '1p')
-		
+
 		if [[ ! " ${do_not_update[@]} " =~ " ${i} " ]]; then
 			m=$(sed "1s/.*/\\${bold}$l\\${reset}/" <<< "$info")
 		else
@@ -113,18 +113,18 @@ if [ -n "$upd" ]; then
 		fi
 		echo -e "$m"  | head -4
 		echo ""
-		
+
 		z+="$i "
-		
+
 	done
 	# z = asgiref setuptools lunr
 
 	# Check dependancies
 	if [ -x "$(command -v pipdeptree)" ] && [ "$display_depend" == true ]; then
-	
+
 		echo -e "🐍 ${underline}Check dependancies:${reset}\n"
 		echo -e "Be carefull!! This updates can be a dependancie for some modules. Check for any incompatible version.\n"
-		
+
 		# packages dont on recherche les dépendances (x = asgiref,setuptools,lunr)
 		x=$(echo "$z" | sed 's/.$//' | sed 's/ /,/g')
 		# on filtre les lignes (y = asgiref|setuptools|lunr)
@@ -132,25 +132,25 @@ if [ -n "$upd" ]; then
 
 		dependencies=$(echo "$x" | xargs pipdeptree -r --python /opt/homebrew/opt/python@3.11/bin/python3.11 -p | grep -E $y)
 		echo -e ""
-		
-		
+
+
 		while IFS= read -r line; do
 			z=$(echo "${line}" | grep -i ^[a-z])
 			k=$(echo "${line}" | awk -F'==' '{print $1}')
 			l=$(echo "${line}" | awk -F':' '{print $2}')
-			
-			
+
+
 			# Si la ligne commence par une lettre (aka. paquet à mettre à jour)
 			if [ -n "$z" ] ; then
-			
+
 				# Met en redbold le paquet si il est 'do_not_update'
 				if [[ ! " ${do_not_update[@]} " =~ " ${k} " ]]; then
 					echo -e "\n${bold}${line}${reset}"
 				else
 					echo -e "\n${redbold}${line}${reset}"
 				fi
-			
-			# sinon dépendance	
+
+			# sinon dépendance
 			elif [[ "${l}" = *"<"* ]] || [[ "${l}" = *"=="* ]]; then
 				echo -e "${red}${line}${reset}"
 			elif [[ "${l}" = *"~="* ]]; then
@@ -167,7 +167,7 @@ if [ -n "$upd" ]; then
 	echo -e "\n🐍 ${underline}Updating packages...${reset}\n"
 
 	[ "${#do_not_update[@]}" -gt 0 ] && echo -e "${redbold}Do not update: ${underline}${do_not_update[@]}${reset}${redbold} . It won't be updated!'${reset}\n"
-	
+
 	for i in $upd
 	do
 		if [[ ! " ${do_not_update[@]} " =~ " ${i} " ]]; then
@@ -187,7 +187,7 @@ if [ -n "$upd" ]; then
 			fi
 		fi
 	done
-	
+
 else
 	echo -e "No availables updates."
 fi

@@ -29,7 +29,7 @@ Ou laisser `install.sh` le copier automatiquement depuis le dépôt.
 
 Ajouter les clés suivantes dans `kymsu.cfg` :
 
-```
+```ini
 pecl_php_info=false
 ```
 

@@ -8,7 +8,7 @@
 #
 # Settings:
 
-# Display info on updated pakages 
+# Display info on updated pakages
 display_info=true
 
 # Casks don't have pinned cask. So add Cask to the do_not_update array for prevent to update.
@@ -76,7 +76,7 @@ if [ -n "$installed" ]; then
 		module=$(echo "$i" | awk -F "/" '{print $NF}')
 		echo -e "${bold}$module${reset} ($url)"
 	done
-	
+
 	echo ""
 	echo "Modules are installed in $antibody_folder folder."
 else
@@ -112,7 +112,7 @@ if [ -n "$updated" ]; then
 		echo "Commits: $commit"
 		echo "Last commit: "$url"/commits/"$last_commit
 		# https://github.com/zsh-users/zsh-completions/commits/
-		
+
 		modules+="$module "
 	done
 	notif="$modules has been updated"
@@ -120,7 +120,7 @@ if [ -n "$updated" ]; then
 
 else
 	echo -e "${underline}No Antibody modules to update.${reset}"
-	echo ""	
+	echo ""
 fi
 
 <<COMMENT

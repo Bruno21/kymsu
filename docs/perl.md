@@ -27,7 +27,7 @@ Ou laisser `install.sh` le copier automatiquement depuis le dépôt.
 
 Ajouter les clés suivantes dans `kymsu.cfg` :
 
-```
+```ini
 perl_dry_run=false
 perl_pinned=
 ```
@@ -43,7 +43,7 @@ perl_pinned=
 
 Exemple :
 
-```
+```ini
 perl_dry_run=false
 perl_pinned=DBD::SQLite Alien::cmake3
 ```

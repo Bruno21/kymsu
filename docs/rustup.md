@@ -26,7 +26,7 @@ Ou laisser `install.sh` le copier automatiquement depuis le dépôt.
 
 Ajouter les clés suivantes dans `kymsu.cfg` :
 
-```
+```ini
 rust_dry_run=false
 rust_locked=true
 rust_pinned=

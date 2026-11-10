@@ -29,7 +29,7 @@ Ou laisser `install.sh` le copier automatiquement depuis le dépôt.
 
 Ajouter les clés suivantes dans `kymsu.cfg` :
 
-```
+```ini
 wp_sites=$HOME/Sites/wordpress
 wp_gpg_recipient=
 wp_passphrase_file=
@@ -134,7 +134,7 @@ gpg --list-keys ton@email.com
 
 Dans `kymsu.cfg` :
 
-```
+```ini
 wp_gpg_recipient=ton@email.com
 ```
 
@@ -156,7 +156,7 @@ chmod 600 ~/.wp_gpg_passphrase
 
 Dans `kymsu.cfg` :
 
-```
+```ini
 wp_passphrase_file=$HOME/.wp_gpg_passphrase
 ```
 

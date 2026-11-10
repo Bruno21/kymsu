@@ -19,7 +19,7 @@ perlbrew:
     PERLBREW_HOME: /Users/bruno/perl5/perlbrew
     PERLBREW_PATH: /Users/bruno/perl5/perlbrew/bin:/Users/bruno/perl5/perlbrew/perls/perl-5.30.1/bin
     PERLBREW_MANPATH: /Users/bruno/perl5/perlbrew/perls/perl-5.30.1/man
-    
+
 COMMENT
 
 # List the recently available versions of perl on CPAN.
@@ -73,8 +73,8 @@ perlbrew install [options] cperl-<version>
 
         --sitecustomize $filename
                        Specify a file to be installed as sitecustomize.pl
- 
- # Uninstalls the given perl installation.                      
+
+ # Uninstalls the given perl installation.
 perlbrew uninstall <name>
 
 COMMENT

@@ -1,0 +1,121 @@
+# Couleurs texte/boite
+bold=\033[1m
+italic=\033[3m
+underline=\033[4m
+ita_under=\033[3;4m
+bold_ita=\033[1;3m
+strikethrough=\033[9m
+
+blue=\033[34m
+bluebold=\033[1;34m
+cyan=\033[36m
+cyanbold=\033[1;36m
+green=\033[32m
+greenbold=\033[1;32m
+grey=\033[30m
+greybold=\033[1;30m
+purple=\033[35m
+purplebold=\033[1;35m
+red=\033[31m
+redbold=\033[1;31m
+white=\033[37m
+whitebold=\033[1;37m
+yellow=\033[33m
+yellowbold=\033[1;33m
+
+# en gras, rouge sur fond vert
+testbox=\033[1;31;42m
+# box (homebrew.sh)
+box=\033[1;41m
+bluebox=\033[33;44m
+greenbox=\033[36;42m
+redbox=\033[33;41m
+yellowbox=\033[30;43m
+#redbox=\033[1;41m
+
+reset=\033[0m
+
+#Timestamp de la dernière installation
+last.update=1793707853
+
+# 00-kymsu
+# Intervalle de mise à jour (depuis kymsu.cfg, défaut : 1w)
+# 5m	5 minutes
+# 2h 	2 hours
+# 4d	4 days
+# 3w	3 weeks
+# 1M	1 month
+# 1Y	1 year
+update_interval=1w
+
+# Homebrew
+# Ces casks ne seront pas misà-jour (liste - noms séparés par un espace):
+pinned_cask=ff-works
+
+# Node
+# Ces modules seront pas mis à jour (liste - noms séparés par un espace):
+# ex, pinned_npm=@squoosh/cli thumbsup
+pinned_npm=@squoosh/cli thumbsup
+# Chemin d'une installation locale (racine du webserver)(chemin)
+npm_local_path=$HOME/Sites
+# Si une update de nodejs est dispo, on l'installe et on réinstalle les paquets actuellemnent installés (true/false).
+npm_update_node=true
+# Lancer npm doctor à chaque fois (true/false).
+npm_doctor=true
+# Afficher des informations sur chaque paquet mis-à-jour (true/false).
+npm_display_info=true
+
+# PECL
+# Affiche un PHP info dans le browser par défaut (true/false).
+pecl_php_info=false
+
+# pipx
+# Mettre à jour les paquets injectés. pipx upgrade --include-injected (true/false).
+pipx_injected=true
+
+# Perl
+# Mode dry-run: signale les mises-à-jour mais ne les fait pas (true/false).
+perl_dry_run=false
+# Apps éplinglées (elles font une erreur lors de la m-à-j) (liste - noms séparés par un espace):
+perl_pinned=DBD::CSV Alien::cmake3 App::Cpan DBD::CSV DBD::SQLite
+
+# GEM
+# Ne génère pas la documentation (+ rapide) (true/false):
+gem_no_document=true
+# Mode dry-run: signale les mises-à-jour mais ne les fait pas. (true/false)
+gem_dry_run=false
+# Gem éplinglés (ils font une erreur lors de la m-à-j) (liste - noms séparés par un espace):
+gem_pinned=rdoc
+
+# mas
+# Mode dry-run: signale les mises-à-jour mais ne les fait pas (true/false).
+mas_dry_run=false
+# Pays du Mac Appstore (code du pays: 2 lettres). Si vide, Appstore local. Repli sur Store us
+mas_store_country=
+# Apps éplinglées (pinned_mas=497799835 1295203466) (liste - noms séparés par un espace)
+# xcode '497799835' reste épinglé. Il devra être mis-à-jour manuellement
+pinned_mas=497799835
+
+# Rust
+# Mode dry-run: signale les mises-à-jour mais ne les fait pas (true/false).
+rust_dry_run=false
+# Si une mise-à-jour échoue, on la relance avec --locked si cargo install échoue (utile pour fnox)(true/false)
+rust_locked=true
+# Paquets cargo épinglés (ils ne seront pas mis à jour) (fnox fonctionne mal sous Sequoia)(liste - noms séparés par un espace):
+rust_pinned=
+
+# venv
+# Liste des apps (le venv doit avoir le même nom que l'app) (liste - noms séparés par un espace):
+venv_apps=
+# Liste des extensions pour Mkdocs (liste - noms séparés par un espace):
+venv_mkdocs_ext=
+
+# wp-cli
+# Config multi-sites - liste des répertoires (chemins)
+wp_sites=
+# Config mono site (chemins)
+wp_rep_wordpress=
+# Encryptage GPG des backups de bases WordPress (email)
+wp_gpg_recipient=
+wp_passphrase_file=$HOME/.gpg_passphrase
+wp_backup_keep=5

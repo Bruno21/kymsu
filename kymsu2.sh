@@ -26,6 +26,7 @@ fi
 # shellcheck source=/dev/null
 source "$SCRIPTS_DIR/config.shlib"	# load the config library functions
 
+red="$(config_get red)"
 italic="$(config_get italic)"
 bold="$(config_get bold)"
 reset="$(config_get reset)"

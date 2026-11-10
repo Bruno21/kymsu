@@ -6,7 +6,7 @@
 # Verified by Claude
 
 # https://pecl.php.net
-# The format of the `pecl list-upgrades` command when an update is available has not yet been confirmed: 
+# The format of the `pecl list-upgrades` command when an update is available has not yet been confirmed:
 # if the output looks incorrect to you at that point, please send me the output.
 
 #########################################

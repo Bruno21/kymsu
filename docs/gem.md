@@ -26,7 +26,7 @@ Ou laisser `install.sh` le copier automatiquement depuis le dépôt.
 
 Ajouter les clés suivantes dans `kymsu.cfg` :
 
-```
+```ini
 gem_dry_run=false
 gem_no_document=true
 gem_pinned=
@@ -34,7 +34,7 @@ gem_pinned=
 
 Pour désactiver définitivement la génération de documentation pour tous les `gem install` et `gem update`, ajouter dans `~/.gemrc` :
 
-```
+```ini
 gem: --no-document
 ```
 
@@ -48,7 +48,7 @@ gem: --no-document
 
 Exemple :
 
-```
+```ini
 gem_dry_run=false
 gem_no_document=true
 gem_pinned=rdoc bundler

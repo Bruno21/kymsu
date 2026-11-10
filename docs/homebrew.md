@@ -32,7 +32,7 @@ brew install jq terminal-notifier
 
 Ajouter les clés suivantes dans `kymsu.cfg` :
 
-```
+```ini
 pinned_cask=
 ```
 

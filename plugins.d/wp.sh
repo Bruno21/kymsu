@@ -123,23 +123,23 @@ fi
 for rep_wordpress in "${wp_sites_arr[@]}"; do
 
 	cd "$rep_wordpress" || { echo -e "${red}WordPress path not found: $rep_wordpress${reset}"; exit 1; }
-	
+
 	echo -e "\n${bold}🟦 WordPress${reset}\n"
-	
+
 	[[ "$no_distract" == true ]] && echo -e "${greenbold}No-distract mode: all updates will be applied automatically.${reset}\n"
-	
+
 	# --- WP --info ---
 	echo -e "${greenbold}📰 WP --info...${reset}\n"
 	wp_info=$("${WP_PKG[@]}" --info)
 	echo "$wp_info"
-	
+
 	wp_version=$("${WP_PKG[@]}" core version)
 	echo "WordPress version: $wp_version"
 	echo ""
-	
+
 	echo ""
 	echo -e "${greenbold}🔧 Updates${reset}\n"
-	
+
 	# --- Core update ---
 	echo -e "${bold}Checking core update... (current: $wp_version)${reset}"
 	core_cu=$("${WP_PKG[@]}" core check-update 2>/dev/null)
@@ -170,37 +170,37 @@ for rep_wordpress in "${wp_sites_arr[@]}"; do
 		echo "WordPress core is up to date!"
 	fi
 	echo ""
-	
+
 	# --- Plugins update ---
 	echo -e "${bold}Checking plugins update...${reset}"
-	
+
 	echo -e "\n${bold}Installed plugins:${reset}"
 	"${WP_PKG[@]}" plugin list --format=table --fields=name,status,version 2>/dev/null
 	echo ""
-	
+
 	plugins_outdated=$("${WP_PKG[@]}" plugin list --update=available --format=csv --fields=name,version,update_version | tail -n +2)
-	
+
 	if [[ -z "$plugins_outdated" ]]; then
 		echo "No plugin update available!"
 	else
 		nb=$(echo "$plugins_outdated" | wc -l | tr -d ' ')
 		echo -e "$nb plugin(s) to update:\n"
-	
+
 		col_name=$(echo "$plugins_outdated" | awk -F',' '{print length($1)}' | sort -n | tail -1)
 		col_name=$(( col_name > 4 ? col_name : 4 ))
 		col_ver=$(echo "$plugins_outdated" | awk -F',' '{print length($2)}' | sort -n | tail -1)
 		col_ver=$(( col_ver > 9 ? col_ver : 9 ))
-	
+
 		printf "${bold}%-*s  %-*s  %s${reset}\n" "$col_name" "Name" "$col_ver" "Installed" "Available"
 		echo "$plugins_outdated" | awk -F',' -v cn="$col_name" -v cv="$col_ver" \
 			'{printf "%-*s  %-*s  →  %s\n", cn, $1, cv, $2, $3}'
 		echo ""
-	
+
 		if [[ "$no_distract" == true ]]; then
 			mapfile -t selected_plugins < <(echo "$plugins_outdated" | awk -F',' '{print $1}')
 		else
 			read -r -p "$(echo -e "Do you wanna update ${bold}${nb} plugin(s)${reset} ? (y=choose/a=all/n) ")" choice
-	
+
 			case "${choice,,}" in
 				a)
 					mapfile -t selected_plugins < <(echo "$plugins_outdated" | awk -F',' '{print $1}')
@@ -231,7 +231,7 @@ for rep_wordpress in "${wp_sites_arr[@]}"; do
 					;;
 			esac
 		fi
-	
+
 		for plugin in "${selected_plugins[@]}"; do
 			[[ -n "$plugin" ]] || continue
 			echo -e "\n${bold}Updating plugin: $plugin${reset}"
@@ -242,7 +242,7 @@ for rep_wordpress in "${wp_sites_arr[@]}"; do
 				report_failed+=("plugin:$plugin")
 			fi
 		done
-	
+
 		# Plugins disponibles mais non sélectionnés
 		mapfile -t all_plugins < <(echo "$plugins_outdated" | awk -F',' '{print $1}')
 		for plugin in "${all_plugins[@]}"; do
@@ -250,37 +250,37 @@ for rep_wordpress in "${wp_sites_arr[@]}"; do
 		done
 	fi
 	echo ""
-	
+
 	# --- Themes update ---
 	echo -e "${bold}Checking themes update...${reset}"
-	
+
 	echo -e "\n${bold}Installed themes:${reset}"
 	"${WP_PKG[@]}" theme list --format=table --fields=name,status,version 2>/dev/null
 	echo ""
-	
+
 	themes_outdated=$("${WP_PKG[@]}" theme list --update=available --format=csv --fields=name,version,update_version 2>/dev/null | tail -n +2)
-	
+
 	if [[ -z "$themes_outdated" ]]; then
 		echo "No theme update available!"
 	else
 		nb=$(echo "$themes_outdated" | wc -l | tr -d ' ')
 		echo -e "$nb theme(s) to update:\n"
-	
+
 		col_name=$(echo "$themes_outdated" | awk -F',' '{print length($1)}' | sort -n | tail -1)
 		col_name=$(( col_name > 4 ? col_name : 4 ))
 		col_ver=$(echo "$themes_outdated" | awk -F',' '{print length($2)}' | sort -n | tail -1)
 		col_ver=$(( col_ver > 9 ? col_ver : 9 ))
-	
+
 		printf "${bold}%-*s  %-*s  %s${reset}\n" "$col_name" "Name" "$col_ver" "Installed" "Available"
 		echo "$themes_outdated" | awk -F',' -v cn="$col_name" -v cv="$col_ver" \
 			'{printf "%-*s  %-*s  →  %s\n", cn, $1, cv, $2, $3}'
 		echo ""
-	
+
 		if [[ "$no_distract" == true ]]; then
 			mapfile -t selected_themes < <(echo "$themes_outdated" | awk -F',' '{print $1}')
 		else
 			read -r -p "$(echo -e "Do you wanna update ${bold}${nb} theme(s)${reset} ? (y=choose/a=all/n) ")" choice
-	
+
 			case "${choice,,}" in
 				a)
 					mapfile -t selected_themes < <(echo "$themes_outdated" | awk -F',' '{print $1}')
@@ -311,7 +311,7 @@ for rep_wordpress in "${wp_sites_arr[@]}"; do
 					;;
 			esac
 		fi
-	
+
 		for theme in "${selected_themes[@]}"; do
 			[[ -n "$theme" ]] || continue
 			echo -e "\n${bold}Updating theme: $theme${reset}"
@@ -322,7 +322,7 @@ for rep_wordpress in "${wp_sites_arr[@]}"; do
 				report_failed+=("theme:$theme")
 			fi
 		done
-	
+
 		# Thèmes disponibles mais non sélectionnés
 		mapfile -t all_themes < <(echo "$themes_outdated" | awk -F',' '{print $1}')
 		for theme in "${all_themes[@]}"; do
@@ -330,13 +330,13 @@ for rep_wordpress in "${wp_sites_arr[@]}"; do
 		done
 	fi
 	echo ""
-	
+
 	# --- Languages update ---
 	for lang_type in core plugin theme; do
 		echo -e "${bold}Checking $lang_type language update...${reset}"
 		lang_outdated=$("${WP_PKG[@]}" language "$lang_type" list --update=available --all --format=csv \
 			--fields=language,status,update 2>/dev/null | tail -n +2)
-	
+
 		if [[ -z "$lang_outdated" ]]; then
 			echo "No $lang_type language update available!"
 		else
@@ -344,7 +344,7 @@ for rep_wordpress in "${wp_sites_arr[@]}"; do
 			echo -e "$nb language(s) to update:"
 			echo "$lang_outdated" | awk -F',' '{print "  " $1}'
 			echo ""
-	
+
 			if [[ "$no_distract" == true ]]; then
 				if "${WP_PKG[@]}" language "$lang_type" update --all; then
 					report_langs_updated+=("$lang_type")
@@ -366,31 +366,31 @@ for rep_wordpress in "${wp_sites_arr[@]}"; do
 		fi
 		echo ""
 	done
-	
-	
+
+
 	# --- Maintenance ---
 	if [[ "$maint" == true ]]; then
-	
+
 		echo ""
 		echo -e "${greenbold}🧹 Maintenance${reset}\n"
-	
+
 		# Installed packages
 		echo -e "${bold}Installed packages:${reset}"
 		packages_list=$("${WP_PKG[@]}" package list | tail -n +2 | awk '{print $1}')
-	
+
 		if [[ -z "$packages_list" ]]; then
 			echo "No packages installed."
 		else
 			echo "$packages_list"
 		fi
 		echo ""
-	
+
 		# Transients
 		if [[ "$transient" == true ]]; then
 			echo -e "${bold}Removing expired transients...${reset}"
 			"${WP_PKG[@]}" transient delete --expired --path="$rep_wordpress"
 		fi
-	
+
 		# Database
 		if [[ "$database" == true ]]; then
 			echo -e "\n${bold}Database maintenance...${reset}"
@@ -400,7 +400,7 @@ for rep_wordpress in "${wp_sites_arr[@]}"; do
 				echo -e "${red}Database optimization failed.${reset}"
 			fi
 		fi
-	
+
 		# Backup
 		if [[ "$backup" == true ]]; then
 			GPG_TTY=$(tty)
@@ -410,7 +410,7 @@ for rep_wordpress in "${wp_sites_arr[@]}"; do
 			blogname="${blogname:-wordpress}"
 			date_backup=$(date +%Y-%m-%d_%H-%M-%S)
 			file="wp-${blogname}-${date_backup}.sql"
-	
+
 			if [ -n "$recipient" ]; then
 				# 1. Export en utilisant une clé publique (chiffrement asymétrique)
 				if "${WP_PKG[@]}" db export - --add-drop-table --path="$rep_wordpress" | gpg --batch --yes --encrypt --recipient "$recipient" -o "../${file}.gpg"; then
@@ -437,23 +437,23 @@ for rep_wordpress in "${wp_sites_arr[@]}"; do
 					report_failed+=("backup")
 				fi
 			fi
-	
+
 			# Conserver uniquement les backup_keep sauvegardes les plus récentes dans le dossier parent
 			pushd "../" >/dev/null
-			
+
 			#ls -t *.sql *.sql.gpg 2>/dev/null | tail -n +6 | while IFS= read -r file; do
 			#	echo "$file"
 			#done
-			
+
 			#find . -maxdepth 1 \( -name "*.sql" -o -name "*.sql.gpg" \) -type f -print0 | xargs -0 ls -t 2>/dev/null | tail -n +6 | xargs rm -f
 			#find . -maxdepth 1 \( -name "wp-${blogname}-*.sql" -o -name "wp-${blogname}-*.sql.gpg" \) -type f -print0 | xargs -0 ls -t 2>/dev/null | tail -n +6 | xargs rm -f
-			
+
 			to_delete=$(find . -maxdepth 1 \( -name "wp-${blogname}-*.sql" -o -name "wp-${blogname}-*.sql.gpg" \) \
 				-type f -print0 | xargs -0 ls -t 2>/dev/null | tail -n +"$((backup_keep + 1))")
 			[[ -n "$to_delete" ]] && echo "$to_delete" | xargs rm -f
 			popd >/dev/null || true
 		fi
-	
+
 		# Spam
 		if [[ "$removespam" == true ]]; then
 			echo -e "\n${bold}Removing spam comments... (dry-run)${reset}"
@@ -465,7 +465,7 @@ for rep_wordpress in "${wp_sites_arr[@]}"; do
 				echo "No spam found."
 			fi
 		fi
-	
+
 		# Trash
 		if [[ "$emptytrash" == true ]]; then
 			echo -e "\n${bold}Removing trashed comments... (dry-run)${reset}"
@@ -477,7 +477,7 @@ for rep_wordpress in "${wp_sites_arr[@]}"; do
 				echo "No trashed comments."
 			fi
 		fi
-	
+
 		# Revisions
 		if [[ "$rev" == true ]]; then
 			if echo "$packages_list" | grep -q 'trepmal/wp-revisions-cli'; then
@@ -495,7 +495,7 @@ for rep_wordpress in "${wp_sites_arr[@]}"; do
 				fi
 			fi
 		fi
-	
+
 		# Trackback & Pingback
 		if [[ "$back" == true ]]; then
 			for type in trackback pingback; do
@@ -509,7 +509,7 @@ for rep_wordpress in "${wp_sites_arr[@]}"; do
 				fi
 			done
 		fi
-	
+
 		# Admin
 		if [[ "$admin" == true ]]; then
 			if echo "$packages_list" | grep -q 'wp-cli/admin-command'; then
@@ -521,14 +521,14 @@ for rep_wordpress in "${wp_sites_arr[@]}"; do
 				"${WP_PKG[@]}" admin --path="$rep_wordpress"
 			fi
 		fi
-	
+
 		echo ""
 	fi
-	
+
 	# --- Rapport final ---
 	echo ""
 	echo -e "${greenbold}📋 Summary${reset}\n"
-	
+
 	# Core
 	if [[ "$core_cu" == *"latest version"* ]]; then
 		echo -e "  Core:      up to date"
@@ -539,7 +539,7 @@ for rep_wordpress in "${wp_sites_arr[@]}"; do
 	elif [[ "$report_core" == "skipped" ]]; then
 		echo -e "  Core:      skipped"
 	fi
-	
+
 	# Plugins
 	if [[ -z "$plugins_outdated" ]]; then
 		echo -e "  Plugins:   up to date"
@@ -554,7 +554,7 @@ for rep_wordpress in "${wp_sites_arr[@]}"; do
 			echo -e "  Plugins:   skipped: ${report_plugins_skipped[*]}"
 		fi
 	fi
-	
+
 	# Themes
 	if [[ -z "$themes_outdated" ]]; then
 		echo -e "  Themes:    up to date"
@@ -569,19 +569,19 @@ for rep_wordpress in "${wp_sites_arr[@]}"; do
 			echo -e "  Themes:    skipped: ${report_themes_skipped[*]}"
 		fi
 	fi
-	
+
 	# Languages
 	if (( ${#report_langs_updated[@]} > 0 )); then
 		echo -e "  Languages: ${greenbold}updated:${reset} ${report_langs_updated[*]}"
 	else
 		echo -e "  Languages: up to date"
 	fi
-	
+
 	# Echecs globaux
 	if (( ${#report_failed[@]} > 0 )); then
 		echo ""
 		echo -e "  ${red}Failed:${reset} ${report_failed[*]}"
 	fi
-	
+
 	echo ""
 done

@@ -69,7 +69,7 @@ echo ""
 if (( ${#do_not_update[@]} )); then
 
 	nbp=${#do_not_update[*]}
-	
+
 	echo -e "${underline}List of${reset} ${redbox} $nbp ${reset} ${underline}'do not update' packages:${reset}"
 	echo -e "${redbold}${do_not_update[*]}${reset}"
 	echo -e "To remove package from this list, you need to edit the ${italic}do_not_update${reset} array."
@@ -85,7 +85,7 @@ if [[ $? -eq 1 ]]; then
 	exit 1
 fi
 
-#Packages update	
+#Packages update
 echo -e "🐍 ${underline}Search for packages update...${reset}\n"
 
 pip_outdated=$($pip_version list --outdated --format columns)
