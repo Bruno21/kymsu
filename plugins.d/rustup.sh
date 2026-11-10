@@ -27,10 +27,16 @@ locked="${locked:-true}"
 # true : affiche ce qui serait mis à jour sans rien installer
 dry_run="$(config_get rust_dry_run)"
 
+# Paquets cargo à ne pas mettre à jour
+pinned_rust="$(config_get rust_pinned)"
+read -r -a cargo_do_not_update <<< "$pinned_rust"
+
 bold="$(config_get bold)"
 underline="$(config_get underline)"
 greenbold="$(config_get greenbold)"
 red="$(config_get red)"
+redbold="$(config_get redbold)"
+redbox="$(config_get redbox)"
 reset="$(config_get reset)"
 #
 #########################################
@@ -138,16 +144,30 @@ if hash cargo 2>/dev/null; then
 		all_verbose+="$name $installed $available"$'\n'
 	done < <(echo "$cargo_before" | sed 's/:$//')
 
-	# Ne garder que les paquets avec une mise à jour disponible
-	mapfile -t pkgs < <(awk '$2 != $3 && $3 != "?" {print $1}' <<< "$all_verbose")
+	# All outdated packages including pinned (for display)
+	outdated_verbose=$(awk '$2 != $3 && $3 != "?" {print}' <<< "$all_verbose")
+
+	# Non-pinned outdated packages: candidates for update
+	mapfile -t pkgs < <(
+		awk '$2 != $3 && $3 != "?" {print $1}' <<< "$all_verbose" | while IFS= read -r p; do
+			[[ " ${cargo_do_not_update[*]} " == *" $p "* ]] || echo "$p"
+		done
+	)
 	nb=${#pkgs[@]}
 	echo
 
-	if (( nb == 0 )); then
+	# Display pinned packages if any
+	if [ ${#cargo_do_not_update[@]} -gt 0 ]; then
+		nb_pinned="${#cargo_do_not_update[*]}"
+		echo -e "${underline}🦀  List of${reset} ${redbox} $nb_pinned ${reset} ${underline}'do not update' packages:${reset}"
+		echo -e "${redbold}${cargo_do_not_update[*]}${reset}"
+		echo ""
+	fi
+
+	if [ -z "$outdated_verbose" ]; then
 		echo -e "${greenbold}All cargo packages are up to date.${reset}"
 	else
-		# Afficher uniquement les paquets obsolètes
-		outdated_verbose=$(awk '$2 != $3 && $3 != "?" {print}' <<< "$all_verbose")
+		# Afficher tous les paquets obsolètes (les épinglés sont signalés mais non mis à jour)
 
 		col_name=$(awk '{print length($1)}' <<< "$outdated_verbose" | sort -n | tail -1)
 		col_name=$(( col_name > 7 ? col_name : 7 ))
@@ -155,8 +175,14 @@ if hash cargo 2>/dev/null; then
 		col_ver=$(( col_ver > 9 ? col_ver : 9 ))
 
 		printf "${bold}%-*s  %-*s  %s${reset}\n" "$col_name" "Package" "$col_ver" "Installed" "Available"
-		awk -v cn="$col_name" -v cv="$col_ver" \
-			'NF {printf "%-*s  %-*s  →  %s\n", cn, $1, cv, $2, $3}' <<< "$outdated_verbose"
+		awk -v cn="$col_name" -v cv="$col_ver" -v pinned="${cargo_do_not_update[*]}" \
+			'BEGIN { n=split(pinned,a," "); for(i=1;i<=n;i++) p[a[i]]=1 }
+			 NF { tag=(p[$1]) ? "  (pinned)" : ""; printf "%-*s  %-*s  →  %s%s\n", cn, $1, cv, $2, $3, tag }' \
+			<<< "$outdated_verbose"
+
+		if (( nb == 0 )); then
+			echo -e "\n${redbold}All outdated packages are pinned. Nothing to update.${reset}"
+		else
 
 		read -r -p "$(echo -e "\nDo you wanna update ${bold}${nb} outdated${reset} packages ? (y=choose/a=all/n) ")" choice
 
@@ -170,8 +196,9 @@ if hash cargo 2>/dev/null; then
 					exit 1
 				fi
 
-				formatted=$(awk -v cn="$col_name" -v cv="$col_ver" \
-					'NF {printf "%-*s  %-*s  →  %s\n", cn, $1, cv, $2, $3}' \
+				formatted=$(awk -v cn="$col_name" -v cv="$col_ver" -v pinned="${cargo_do_not_update[*]}" \
+					'BEGIN { n=split(pinned,a," "); for(i=1;i<=n;i++) p[a[i]]=1 }
+					 NF && !p[$1] { printf "%-*s  %-*s  →  %s\n", cn, $1, cv, $2, $3 }' \
 					<<< "$outdated_verbose")
 
 				mapfile -t selected < <(
@@ -237,6 +264,8 @@ if hash cargo 2>/dev/null; then
 		if [ -n "$cargo_after" ]; then
 			awk -F":" '{print $1}' <<< "$cargo_after"
 		fi
+
+		fi	# end if nb > 0
 	fi
 
 fi
