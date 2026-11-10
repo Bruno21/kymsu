@@ -181,3 +181,6 @@ done
 if (( ${#failed[@]} > 0 )); then
 	echo -e "\n${red}Failed:${reset} ${failed[*]}"
 fi
+
+echo
+echo
